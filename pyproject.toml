@@ -2,6 +2,12 @@
 name = "scotclimpact"
 description = "A web tool to esmitate the impact of climate change in Scotland"
 version = '0.0.1'
+requires-python = ">=3.10"
 dependencies = [
     "flask>=3.1.1",
+    "h5py>=3.14.0",
+    "netcdf4>=1.7.2",
+    "psycopg2>=2.9.10",
+    "pyhdf>=0.11.6",
+    "xarray>=2025.6.1",
 ]

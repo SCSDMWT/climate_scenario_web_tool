@@ -19,7 +19,7 @@ MAP
       "wms_getfeatureinfo_formatlist" "text/plain,text/html,application/vnd.ogc.gml,gml,geojson"
 
       "wfs_title"         "Scotland Climate Change Impact Tool" ##REQUIRED
-      "wfs_srs"           "EPSG:4326" ## REQUIRED
+      "wfs_srs"           "EPSG:4326 EPSG:3857" ## REQUIRED
       "gml_include_items" "all" ## Optional (serves all attributes for layer)
       "gml_featureid"     "ID" ## REQUIRED
       "gml_types"         "auto" ## Optional (automatically populate the type for the attributes)
@@ -87,18 +87,32 @@ MAP
 
   LAYER
     NAME grid2
-    TYPE POINT
+    TYPE POLYGON
     STATUS ON
     CONNECTIONTYPE POSTGIS
     CONNECTION "host=postgis user=scotclimpact dbname=scotclimpact password=testingtesting"
-    DATA "geometry from (select id as gss_id, geom as geometry, param_a as value from model_parameters) as subquery using unique gss_id using srid=0"
+    DATA "geometry from (select id as gss_id, st_setsrid(geom, 4326) as geometry, param_a as param_a from model_parameters) as subquery using unique gss_id using srid=4326"
 
     CLASS
       NAME grid2
+      GROUP value
       STYLE
         SYMBOL "cicle"
         COLOR 255 255 255
       END
+    END
+
+    PROJECTION
+      "init=epsg:4326"
+    END
+
+    METADATA
+      "wfs_featureid"     "grid2" 
+      "wfs_getfeature_formatlist" "geojson"
+      "wfs_srs"           "EPSG:4326 EPSG:3857" ## REQUIRED
+      "gml_include_items" "param_a"
+      #"gml_exclude_items" "ROAD_"
+      #"gml_types"         "auto"
     END
   END
 END

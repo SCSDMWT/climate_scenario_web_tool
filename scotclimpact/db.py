@@ -5,6 +5,8 @@ import psycopg2
 from pyhdf.SD import SD, SDC
 from pyproj import Transformer
 
+from scotclimpact.projections import modis_to_lat_lon
+
 
 def get_db():
     """Returns the current connection object to the Postgre database."""
@@ -46,28 +48,31 @@ def import_hdfeos(filename):
     click.echo(f"Importing: {filename.name}")
     hdf = SD(filename.name, SDC.READ)
 
-    # Coordinates in degrees
-    x_dim = np.linspace(17.0, 18.0, num=1200, endpoint=False)*10 - 180.0
-    y_dim = 90 - np.linspace(3.0, 4.0 , num=1200, endpoint=False) * 10
+    # Coordinates in MODIS projection
+    x_dim = np.linspace(17, 18, num=1200)
+    y_dim = np.linspace(3, 4, num=1200)
 
-    # Change to the  EPSG:3857 projection
-    #transformer = Transformer.from_crs("EPSG:4326", "EPSG:3857")
-    #x_dim, y_dim = zip(*[transformer.transform(x, y) for x, y in zip(x_dim, y_dim)])
+    # Change to lon/lat 
+    x_dim, y_dim = zip(*[modis_to_lat_lon(x, y) for x, y in zip(x_dim, y_dim)])
 
     xx, yy = np.meshgrid(x_dim, y_dim)
     dataset = hdf.select("LST_Day_1km")
 
     idx = np.where(dataset[:] > 0)
     
+    dy = 0.004
+    dx = 0.008
     values = [
-        f"('POINT({y} {x})', {v * dataset.scale_factor - 273})"
+        f"('POLYGON (({y-dy} {x-dx}, {y+dy} {x-dx}, {y+dy} {x+dx}, {y-dy} {x+dx}, {y-dy} {x-dx}))', {v * dataset.scale_factor - 273})"
         for x, y, v in zip(xx[idx], yy[idx], dataset[:][idx])
     ]
     values_clause = ','.join(values)
+    #breakpoint()
 
+    query = f"INSERT INTO model_parameters (geom, param_a) VALUES {values_clause};"
     db = get_db()
     with db.cursor() as cursor:
-        cursor.execute(f"INSERT INTO model_parameters (geom, param_a) VALUES {values_clause};")
+        cursor.execute(query)
     db.commit()
 
 

@@ -54,15 +54,52 @@ async function fetch_data(url) {
     return data
 }
 
+color_values = [
+    "#ffffe5",
+    "#fff7bc",
+    "#fee391",
+    "#fec44f",
+    "#fe9929",
+    "#ec7014",
+    "#cc4c02",
+    "#993404",
+    "#662506",
+]
+
+function color_map(value, min, max, values) {
+    var scaled_value = (value - min) / (max - min);
+    if (scaled_value < 0.0) scaled_value = 0.0;
+    if (scaled_value >= 1.0) scaled_value = 0.99;
+    return values[ Math.floor(scaled_value * values.length) ]
+}
+
 async function update_data_layer() {
     //const data_url = "http://10.155.55.10?map=/etc/mapserver/scotclimpact.map&service=wfs&version=2.0.0&request=GetFeature&typeNames=grid2&outputFormat=geojson&maxfeatures=10"
-    const data_url = "http://10.155.55.10?map=/etc/mapserver/scotclimpact.map&service=wfs&version=2.0.0&request=GetFeature&typeNames=grid2&outputFormat=geojson"
+    //const data_url = "http://10.155.55.10?map=/etc/mapserver/scotclimpact.map&service=wfs&version=2.0.0&request=GetFeature&typeNames=grid2&outputFormat=geojson"
+    //const data_url = mapserverurl + "&service=wfs&version=2.0.0&request=GetFeature&typeNames=grid2&outputFormat=geojson&maxfeatures=10"
+    const data_url = mapserverurl + "&service=wfs&version=2.0.0&request=GetFeature&typeNames=grid2&outputFormat=geojson"
+    console.log(data_url);
     data = await fetch_data(data_url);
+    console.log(data);
 
+    const delta = 0.004;
 
-    data.features.forEach(function(element, idx, arr) {
-        element.geometry.coordinates = ol.proj.fromLonLat(element.geometry.coordinates);
+    
+    data.features.forEach(function(element) {
+
+        element.geometry.coordinates[0].forEach( function(coord, idx, arr) { arr[idx] = ol.proj.fromLonLat(coord) } );
+        //element.geometry.coordinates =
+        //    ol.proj.fromLonLat(element.geometry.coordinates);
+        
+        //element.geometry.type = "Polygon";
+        //element.geometry.coordinates = [
+        //    ol.proj.fromLonLat([element.geometry.coordinates[0]-delta, element.geometry.coordinates[1]-delta]),
+        //    ol.proj.fromLonLat([element.geometry.coordinates[0]+delta, element.geometry.coordinates[1]-delta]),
+        //    ol.proj.fromLonLat([element.geometry.coordinates[0]+delta, element.geometry.coordinates[1]+delta]),
+        //    ol.proj.fromLonLat([element.geometry.coordinates[0]-delta, element.geometry.coordinates[1]+delta]),
+        //];
     })
+    
 
     console.log(data);
 
@@ -73,14 +110,31 @@ async function update_data_layer() {
         stroke: new ol.style.Stroke({color: 'red', width: 1}),
     });
 
+    //const polygon_style = new ol.style.Style({
+    //    fill: new ol.style.Fill({
+    //        color: "#11eeee",
+    //    })
+    //});
     const styles = {
         'Point': new ol.style.Style({
             image: image,
         }),
+        'Polygon': new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: "#11eeee",
+            }),
+        }),
     };
 
     const styleFunction = function (feature) {
-        return styles[feature.getGeometry().getType()];
+        var style = styles[feature.getGeometry().getType()];
+        if (feature.getGeometry().getType() == 'Polygon') {
+            style.getFill().setColor( color_map(feature.values_.param_a, 0, 20, color_values) );
+        }
+        return style;
+        //const color = feature.properties.get("param_a", 0);
+
+        //return polygon_style
     };
     
     // Creat the vector layer

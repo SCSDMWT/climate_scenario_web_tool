@@ -1,5 +1,7 @@
 //import VectorSource from 'ol/source/Vector.js';
 
+$("#randomParam")[0].value = 0 
+
 var layers = {};
 
 /// The background map
@@ -26,6 +28,9 @@ const view = new ol.View({
     //center: [-4.352258, 57.009659],
     //projection: 'EPSG:4326',
 });
+
+// Source items for the vector layer
+var vectorSource = null;
 
 /// The map object
 var map = new ol.Map({
@@ -64,7 +69,7 @@ color_values = [
     "#cc4c02",
     "#993404",
     "#662506",
-]
+]; //.reverse()
 
 function color_map(value, min, max, values) {
     var scaled_value = (value - min) / (max - min);
@@ -82,11 +87,13 @@ async function update_data_layer() {
     data = await fetch_data(data_url);
     console.log(data);
 
-    const delta = 0.004;
+    //const delta = 0.004;
 
     
     data.features.forEach(function(element) {
 
+	element.properties.temp = parseFloat(element.properties.temp);
+	element.properties.param_a = parseFloat(element.properties.param_a);
         element.geometry.coordinates[0].forEach( function(coord, idx, arr) { arr[idx] = ol.proj.fromLonLat(coord) } );
         //element.geometry.coordinates =
         //    ol.proj.fromLonLat(element.geometry.coordinates);
@@ -101,7 +108,7 @@ async function update_data_layer() {
     })
     
 
-    console.log(data);
+    //console.log(data);
 
     // Set the style 
     const image = new ol.style.Circle({
@@ -129,7 +136,7 @@ async function update_data_layer() {
     const styleFunction = function (feature) {
         var style = styles[feature.getGeometry().getType()];
         if (feature.getGeometry().getType() == 'Polygon') {
-            style.getFill().setColor( color_map(feature.values_.param_a, 0, 20, color_values) );
+            style.getFill().setColor( color_map(feature.values_.temp, -10, 30, color_values) );
         }
         return style;
         //const color = feature.properties.get("param_a", 0);
@@ -138,19 +145,31 @@ async function update_data_layer() {
     };
     
     // Creat the vector layer
-    const vectorSource = new ol.source.Vector({
+    vectorSource = new ol.source.Vector({
         features: new ol.format.GeoJSON().readFeatures(data),
     });
-    vectorSource.addFeature(new ol.Feature(new ol.geom.Circle([5e6, 7e6], 1e6)));
     const vectorLayer = new ol.layer.Vector({
         source: vectorSource,
         style: styleFunction,
         //projection: 'EPSG:4326',
     });
 
-    vectorLayer.projection = "EPSG:4326";
+    //vectorLayer.projection = "EPSG:4326";
     // Add to the map
     map.setLayers([baselayer, vectorLayer]);
 }
 
 update_data_layer();
+
+
+$("#randomParam")[0].oninput = function() {
+    const slider_value = parseFloat($(this).val());
+    $('#randomParamVal').html(slider_value);
+
+    if (!vectorSource)
+	return;
+    vectorSource.forEachFeature( function(feature) {
+	feature.values_.temp = feature.values_.param_a + slider_value;
+    });
+    vectorSource.changed();
+};

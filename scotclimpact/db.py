@@ -5,7 +5,7 @@ import psycopg2
 from pyhdf.SD import SD, SDC
 from pyproj import Transformer
 
-from scotclimpact.projections import modis_to_lat_lon
+from scotclimpact.projections import Modis_1km
 
 
 def get_db():
@@ -53,7 +53,7 @@ def import_hdfeos(filename):
     y_dim = np.linspace(3, 4, num=1200)
 
     # Change to lon/lat 
-    x_dim, y_dim = zip(*[modis_to_lat_lon(x, y) for x, y in zip(x_dim, y_dim)])
+    x_dim, y_dim = zip(*[Modis_1km.modis_to_lat_lon(x, y) for x, y in zip(x_dim, y_dim)])
 
     xx, yy = np.meshgrid(x_dim, y_dim)
     dataset = hdf.select("LST_Day_1km")

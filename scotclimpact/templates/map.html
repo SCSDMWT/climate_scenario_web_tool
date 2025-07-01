@@ -4,11 +4,15 @@
 {% block content %}
 <div class="container">
   <div class="row">
+
     <div class="col-md-9">
       <div id='map' class='map'></div>
     </div>
+
     <div class="col-md-3">
-      
+      <label for="randomParam" class="form-label">A random range</label>
+      <input type="range" class="form-range" min="-10" max="10" step="0.1" defaultValue="0.0" id="randomParam"/>
+      <span id="randomParamVal">0<!-- Default value --></span>
     </div>
   </div>
 </div>
@@ -106,6 +110,7 @@
 <!-- <script src='https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/build/ol.js'></script> -->
 <!-- <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.js"></script> -->
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ol@v10.6.0/dist/ol.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.6.0/ol.css">
 <!-- <script src="static\v6.14.1-dist\ol.js"></script> -->

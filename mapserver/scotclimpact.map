@@ -91,7 +91,7 @@ MAP
     STATUS ON
     CONNECTIONTYPE POSTGIS
     CONNECTION "host=postgis user=scotclimpact dbname=scotclimpact password=testingtesting"
-    DATA "geometry from (select id as gss_id, st_setsrid(geom, 4326) as geometry, param_a as param_a from model_parameters) as subquery using unique gss_id using srid=4326"
+    DATA "geometry from (select id as gss_id, st_setsrid(geom, 4326) as geometry, param_a as param_a, param_a as temp from model_parameters) as subquery using unique gss_id using srid=4326"
 
     CLASS
       NAME grid2
@@ -110,7 +110,7 @@ MAP
       "wfs_featureid"     "grid2" 
       "wfs_getfeature_formatlist" "geojson"
       "wfs_srs"           "EPSG:4326 EPSG:3857" ## REQUIRED
-      "gml_include_items" "param_a"
+      "gml_include_items" "all"
       #"gml_exclude_items" "ROAD_"
       #"gml_types"         "auto"
     END

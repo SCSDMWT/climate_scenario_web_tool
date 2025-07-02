@@ -9,10 +9,7 @@ import VectorLayer from 'ol/layer/Vector.js'
 import {fromLonLat} from 'ol/proj';
 import {GeoJSON} from 'ol/format';
 import $ from 'jquery';
-
-$("#randomParam")[0].value = 0 
-
-var layers = {};
+import { SVG } from '@svgdotjs/svg.js'
 
 /// The background map
 const baselayer = new Tile({
@@ -54,7 +51,7 @@ async function fetch_data(url) {
     return data
 }
 
-var color_values = [
+const color_values = [
     "#ffffe5",
     "#fff7bc",
     "#fee391",
@@ -64,7 +61,9 @@ var color_values = [
     "#cc4c02",
     "#993404",
     "#662506",
-]; //.reverse()
+];
+
+const colorbar_range = [-10, 30];
 
 function color_map(value, min, max, values) {
     var scaled_value = (value - min) / (max - min);
@@ -99,7 +98,7 @@ async function update_data_layer() {
     const styleFunction = function (feature) {
         var style = styles[feature.getGeometry().getType()];
         if (feature.getGeometry().getType() == 'Polygon') {
-            style.getFill().setColor( color_map(feature.values_.temp, -10, 30, color_values) );
+            style.getFill().setColor( color_map(feature.values_.temp, colorbar_range[0], colorbar_range[1], color_values) );
         }
         return style;
         //const color = feature.properties.get("param_a", 0);
@@ -121,12 +120,44 @@ async function update_data_layer() {
     map.setLayers([baselayer, vectorLayer]);
 }
 
+function add_legend() {
+    var pos = 0;
+    var draw = SVG().addTo("#legend").size(300, 30 * color_values.length );
+    color_values.slice().reverse().forEach((color_value, _idx, arr) => {
+        // Index in original color_values
+        const idx = color_values.length - _idx - 1;
+        // Add a colored box
+        draw.rect(30, 30).move(0, pos).attr({fill: color_value});
+        // Add text
+        if (idx == color_values.length - 1)
+            draw
+                .text("> " + colorbar_range[1])
+                .move(35, pos);
+        else if (idx == 0)
+            draw
+                .text("< " + colorbar_range[0])
+                .move(35, pos);
+        else {
+            const lower_val = ((idx + 0.0) / color_values.length) * (colorbar_range[1] - colorbar_range[0]) + colorbar_range[0];
+            const upper_val = ((idx + 1.0) / color_values.length) * (colorbar_range[1] - colorbar_range[0]) + colorbar_range[0];
+            draw
+                .text(lower_val.toFixed(1) + " - " + upper_val.toFixed(1))
+                .move(35, pos);
+        }
+
+        pos += 30;
+    });
+}
+
 update_data_layer();
+add_legend();
 
 
-$("#randomParam")[0].oninput = function() {
+//$("#offsetParam")[0].value = 0 
+$("#offsetParamLabel")[0].value = "Add an offset: <span style=\"font-weight:bold\">0</span>"; 
+$("#offsetParam")[0].oninput = function() {
     const slider_value = parseFloat($(this).val());
-    $('#randomParamVal').html(slider_value);
+    $('#offsetParamLabel').html("Add an offset: <span style=\"font-weight:bold\">" + slider_value.toFixed(1) + "</span>");
 
     if (!vectorSource)
 	return;
@@ -135,3 +166,4 @@ $("#randomParam")[0].oninput = function() {
     });
     vectorSource.changed();
 };
+

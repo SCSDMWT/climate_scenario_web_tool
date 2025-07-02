@@ -10,9 +10,16 @@
     </div>
 
     <div class="col-md-3">
-      <label for="randomParam" class="form-label">A random range</label>
-      <input type="range" class="form-range" min="-10" max="10" step="0.1" defaultValue="0.0" id="randomParam"/>
-      <span id="randomParamVal">0<!-- Default value --></span>
+      <div style="grid-template-columns: 1fr"  class="d-grid gap-0 row-gap-3">
+          <div class="p-2">
+              <label for="offsetParam" class="form-label" id="offsetParamLabel">Add an offset: <span style="font-weight:bold">0</span></label>
+              <input type="range" class="form-range" min="-10" max="10" step="0.1" defaultValue="0.0" id="offsetParam"/>
+          </div>
+
+          <div class="p-2">
+              <label class="form-label">Legend:</label>
+              <div id="legend"></div>
+          </div>
     </div>
   </div>
 </div>

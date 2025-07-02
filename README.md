@@ -37,6 +37,7 @@ uv run -- flask --app scotclimpact run -p 8000
 Javascript dependencies are managed in an `npm` project in `scotclimpact/static`.
 Changes to `scotclimpact/static/src/` should be compiled with
 ```bash
+cd scotclimpact/static
 npm run build
 ```
 

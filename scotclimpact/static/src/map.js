@@ -1,42 +1,37 @@
-//import VectorSource from 'ol/source/Vector.js';
+import VectorSource from 'ol/source/Vector.js';
+import OSM from 'ol/source/OSM.js';
+import Tile from 'ol/layer/Tile.js';
+import View from 'ol/View.js'
+import Map from 'ol/Map.js'
+import Style from 'ol/style/Style.js'
+import Fill from 'ol/style/Fill.js'
+import VectorLayer from 'ol/layer/Vector.js'
+import {fromLonLat} from 'ol/proj';
+import {GeoJSON} from 'ol/format';
+import $ from 'jquery';
 
 $("#randomParam")[0].value = 0 
 
 var layers = {};
 
 /// The background map
-const baselayer = new ol.layer.Tile({
-    source: new ol.source.OSM()
+const baselayer = new Tile({
+    source: new OSM()
 });
 
-/// The temperature layer
-//const tmp_layer = new ol.layer.Tile({
-//    source: new ol.source.TileWMS({
-//        url: mapserverurl,
-//        params : {
-//            'LAYERS': 'grid2'
-//        },
-//        crossOrigin: 'anonymous',
-//        transition: 0,
-//    })
-//})
-
 /// Default view that includes Scotland
-const view = new ol.View({
-    center: ol.proj.fromLonLat([-4.352258, 57.009659]),
+const view = new View({
+    center: fromLonLat([-4.352258, 57.009659]),
     zoom: 7,
-    //center: [-4.352258, 57.009659],
-    //projection: 'EPSG:4326',
 });
 
 // Source items for the vector layer
 var vectorSource = null;
 
 /// The map object
-var map = new ol.Map({
+var map = new Map({
     target: 'map',
     layers: [baselayer/*, tmp_layer*/],
-    //overlays: [overlayHist, overlayQual],
     view: view,
 });
 
@@ -59,7 +54,7 @@ async function fetch_data(url) {
     return data
 }
 
-color_values = [
+var color_values = [
     "#ffffe5",
     "#fff7bc",
     "#fee391",
@@ -84,50 +79,18 @@ async function update_data_layer() {
     //const data_url = mapserverurl + "&service=wfs&version=2.0.0&request=GetFeature&typeNames=grid2&outputFormat=geojson&maxfeatures=10"
     const data_url = mapserverurl + "&service=wfs&version=2.0.0&request=GetFeature&typeNames=grid2&outputFormat=geojson"
     console.log(data_url);
-    data = await fetch_data(data_url);
-    console.log(data);
+    var data = await fetch_data(data_url);
 
-    //const delta = 0.004;
-
-    
     data.features.forEach(function(element) {
 
-	element.properties.temp = parseFloat(element.properties.temp);
-	element.properties.param_a = parseFloat(element.properties.param_a);
-        element.geometry.coordinates[0].forEach( function(coord, idx, arr) { arr[idx] = ol.proj.fromLonLat(coord) } );
-        //element.geometry.coordinates =
-        //    ol.proj.fromLonLat(element.geometry.coordinates);
-        
-        //element.geometry.type = "Polygon";
-        //element.geometry.coordinates = [
-        //    ol.proj.fromLonLat([element.geometry.coordinates[0]-delta, element.geometry.coordinates[1]-delta]),
-        //    ol.proj.fromLonLat([element.geometry.coordinates[0]+delta, element.geometry.coordinates[1]-delta]),
-        //    ol.proj.fromLonLat([element.geometry.coordinates[0]+delta, element.geometry.coordinates[1]+delta]),
-        //    ol.proj.fromLonLat([element.geometry.coordinates[0]-delta, element.geometry.coordinates[1]+delta]),
-        //];
+        element.properties.temp = parseFloat(element.properties.temp);
+        element.properties.param_a = parseFloat(element.properties.param_a);
+        element.geometry.coordinates[0].forEach( function(coord, idx, arr) { arr[idx] = fromLonLat(coord) } );
     })
     
-
-    //console.log(data);
-
-    // Set the style 
-    const image = new ol.style.Circle({
-        radius: 5,
-        fill: null,
-        stroke: new ol.style.Stroke({color: 'red', width: 1}),
-    });
-
-    //const polygon_style = new ol.style.Style({
-    //    fill: new ol.style.Fill({
-    //        color: "#11eeee",
-    //    })
-    //});
     const styles = {
-        'Point': new ol.style.Style({
-            image: image,
-        }),
-        'Polygon': new ol.style.Style({
-            fill: new ol.style.Fill({
+        'Polygon': new Style({
+            fill: new Fill({
                 color: "#11eeee",
             }),
         }),
@@ -145,16 +108,15 @@ async function update_data_layer() {
     };
     
     // Creat the vector layer
-    vectorSource = new ol.source.Vector({
-        features: new ol.format.GeoJSON().readFeatures(data),
+    vectorSource = new VectorSource({
+        features: new GeoJSON().readFeatures(data),
     });
-    const vectorLayer = new ol.layer.Vector({
+    const vectorLayer = new VectorLayer({
         source: vectorSource,
         style: styleFunction,
         //projection: 'EPSG:4326',
     });
 
-    //vectorLayer.projection = "EPSG:4326";
     // Add to the map
     map.setLayers([baselayer, vectorLayer]);
 }

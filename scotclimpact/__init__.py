@@ -1,10 +1,8 @@
 from flask import Flask
-#from flask_sqlalchemy import SQLAlchemy
-#from flask_flatpages import FlatPages
+from flask_static_digest import FlaskStaticDigest
 from .config import Config
 
-#pages = FlatPages()
-#db = SQLAlchemy()
+flask_static_digest = FlaskStaticDigest()
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=False)
@@ -13,6 +11,8 @@ def create_app(test_config=None):
     with app.app_context():
         from . import routes
         from . import db
+
+        flask_static_digest.init_app(app)
         db.init_app(app)
-        #pages.init_app(app)
+
         return app

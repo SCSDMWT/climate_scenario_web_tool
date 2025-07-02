@@ -2,6 +2,9 @@
 
 ## Dev
 
+
+### Python
+
 The web app requires a PostgreSQL database and Mapserver.
 These can be hosted with docker compose on a Linux device with root access:
 [TODO]
@@ -28,4 +31,18 @@ Run the the web app locally:
 ```bash
 uv run -- flask --app scotclimpact run -p 8000
 ```
+
+### Javascript
+
+Javascript dependencies are managed in an `npm` project in `scotclimpact/static`.
+Changes to `scotclimpact/static/src/` should be compiled with
+```bash
+npm run build
+```
+
+## Licence
+
+See [LICENCE](LICENCE).
+
+
 

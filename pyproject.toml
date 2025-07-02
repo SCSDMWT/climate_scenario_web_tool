@@ -5,6 +5,7 @@ version = '0.0.1'
 requires-python = ">=3.10"
 dependencies = [
     "flask>=3.1.1",
+    "flask-static-digest>=0.4.1",
     "h5py>=3.14.0",
     "netcdf4>=1.7.2",
     "psycopg2>=2.9.10",

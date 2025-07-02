@@ -1,0 +1,28 @@
+{
+  "name": "scotclimpact",
+  "version": "0.0.1",
+  "description": "A web tool to esmitate the impact of climate change in Scotland",
+  "homepage": "https://github.com/dawiedotcom/scotclimpact#readme",
+  "bugs": {
+    "url": "https://github.com/dawiedotcom/scotclimpact/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dawiedotcom/scotclimpact.git"
+  },
+  "license": "GPL-3.0-or-later",
+  "author": "David de Klerk",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "dependencies": {
+    "jquery": "^3.7.1",
+    "ol": "^10.6.1"
+  },
+  "devDependencies": {
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1"
+  }
+}

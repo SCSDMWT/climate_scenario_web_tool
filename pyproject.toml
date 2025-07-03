@@ -8,10 +8,11 @@ dependencies = [
     "flask-static-digest>=0.4.1",
     "h5py>=3.14.0",
     "netcdf4>=1.7.2",
-    "psycopg2>=2.9.10",
     "pyhdf>=0.11.6",
     "pyproj>=3.7.1",
     "xarray>=2025.6.1",
+    "psycopg2-binary>=2.9.10",
+    "gunicorn>=23.0.0",
 ]
 
 [build-system]

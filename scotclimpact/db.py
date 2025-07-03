@@ -76,23 +76,36 @@ def import_hdfeos(filename):
     dataset = hdf.select("LST_Day_1km")
     idx = np.where(dataset[:] > 0)
     
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute("SELECT source FROM model_parameters")
+        existing_source = {item[0] for item in cursor.fetchall()}
+    new_source = [
+        f"{filename.name}:{x}:{y}"
+        for x,y in zip(*idx)
+    ]
     # Create the SQL query
     values = [
         ("('POLYGON ((" +
-         f"{y_lower_bound[y]} {x_lower_bound[x]}," +
-         f"{y_upper_bound[y]} {x_lower_bound[x]}," +
-         f"{y_upper_bound[y]} {x_upper_bound[x]}," +
-         f"{y_lower_bound[y]} {x_upper_bound[x]}," +
-         f"{y_lower_bound[y]} {x_lower_bound[x]}))'," +
-         f"{v * dataset.scale_factor - 273})"
+         f"{x_lower_bound[x]} {y_lower_bound[y]}," +
+         f"{x_lower_bound[x]} {y_upper_bound[y]}," +
+         f"{x_upper_bound[x]} {y_upper_bound[y]}," +
+         f"{x_upper_bound[x]} {y_lower_bound[y]}," +
+         f"{x_lower_bound[x]} {y_lower_bound[y]}))'," +
+         f"{v * dataset.scale_factor - 273}," +
+         f"'{s}'" +
+         ")"
          )
-        for x, y, v in zip(xx[idx], yy[idx], dataset[:][idx])
+        for s, x, y, v in zip(new_source, xx[idx], yy[idx], dataset[:][idx])
+        if not s in existing_source
     ]
+
+    if len(values) == 0:
+        return
     values_clause = ','.join(values)
-    query = f"INSERT INTO model_parameters (geom, param_a) VALUES {values_clause};"
+    query = f"INSERT INTO model_parameters (geom, param_a, source) VALUES {values_clause};"
 
     # Run the query
-    db = get_db()
     with db.cursor() as cursor:
         cursor.execute(query)
     db.commit()

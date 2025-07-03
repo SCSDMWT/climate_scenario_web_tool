@@ -2,8 +2,10 @@
 
 CREATE TABLE IF NOT EXISTS model_parameters (
     id SERIAL PRIMARY KEY,
-    geom geometry,
-    param_a double precision
+    geom GEOMETRY,
+    param_a DOUBLE PRECISION,
+    source VARCHAR,
+    CONSTRAINT unique_source UNIQUE (source)
 );
 
 

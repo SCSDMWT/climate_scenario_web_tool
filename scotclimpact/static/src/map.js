@@ -10,16 +10,32 @@ import {fromLonLat} from 'ol/proj';
 import {GeoJSON} from 'ol/format';
 import $ from 'jquery';
 import { SVG } from '@svgdotjs/svg.js'
+import proj4 from 'proj4';
+import {get as getProjection} from 'ol/proj.js';
+import {register} from 'ol/proj/proj4.js';
+
+/// Setup the British National Grid projection
+// See: https://openlayers.org/doc/tutorials/raster-reprojection.html
+proj4.defs('EPSG:27700', '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 ' +
+    '+x_0=400000 +y_0=-100000 +ellps=airy ' +
+    '+towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 ' +
+    '+units=m +no_defs');
+register(proj4);
+const proj27700 = getProjection('EPSG:27700');
+proj27700.setExtent([0, 0, 700000, 1300000]);
 
 /// The background map
 const baselayer = new Tile({
-    source: new OSM()
+    source: new OSM({
+        projection: 'EPSG:3857'
+    })
 });
 
 /// Default view that includes Scotland
 const view = new View({
-    center: fromLonLat([-4.352258, 57.009659]),
-    zoom: 7,
+    projection: 'EPSG:27700',
+    center: fromLonLat([-4.352258, 57.009659], 'EPSG:27700'),
+    zoom: 3,
 });
 
 // Source items for the vector layer
@@ -84,7 +100,6 @@ async function update_data_layer() {
 
         element.properties.temp = parseFloat(element.properties.temp);
         element.properties.param_a = parseFloat(element.properties.param_a);
-        element.geometry.coordinates[0].forEach( function(coord, idx, arr) { arr[idx] = fromLonLat(coord) } );
     })
     
     const styles = {
@@ -109,15 +124,22 @@ async function update_data_layer() {
     // Creat the vector layer
     vectorSource = new VectorSource({
         features: new GeoJSON().readFeatures(data),
+        projection: 'EPSG:4326',
     });
     const vectorLayer = new VectorLayer({
         source: vectorSource,
         style: styleFunction,
-        //projection: 'EPSG:4326',
     });
 
     // Add to the map
     map.setLayers([baselayer, vectorLayer]);
+
+    // Hookup the opacity offset
+    var opacityInput = $("#opacityInput")[0];
+    opacityInput.oninput = function() {
+        const opacity = parseFloat(opacityInput.value);
+        vectorLayer.setOpacity(opacity);
+    }
 }
 
 function add_legend() {

@@ -70,12 +70,12 @@ def import_nc4(projection, variable, filename, slice=0):
 
     # Map edges to EPSG:4326 (lat/long)
     #transform = Transformer.from_crs(f"EPSG:{projection}", "EPSG:3875")
-    transform = Transformer.from_crs(f"EPSG:{projection}", "EPSG:4326")
+    #transform = Transformer.from_crs(f"EPSG:{projection}", "EPSG:4326")
     dx = np.diff(x_dim).mean()/2.0
     dy = np.diff(y_dim).mean()/2.0
     def transform_to_sql_format(x, y):
-        a, b = transform.transform(x, y)
-        return f"{a} {b}"
+        #a, b = transform.transform(x, y)
+        return f"{x} {y}"
     top_right =    [ transform_to_sql_format(x_dim[i]+dx, y_dim[j]+dy) for j, i in zip(*idx)]
     top_left  =    [ transform_to_sql_format(x_dim[i]+dx, y_dim[j]-dy) for j, i in zip(*idx) ]
     bottom_right = [ transform_to_sql_format(x_dim[i]-dx, y_dim[j]+dy) for j, i in zip(*idx) ]

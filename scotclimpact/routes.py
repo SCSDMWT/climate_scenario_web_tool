@@ -11,6 +11,7 @@ def index():
         'map.html',
         navigation=menu_items(),
         mapserverurl=app.config['MAPSERVER_URL'],
+        tilelayerurl=app.config['TILE_LAYER_URL'],
         mapattribs='[]',
         domains=[],
         years=[],

@@ -10,3 +10,7 @@ class Config:
         'DATABASE_URL',
         'postgresql://scotclimpact:testingtesting@localhost/scotclimpact'
     )
+    TILE_LAYER_URL = os.environ.get(
+        'TILE_LAYER_URL',
+        ''
+    )

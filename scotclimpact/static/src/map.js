@@ -1,6 +1,6 @@
 import VectorSource from 'ol/source/Vector.js';
 import OSM from 'ol/source/OSM.js';
-import Tile from 'ol/layer/Tile.js';
+import TileLayer from 'ol/layer/Tile.js';
 import View from 'ol/View.js'
 import Map from 'ol/Map.js'
 import Style from 'ol/style/Style.js'
@@ -13,6 +13,8 @@ import { SVG } from '@svgdotjs/svg.js'
 import proj4 from 'proj4';
 import {get as getProjection} from 'ol/proj.js';
 import {register} from 'ol/proj/proj4.js';
+import ImageTile from 'ol/source/ImageTile.js';
+import TileGrid from 'ol/tilegrid/TileGrid.js';
 
 /// Setup the British National Grid projection
 // See: https://openlayers.org/doc/tutorials/raster-reprojection.html
@@ -24,18 +26,38 @@ register(proj4);
 const proj27700 = getProjection('EPSG:27700');
 proj27700.setExtent([0, 0, 700000, 1300000]);
 
+
 /// The background map
-const baselayer = new Tile({
-    source: new OSM({
-        projection: 'EPSG:3857'
+function make_baselayer_source() {
+    // Use OSM if a tile layer is not specified
+    if (tilelayerurl === '') {
+        return new OSM({
+            projection: 'EPSG:3857'
+        });
+    }
+
+    // Create the OS tile source
+    const tilegrid = new TileGrid({
+        resolutions: [ 896.0, 448.0, 224.0, 112.0, 56.0, 28.0, 14.0, 7.0, 3.5, 1.75 ],
+        origin: [ -238375.0, 1376256.0 ]
+    });
+    return new ImageTile({
+        projection: 'EPSG:27700',
+        url: tilelayerurl,
+        tileGrid: tilegrid,
     })
-});
+}
+
+const baselayer = new TileLayer({
+    source: make_baselayer_source(),
+})
 
 /// Default view that includes Scotland
 const view = new View({
     projection: 'EPSG:27700',
     center: fromLonLat([-4.352258, 57.009659], 'EPSG:27700'),
     zoom: 3,
+    //resolutions: tilegrid.getResolutions(),
 });
 
 // Source items for the vector layer
@@ -182,9 +204,9 @@ $("#offsetParam")[0].oninput = function() {
     $('#offsetParamLabel').html("Add an offset: <span style=\"font-weight:bold\">" + slider_value.toFixed(1) + "</span>");
 
     if (!vectorSource)
-	return;
+        return;
     vectorSource.forEachFeature( function(feature) {
-	feature.values_.temp = feature.values_.param_a + slider_value;
+        feature.values_.temp = feature.values_.param_a + slider_value;
     });
     vectorSource.changed();
 };

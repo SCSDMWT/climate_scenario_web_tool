@@ -1,0 +1,48 @@
+name: climate_scenario_web_tool
+services:
+  web:
+    image: SCSDMWT/climate_scenario_web_tool
+    hostname: web
+    environment:
+      - MAPSERVER_URL=http://localhost:8080?map=/etc/mapserver/scotclimpact.map&
+      - DATABASE_URL=postgresql://scotclimpact:testingtesting@postgres/scotclimpact
+      - TILE_LAYER_URL=https://api.os.uk/maps/raster/v1/zxy/Light_27700/{z}/{x}/{y}.png?key=kGRRd5G4s3OhzNnIjabI3tUPQMI073do
+      - FLASK_APP=scotclimpact
+      - FLASK_ENV=development
+    volumes:
+      - mapserver_share:/app/mapserver
+    networks:
+      - default
+    ports:
+      - 80:80
+
+
+  postgis:
+    image: postgis/postgis
+    hostname: postgis
+    environment:
+      - POSTGRES_DB=scotclimpact
+      - POSTGRES_USER=scotclimpact
+      - POSTGRES_PASSWORD=testingtesting
+    volumes:
+      - ./postgis:/var/lib/postgresql/data
+    networks:
+      - default
+    ports:
+      - "5432:5432"
+
+  mapserver:
+    image: camptocamp/mapserver:latest
+    hostname: mapserver
+    volumes:
+      - mapserver_share:/etc/mapserver
+    networks:
+      - default
+    ports:
+      - "8080:80"
+    #  - "443:443"
+
+networks:
+  default:
+volumes:
+  mapserver_share:

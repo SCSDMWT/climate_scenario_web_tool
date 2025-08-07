@@ -1,0 +1,38 @@
+# D2 source for the archetecture diagram.
+# Compile by running:
+#   d2 -s -l elk -t 105 architecture.d2
+# See installation intructions for d2 at
+#   https://d2lang.com/tour/install/
+
+direction: right
+
+Server: {
+  Python: "Flask App" {
+    HTTP: "Web App"
+    CLI
+  }
+  DB: "Postgres"
+  Mapserver
+}
+
+Browser: {
+  direction: down
+  UI: "UI"
+  Mapjs: "Map"
+}
+
+tiles: "Third party service"
+
+Server.Python.CLI -> Server.DB: "Setup\n+\nPopulate"
+#Server.Python.CLI -> Server.Mapserver: "Generate Mapfile"
+
+# Server.DB -> Server.Python.HTTP: "Parameters"
+Server.DB -> Server.Mapserver
+
+Server.Mapserver -> Browser.Mapjs: "Data Layer"
+Server.Python.HTTP -> Browser: "Serve App"
+#Server.Python.HTTP <-> Browser.UI: "Calculations"
+
+# Browser.UI -> Browser.Mapjs
+tiles -> Browser.Mapjs: "Tile Layer"
+

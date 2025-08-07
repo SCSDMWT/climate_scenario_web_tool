@@ -1,4 +1,4 @@
-# ScotClImpact
+# Climate Scenario Web Tool
 
 This is the repository for the web component of the Scottish Climate Scenario 
 Decision-Making Web-Tool.

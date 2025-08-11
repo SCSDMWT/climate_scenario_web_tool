@@ -111,7 +111,7 @@ function color_map(value, min, max, values) {
 }
 
 async function update_data_layer(covariate) {
-    const data_url = window.location.href + 'data/extreme_temp/intensity/' + covariate + '/100'
+    const data_url = window.location.href + '/data/extreme_temp/intensity/' + covariate + '/100'
     //console.log(data_url);
     var data = await fetch_data(data_url);
 

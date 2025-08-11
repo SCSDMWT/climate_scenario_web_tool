@@ -101,7 +101,7 @@ const color_values = [
     "#662506",
 ];
 
-const colorbar_range = [-10, 30];
+const colorbar_range = [25, 45];
 
 function color_map(value, min, max, values) {
     var scaled_value = (value - min) / (max - min);
@@ -110,18 +110,13 @@ function color_map(value, min, max, values) {
     return values[ Math.floor(scaled_value * values.length) ]
 }
 
-async function update_data_layer() {
-    //const data_url = "http://10.155.55.10?map=/etc/mapserver/scotclimpact.map&service=wfs&version=2.0.0&request=GetFeature&typeNames=grid2&outputFormat=geojson&maxfeatures=10"
-    //const data_url = "http://10.155.55.10?map=/etc/mapserver/scotclimpact.map&service=wfs&version=2.0.0&request=GetFeature&typeNames=grid2&outputFormat=geojson"
-    //const data_url = mapserverurl + "&service=wfs&version=2.0.0&request=GetFeature&typeNames=grid2&outputFormat=geojson&maxfeatures=10"
-    const data_url = mapserverurl + "&service=wfs&version=2.0.0&request=GetFeature&typeNames=grid2&outputFormat=geojson"
-    console.log(data_url);
+async function update_data_layer(covariate) {
+    const data_url = window.location.href + 'data/extreme_temp/intensity/' + covariate + '/100'
+    //console.log(data_url);
     var data = await fetch_data(data_url);
 
     data.features.forEach(function(element) {
-
-        element.properties.temp = parseFloat(element.properties.temp);
-        element.properties.param_a = parseFloat(element.properties.param_a);
+        element.properties.data = parseFloat(element.properties.data);
     })
     
     const styles = {
@@ -135,18 +130,15 @@ async function update_data_layer() {
     const styleFunction = function (feature) {
         var style = styles[feature.getGeometry().getType()];
         if (feature.getGeometry().getType() == 'Polygon') {
-            style.getFill().setColor( color_map(feature.values_.temp, colorbar_range[0], colorbar_range[1], color_values) );
+            style.getFill().setColor( color_map(feature.values_.data, colorbar_range[0], colorbar_range[1], color_values) );
         }
         return style;
-        //const color = feature.properties.get("param_a", 0);
-
-        //return polygon_style
     };
     
     // Creat the vector layer
     vectorSource = new VectorSource({
         features: new GeoJSON().readFeatures(data),
-        projection: 'EPSG:4326',
+        //projection: 'EPSG:4326',
     });
     const vectorLayer = new VectorLayer({
         source: vectorSource,
@@ -156,7 +148,7 @@ async function update_data_layer() {
     // Add to the map
     map.setLayers([baselayer, vectorLayer]);
 
-    // Hookup the opacity offset
+    // Hookup the opacity slider
     var opacityInput = $("#opacityInput")[0];
     opacityInput.oninput = function() {
         const opacity = parseFloat(opacityInput.value);
@@ -193,21 +185,17 @@ function add_legend() {
     });
 }
 
-update_data_layer();
+//update_data_layer();
 add_legend();
 
-
-//$("#offsetParam")[0].value = 0 
-$("#offsetParamLabel")[0].value = "Add an offset: <span style=\"font-weight:bold\">0</span>"; 
-$("#offsetParam")[0].oninput = function() {
+$("#covariateParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">0</span>"; 
+$("#covariateParam")[0].oninput = function() {
+    
     const slider_value = parseFloat($(this).val());
-    $('#offsetParamLabel').html("Add an offset: <span style=\"font-weight:bold\">" + slider_value.toFixed(1) + "</span>");
+    $('#covariateParamLabel').html("Covariate: <span style=\"font-weight:bold\">" + slider_value.toFixed(1) + "</span>");
 
-    if (!vectorSource)
-        return;
-    vectorSource.forEachFeature( function(feature) {
-        feature.values_.temp = feature.values_.param_a + slider_value;
-    });
-    vectorSource.changed();
+
+    update_data_layer(slider_value);
 };
+$("#covariateParam")[0].oninput()
 

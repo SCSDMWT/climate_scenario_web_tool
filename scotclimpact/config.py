@@ -4,7 +4,7 @@ class Config:
     '''Set Flask configuration variables'''
     MAPSERVER_URL = os.environ.get(
         'MAPSERVER_URL',
-        'http://0.0.0.0?/etc/mapserver/scotclimpact.map'
+        'http://127.0.0.1:8080?/etc/mapserver/scotclimpact.map'
     )
     DATABASE_URL = os.environ.get(
         'DATABASE_URL',
@@ -14,3 +14,5 @@ class Config:
         'TILE_LAYER_URL',
         ''
     )
+    DATA_FILE_DESC = 'GEV_covaraite_fit_tasmax_linear_loc_scale_nFits_1000_parametric_False'
+    

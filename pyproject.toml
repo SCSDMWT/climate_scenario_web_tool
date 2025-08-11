@@ -11,6 +11,7 @@ dependencies = [
     "xarray>=2025.6.1",
     "psycopg2-binary>=2.9.10",
     "gunicorn>=23.0.0",
+    "scipy>=1.15.3",
 ]
 
 [build-system]
@@ -20,4 +21,9 @@ build-backend = "flit_core.buildapi"
 [dependency-groups]
 dev = [
     "pytest>=8.4.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
 ]

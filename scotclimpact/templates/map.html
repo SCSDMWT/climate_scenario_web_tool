@@ -13,12 +13,20 @@
       <div style="grid-template-columns: 1fr"  class="d-grid gap-0 row-gap-3">
           <div class="p-2">
               <label for="opacityInput" class="form-label" id="opacityInputLabel">Data Layer Opacity:</label>
-              <input type="range" class="form-range" min="0" max="1.0" step="0.01" defaultValue="1.0" id="opacityInput"/>
+              <input type="range" class="form-range" min="0" max="1.0" step="0.1" defaultValue="1.0" id="opacityInput"/>
           </div>
+
+          <datalist id="covariateValues">
+            <option value="0"></option>
+            <option value="1.5"></option>
+            <option value="2"></option>
+            <option value="4"></option>
+          </datalist>
           <div class="p-2">
-              <label for="offsetParam" class="form-label" id="offsetParamLabel">Add an offset: <span style="font-weight:bold">0</span></label>
-              <input type="range" class="form-range" min="-10" max="10" step="0.1" defaultValue="0.0" id="offsetParam"/>
+              <label for="covariateParam" class="form-label" id="covariateParamLabel">Covariate: <span style="font-weight:bold">0</span></label>
+              <input type="range" class="form-range" min="0" max="4" step="0.5" defaultValue="2.0" id="covariateParam" list="covariateValues"/>
           </div>
+
 
           <div class="p-2">
               <label class="form-label">Legend:</label>
@@ -114,8 +122,6 @@
 <script type='text/javascript'>
   const mapserverurl = "{{ mapserverurl }}";
   const tilelayerurl = "{{ tilelayerurl }}";
-  const mapattribs = {{ mapattribs|safe }};
-  
 </script>
 <script type="module" src="{{ static_url_for('static', filename='dist/map.js') }}"></script>
 {% endblock %}

@@ -11,9 +11,12 @@
 
     <div class="col-md-3">
       <div style="grid-template-columns: 1fr"  class="d-grid gap-0 row-gap-3">
+
           <div class="p-2">
-              <label for="opacityInput" class="form-label" id="opacityInputLabel">Data Layer Opacity:</label>
-              <input type="range" class="form-range" min="0" max="1.0" step="0.1" defaultValue="1.0" id="opacityInput"/>
+              <label for="scenario" class="form-label" id="scenarioLabel">Scenario:</label>
+              <select class="form-select" name="scenario" id="scenario">
+                  <option value="extreme_temp">Extreme Temperature</option>
+              </select>
           </div>
 
           <datalist id="covariateValues">
@@ -22,15 +25,58 @@
             <option value="2"></option>
             <option value="4"></option>
           </datalist>
-          <div class="p-2">
+          <div class="p-2" id="covariateGroup">
               <label for="covariateParam" class="form-label" id="covariateParamLabel">Covariate: <span style="font-weight:bold">0</span></label>
               <input type="range" class="form-range" min="0" max="4" step="0.5" defaultValue="2.0" id="covariateParam" list="covariateValues"/>
+          </div>
+
+          <div class="p-2" id="calculationGroup">
+              <label for="calculation" class="form-label" id="calculationLabel">Calculation:</label>
+              <select class="form-select" name="calculation" id="calculation">
+                  <option value="intensity">Intensity</option>
+                  <option value="return_time">Return Time</option>
+              </select>
+          </div>
+
+          <datalist id="tauReturnValues">
+            <option value="10"></option>
+            <option value="20"></option>
+            <option value="30"></option>
+            <option value="40"></option>
+            <option value="50"></option>
+            <option value="60"></option>
+            <option value="70"></option>
+            <option value="80"></option>
+            <option value="90"></option>
+            <option value="100"></option>
+          </datalist>
+
+          <div class="p-2" id="tauReturnGroup">
+              <label for="tauReturnParam" class="form-label" id="tauReturnParamLabel">Return time: <span style="font-weight:bold">0</span></label>
+              <input type="range" class="form-range" min="10" max="100" step="10" defaultValue="2.0" id="tauReturnParam" list="tauReturnValues"/>
+          </div>
+
+          <datalist id="tauReturnValues">
+            <option value="25"></option>
+            <option value="30"></option>
+            <option value="35"></option>
+            <option value="40"></option>
+            <option value="45"></option>
+          </datalist>
+
+          <div class="p-2" id="intensityGroup">
+              <label for="intensityParam" class="form-label" id="intensityParamLabel">Intensity: <span style="font-weight:bold">0</span></label>
+              <input type="range" class="form-range" min="25" max="45" step="5" defaultValue="25" id="intensityParam" list="intensityValues"/>
           </div>
 
 
           <div class="p-2">
               <label class="form-label">Legend:</label>
               <div id="legend"></div>
+          </div>
+          <div class="p-2">
+              <label for="opacityInput" class="form-label" id="opacityInputLabel">Data Layer Opacity:</label>
+              <input type="range" class="form-range" min="0" max="1.0" step="0.1" defaultValue="1.0" id="opacityInput"/>
           </div>
     </div>
   </div>

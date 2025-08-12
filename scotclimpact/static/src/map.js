@@ -101,7 +101,7 @@ const color_values = [
     "#662506",
 ];
 
-const colorbar_range = [25, 45];
+//const colorbar_range = [25, 45];
 
 function color_map(value, min, max, values) {
     var scaled_value = (value - min) / (max - min);
@@ -110,10 +110,8 @@ function color_map(value, min, max, values) {
     return values[ Math.floor(scaled_value * values.length) ]
 }
 
-async function update_data_layer(covariate) {
-    const data_url = window.location.href + '/data/extreme_temp/intensity/' + covariate + '/100'
-    //console.log(data_url);
-    var data = await fetch_data(data_url);
+async function update_data_layer(url, colorbar) {
+    var data = await fetch_data(url);
 
     data.features.forEach(function(element) {
         element.properties.data = parseFloat(element.properties.data);
@@ -130,7 +128,7 @@ async function update_data_layer(covariate) {
     const styleFunction = function (feature) {
         var style = styles[feature.getGeometry().getType()];
         if (feature.getGeometry().getType() == 'Polygon') {
-            style.getFill().setColor( color_map(feature.values_.data, colorbar_range[0], colorbar_range[1], color_values) );
+            style.getFill().setColor( color_map(feature.values_.data, colorbar.range[0], colorbar.range[1], colorbar.colors) );
         }
         return style;
     };
@@ -156,10 +154,12 @@ async function update_data_layer(covariate) {
     }
 }
 
-function add_legend() {
+function draw_legend(colorbar) {
+    for (const svg of $("svg"))
+        svg.remove();
     var pos = 0;
-    var draw = SVG().addTo("#legend").size(300, 30 * color_values.length );
-    color_values.slice().reverse().forEach((color_value, _idx, arr) => {
+    var draw = SVG().addTo("#legend").size(300, 30 * colorbar.colors.length );
+    colorbar.colors.slice().reverse().forEach((color_value, _idx, arr) => {
         // Index in original color_values
         const idx = color_values.length - _idx - 1;
         // Add a colored box
@@ -167,15 +167,15 @@ function add_legend() {
         // Add text
         if (idx == color_values.length - 1)
             draw
-                .text("> " + colorbar_range[1])
+                .text("> " + colorbar.range[1])
                 .move(35, pos);
         else if (idx == 0)
             draw
-                .text("< " + colorbar_range[0])
+                .text("< " + colorbar.range[0])
                 .move(35, pos);
         else {
-            const lower_val = ((idx + 0.0) / color_values.length) * (colorbar_range[1] - colorbar_range[0]) + colorbar_range[0];
-            const upper_val = ((idx + 1.0) / color_values.length) * (colorbar_range[1] - colorbar_range[0]) + colorbar_range[0];
+            const lower_val = ((idx + 0.0) / colorbar.colors.length) * (colorbar.range[1] - colorbar.range[0]) + colorbar.range[0];
+            const upper_val = ((idx + 1.0) / colorbar.colors.length) * (colorbar.range[1] - colorbar.range[0]) + colorbar.range[0];
             draw
                 .text(lower_val.toFixed(1) + " - " + upper_val.toFixed(1))
                 .move(35, pos);
@@ -185,17 +185,110 @@ function add_legend() {
     });
 }
 
-//update_data_layer();
-add_legend();
-
-$("#covariateParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">0</span>"; 
-$("#covariateParam")[0].oninput = function() {
-    
-    const slider_value = parseFloat($(this).val());
-    $('#covariateParamLabel').html("Covariate: <span style=\"font-weight:bold\">" + slider_value.toFixed(1) + "</span>");
-
-
-    update_data_layer(slider_value);
+const colorbar = {
+    extreme_temp: {
+        intensity: {
+            range: [25, 45],
+            colors: color_values,
+        },
+        return_time: {
+            range: [0, 200],
+            colors: color_values.slice().reverse(),
+        }
+    }
 };
-$("#covariateParam")[0].oninput()
 
+const selection_tree = {
+    extreme_temp: {
+        next_choice: "#calculation",
+        intensity: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": true,
+            "#intensityGroup": false,
+        },
+        return_time: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": false,
+            "#intensityGroup": true,
+        }
+    }
+};
+
+function update_ui(slider_values) {
+    
+    const scenario = $("#scenario")[0].value;
+    const next_choice = $(selection_tree[scenario].next_choice)[0].value;
+
+    // Update slider visibility
+    for (let ui_item_id in selection_tree[scenario][next_choice]) {
+        const ui_item = $(ui_item_id)[0];
+        const ui_item_is_visible = selection_tree[scenario][next_choice][ui_item_id];
+        ui_item.style.display = ui_item_is_visible ? "block" : "none";
+    }
+
+    // Update slider labels
+    $('#covariateParamLabel').html("Covariate: <span style=\"font-weight:bold\">" + slider_values["#covariateParam"].toFixed(1) + "</span>");
+    $('#tauReturnParamLabel').html("Return time: <span style=\"font-weight:bold\">" + slider_values["#tauReturnParam"].toFixed(0) + "</span>");
+    $('#intensityParamLabel').html("Intensity: <span style=\"font-weight:bold\">" + slider_values["#intensityParam"].toFixed(0) + "</span>");
+
+    return colorbar[scenario][next_choice] // FIXME
+}
+
+function make_data_url(slider_values) {
+    const scenario = $("#scenario")[0].value;
+    var url_endpoint = new URL("data/" + scenario, window.location.href); 
+
+    if (scenario == "extreme_temp") {
+
+        // Update slider labels
+        const calculation = $("#calculation")[0].value;
+
+        url_endpoint.pathname += '/' + calculation;
+        url_endpoint.pathname += '/' + slider_values["#covariateParam"];
+        if (calculation == "intensity") {
+            url_endpoint.pathname += '/' + slider_values["#tauReturnParam"];
+        }
+        else if(calculation == "return_time") {
+            url_endpoint.pathname += '/' + slider_values["#intensityParam"];
+        }
+    }
+    return url_endpoint.href;
+
+}
+
+function get_slider_values() {
+    var result = new Object();
+    const slider_ids = [
+        "#covariateParam",
+        "#tauReturnParam",
+        "#intensityParam",
+    ];
+
+    for (const id of slider_ids) {
+        result[id] = parseFloat($(id).val());
+    }
+    return result;
+}
+
+function on_user_input() {
+    /// Handler for UI events
+    const slider_values = get_slider_values();
+    const url_endpoint = make_data_url(slider_values)
+    const colorbar = update_ui(slider_values);
+    update_data_layer(url_endpoint, colorbar);
+    draw_legend(colorbar);
+}
+
+$("#covariateParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">1.5</span>"; 
+$("#covariateParam")[0].oninput = on_user_input;
+$("#tauReturnParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">100</span>"; 
+$("#tauReturnParam")[0].oninput = on_user_input;
+$("#intensityParamLabel")[0].value = "Intensity: <span style=\"font-weight:bold\">100</span>"; 
+$("#intensityParam")[0].oninput = on_user_input;
+
+$("#scenario")[0].oninput = on_user_input; 
+$("#calculation")[0].oninput = on_user_input; 
+
+on_user_input();

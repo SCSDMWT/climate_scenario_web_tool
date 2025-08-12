@@ -1,5 +1,11 @@
 import numpy as np
+import re
 import xarray as xr
+
+def is_number(s):
+    '''Returns true if s is a string representing an actual number (excluding NaN or Inf)'''
+    return re.match(r'(^\d+(\.\d*)?$)|(^\.\d+$)', s) is not None
+
 
 def xarray_to_geojson(dataset_name, dataset, x_key='projection_x_coordinate', y_key='projection_y_coordinate'):
     '''Convert an xarray.DataArray object to GeoJSON compatible object.'''
@@ -23,7 +29,7 @@ def xarray_to_geojson(dataset_name, dataset, x_key='projection_x_coordinate', y_
         dict(
             type='Feature',
             properties=dict(
-                data=value
+                data=value if not value == float("inf") else 10000
             ),
             geometry=dict(
                 type='Polygon',

@@ -10,8 +10,9 @@ def xarray_to_geojson(dataset_name, dataset, x_key='projection_x_coordinate', y_
     dataset = dataset.to_numpy()
     idx = np.where(dataset == dataset)
 
-    dx = np.diff(x_dim).mean()/2.0
-    dy = np.diff(y_dim).mean()/2.0
+    dx = np.diff(x_dim).min()/2.0
+    dy = np.diff(y_dim).min()/2.0
+
     top_right =    [ [x_dim[i]+dx, y_dim[j]+dy] for j, i in zip(*idx)]
     top_left  =    [ [x_dim[i]+dx, y_dim[j]-dy] for j, i in zip(*idx) ]
     bottom_right = [ [x_dim[i]-dx, y_dim[j]+dy] for j, i in zip(*idx) ]

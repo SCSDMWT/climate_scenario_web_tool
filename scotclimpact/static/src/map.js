@@ -101,13 +101,18 @@ const color_values = [
     "#662506",
 ];
 
-//const colorbar_range = [25, 45];
+function apply_color_map(value, edges, colors) {
+    //var scaled_value = (value - min) / (max - min);
+    //if (scaled_value < 0.0) scaled_value = 0.0;
+    //if (scaled_value >= 1.0) scaled_value = 0.99;
+    //return values[ Math.floor(scaled_value * values.length) ]
 
-function color_map(value, min, max, values) {
-    var scaled_value = (value - min) / (max - min);
-    if (scaled_value < 0.0) scaled_value = 0.0;
-    if (scaled_value >= 1.0) scaled_value = 0.99;
-    return values[ Math.floor(scaled_value * values.length) ]
+    return edges.reduceRight( (result, edge, index, array) => {
+        result = (edge < value) ? index : result;
+
+    },
+        0
+    );
 }
 
 async function update_data_layer(url, colorbar) {
@@ -128,7 +133,7 @@ async function update_data_layer(url, colorbar) {
     const styleFunction = function (feature) {
         var style = styles[feature.getGeometry().getType()];
         if (feature.getGeometry().getType() == 'Polygon') {
-            style.getFill().setColor( color_map(feature.values_.data, colorbar.range[0], colorbar.range[1], colorbar.colors) );
+            style.getFill().setColor( apply_color_map(feature.values_.data, colorbar.range[0], colorbar.range[1], colorbar.colors) );
         }
         return style;
     };
@@ -188,12 +193,16 @@ function draw_legend(colorbar) {
 const colorbar = {
     extreme_temp: {
         intensity: {
-            range: [25, 45],
-            colors: color_values,
+            //range: [25, 45],
+            edges: [25, 29, 33, 27, 41, 45],
+            // Colorbrewer YlOrBr-8
+            colors: ["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
         },
         return_time: {
-            range: [0, 200],
-            colors: color_values.slice().reverse(),
+            //range: [0, 200],
+            edges: [0, 10, 25, 50, 100, 200],
+            // Colorbrewer YlOrBr-7
+            colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
         }
     }
 };
@@ -239,8 +248,8 @@ function update_ui(slider_values) {
 function make_data_url(slider_values) {
     const scenario = $("#scenario")[0].value;
     var url_endpoint = new URL(
-        window.location.pathname + "/data/" + scenario, 
-        window.location.protocol + "//" + window.location.hostname
+        window.location.protocol + "//" + window.location.host + "/" +
+        window.location.pathname + "/data/" + scenario
     ); 
 
     if (scenario == "extreme_temp") {

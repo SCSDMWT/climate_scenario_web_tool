@@ -238,7 +238,10 @@ function update_ui(slider_values) {
 
 function make_data_url(slider_values) {
     const scenario = $("#scenario")[0].value;
-    var url_endpoint = new URL("data/" + scenario, window.location.href); 
+    var url_endpoint = new URL(
+        window.location.pathname + "/data/" + scenario, 
+        window.location.protocol + "//" + window.location.hostname
+    ); 
 
     if (scenario == "extreme_temp") {
 

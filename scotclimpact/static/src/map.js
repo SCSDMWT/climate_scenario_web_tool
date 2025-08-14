@@ -9,12 +9,15 @@ import VectorLayer from 'ol/layer/Vector.js'
 import {fromLonLat} from 'ol/proj';
 import {GeoJSON} from 'ol/format';
 import $ from 'jquery';
-import { SVG } from '@svgdotjs/svg.js'
+//import { SVG } from '@svgdotjs/svg.js'
 import proj4 from 'proj4';
 import {get as getProjection} from 'ol/proj.js';
 import {register} from 'ol/proj/proj4.js';
 import ImageTile from 'ol/source/ImageTile.js';
 import TileGrid from 'ol/tilegrid/TileGrid.js';
+
+import {apply_color_map, legend_endpoints} from "../src/color_map.js";
+import {draw_legend} from "../src/legend.js";
 
 /// Setup the British National Grid projection
 // See: https://openlayers.org/doc/tutorials/raster-reprojection.html
@@ -89,32 +92,6 @@ async function fetch_data(url) {
     return data
 }
 
-const color_values = [
-    "#ffffe5",
-    "#fff7bc",
-    "#fee391",
-    "#fec44f",
-    "#fe9929",
-    "#ec7014",
-    "#cc4c02",
-    "#993404",
-    "#662506",
-];
-
-function apply_color_map(value, edges, colors) {
-    //var scaled_value = (value - min) / (max - min);
-    //if (scaled_value < 0.0) scaled_value = 0.0;
-    //if (scaled_value >= 1.0) scaled_value = 0.99;
-    //return values[ Math.floor(scaled_value * values.length) ]
-
-    return edges.reduceRight( (result, edge, index, array) => {
-        result = (edge < value) ? index : result;
-
-    },
-        0
-    );
-}
-
 async function update_data_layer(url, colorbar) {
     var data = await fetch_data(url);
 
@@ -133,7 +110,9 @@ async function update_data_layer(url, colorbar) {
     const styleFunction = function (feature) {
         var style = styles[feature.getGeometry().getType()];
         if (feature.getGeometry().getType() == 'Polygon') {
-            style.getFill().setColor( apply_color_map(feature.values_.data, colorbar.range[0], colorbar.range[1], colorbar.colors) );
+            const color_value = apply_color_map(feature.values_.data, colorbar.edges, colorbar.colors, colorbar.endpoint_type);
+            console.log(feature.values_.data, color_value);
+            style.getFill().setColor(color_value);
         }
         return style;
     };
@@ -159,50 +138,25 @@ async function update_data_layer(url, colorbar) {
     }
 }
 
-function draw_legend(colorbar) {
-    for (const svg of $("svg"))
-        svg.remove();
-    var pos = 0;
-    var draw = SVG().addTo("#legend").size(300, 30 * colorbar.colors.length );
-    colorbar.colors.slice().reverse().forEach((color_value, _idx, arr) => {
-        // Index in original color_values
-        const idx = color_values.length - _idx - 1;
-        // Add a colored box
-        draw.rect(30, 30).move(0, pos).attr({fill: color_value});
-        // Add text
-        if (idx == color_values.length - 1)
-            draw
-                .text("> " + colorbar.range[1])
-                .move(35, pos);
-        else if (idx == 0)
-            draw
-                .text("< " + colorbar.range[0])
-                .move(35, pos);
-        else {
-            const lower_val = ((idx + 0.0) / colorbar.colors.length) * (colorbar.range[1] - colorbar.range[0]) + colorbar.range[0];
-            const upper_val = ((idx + 1.0) / colorbar.colors.length) * (colorbar.range[1] - colorbar.range[0]) + colorbar.range[0];
-            draw
-                .text(lower_val.toFixed(1) + " - " + upper_val.toFixed(1))
-                .move(35, pos);
-        }
-
-        pos += 30;
-    });
-}
-
 const colorbar = {
     extreme_temp: {
         intensity: {
-            //range: [25, 45],
-            edges: [25, 29, 33, 27, 41, 45],
+            edges: [25, 27, 29, 31, 33, 35, 37, 39],
+            // Colorbrewer YlOrBr-9
+            colors: ["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#993404", "#662506"],
             // Colorbrewer YlOrBr-8
-            colors: ["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
+            //colors: ["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"].slice().reverse(),
+            // Colorbrewer YlOrBr-7
+            //colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
+            endpoint_type: legend_endpoints.out_of_range,
         },
         return_time: {
-            //range: [0, 200],
             edges: [0, 10, 25, 50, 100, 200],
             // Colorbrewer YlOrBr-7
-            colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
+            //colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
+            // Colorbrewer YlOrBr-6
+            colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404" ].slice().reverse(),
+            endpoint_type: legend_endpoints.lower_in_range,
         }
     }
 };
@@ -290,7 +244,8 @@ function on_user_input() {
     const url_endpoint = make_data_url(slider_values)
     const colorbar = update_ui(slider_values);
     update_data_layer(url_endpoint, colorbar);
-    draw_legend(colorbar);
+    //draw_legend(colorbar);
+    draw_legend(colorbar.edges, colorbar.colors, colorbar.endpoint_type);
 }
 
 $("#covariateParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">1.5</span>"; 

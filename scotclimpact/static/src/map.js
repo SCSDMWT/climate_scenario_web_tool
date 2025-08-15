@@ -5,6 +5,7 @@ import View from 'ol/View.js'
 import Map from 'ol/Map.js'
 import Style from 'ol/style/Style.js'
 import Fill from 'ol/style/Fill.js'
+import Stroke from 'ol/style/Stroke.js'
 import VectorLayer from 'ol/layer/Vector.js'
 import {fromLonLat} from 'ol/proj';
 import {GeoJSON} from 'ol/format';
@@ -136,6 +137,58 @@ async function update_data_layer(url, colorbar) {
         const opacity = parseFloat(opacityInput.value);
         vectorLayer.setOpacity(opacity);
     }
+}
+
+async function add_boundary_layer() {
+
+
+    var url = new URL(
+        window.location.protocol + "//" + window.location.host + "/" +
+        window.location.pathname + "/boundaries/local_authorities";
+    ); 
+    var data = await fetch_data(url.href);
+
+    //data.features.forEach(function(element) {
+    //    element.properties.data = parseFloat(element.properties.data);
+    //})
+    
+    const styles = {
+        'Polygon': new Style({
+            stroke: new Stroke({
+                color: "#ffffff",
+            }),
+        }),
+    };
+
+    //const styleFunction = function (feature) {
+    //    var style = styles[feature.getGeometry().getType()];
+    //    if (feature.getGeometry().getType() == 'Polygon') {
+    //        const color_value = apply_color_map(feature.values_.data, colorbar.edges, colorbar.colors, colorbar.endpoint_type);
+    //        console.log(feature.values_.data, color_value);
+    //        style.getFill().setColor(color_value);
+    //    }
+    //    return style;
+    //};
+    
+    // Creat the vector layer
+    vectorSource = new VectorSource({
+        features: new GeoJSON().readFeatures(data),
+        //projection: 'EPSG:4326',
+    });
+    const vectorLayer = new VectorLayer({
+        source: vectorSource,
+        style: styles["Polygon"],
+    });
+
+    // Add to the map
+    map.setLayers([baselayer, vectorLayer]);
+
+    // Hookup the opacity slider
+    //var opacityInput = $("#opacityInput")[0];
+    //opacityInput.oninput = function() {
+    //    const opacity = parseFloat(opacityInput.value);
+    //    vectorLayer.setOpacity(opacity);
+    //}
 }
 
 const colorbar = {

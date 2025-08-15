@@ -11,6 +11,7 @@ from .extreme_temp import (
     return_time_from_intensity,
 )
 from .data_helpers import xarray_to_geojson, is_number
+from .boundary_layer import get_wfs
 
 def menu_items():
     return []
@@ -34,6 +35,10 @@ def make_json_response(json_data):
     ))
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+
+@app.route('/boundaries/local_authorities')
+def bondaries_local_authorities():
+    return make_json_response(get_wfs(app.config['BOUNDARY_LAYER_URL']))
 
 @app.route('/data/extreme_temp/intensity/<covariate>/<tauReturn>')
 def data_extreme_temp_intensity(covariate, tauReturn):

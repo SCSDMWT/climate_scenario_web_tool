@@ -15,4 +15,9 @@ class Config:
         ''
     )
     DATA_FILE_DESC = 'GEV_covaraite_fit_tasmax_linear_loc_scale_nFits_1000_parametric_False'
+    BOUNDARY_LAYER_URL = os.environ.get(
+        'BONDARY_LAYER_URL',
+        ''
+    )
+
     

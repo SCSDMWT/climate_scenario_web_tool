@@ -63,7 +63,10 @@ async function update_data_layer(url, colorbar) {
 
 async function update_boundary_layer(layer_name) {
     const valid_layers = {
-        'local_authorities': ''
+        'local_authorities': '',
+        'police': '',
+        'fire_rescue': '',
+        'health_boards': '',
     };
 
     if (!(layer_name in valid_layers)) {

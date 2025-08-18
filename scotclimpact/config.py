@@ -15,13 +15,32 @@ class Config:
         ''
     )
     DATA_FILE_DESC = 'GEV_covaraite_fit_tasmax_linear_loc_scale_nFits_1000_parametric_False'
-    BOUNDARY_LAYER_URL = os.environ.get(
-        'BONDARY_LAYER_URL',
-        ''
+
+    BOUNDARY_LAYER_CACHE_DIR = os.environ.get(
+        'BOUNDARY_LAYER_CACHE_DIR',
+        'data/boundaries'
     )
-    BOUNDARY_LAYER_CACHE_FILE = os.environ.get(
-        'BONDARY_LAYER_CACHE_FILE',
-        'data/boundaries/local_councels.json'
+    BOUNDARY_LAYER = dict(
+        local_authorities=dict(
+            url=os.environ.get('BL_COUNCIL_URL', ''),
+            cache_file='local_council.json',
+        ),
+        fire_rescue=dict(
+            url=os.environ.get('BL_FIRE_RESCUE_URL', ''),
+            cache_file='fire_rescue.json',
+        ),
+        police=dict(
+            url=os.environ.get('BL_POLICE_URL', ''),
+            cache_file='police.json',
+        ),
+        health_integration_authorities=dict(
+            url=os.environ.get('BL_HEALTH_INT_AUTH_URL', ''),
+            cache_file='health_integration_authorities.json',
+        ),
+        health_boards=dict(
+            url=os.environ.get('BL_HEALTH_BOARDS_URL', ''),
+            cache_file='health_boards.json',
+        ),
     )
 
     

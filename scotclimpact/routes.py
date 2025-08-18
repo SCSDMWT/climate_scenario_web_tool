@@ -1,6 +1,7 @@
 import functools
 import io
 import json
+import os
 
 from flask import current_app as app
 from flask import render_template, make_response, send_file
@@ -36,13 +37,17 @@ def make_json_response(json_data):
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-@app.route('/boundaries/local_authorities')
-def bondaries_local_authorities():
-    return make_json_response(
-        get_wfs(
-            app.config['BOUNDARY_LAYER_URL'],
-            app.config['BOUNDARY_LAYER_CACHE_FILE'],
-        ))
+@app.route('/boundaries/<layer_name>')
+def bondaries_local_authorities(layer_name):
+    if not layer_name in app.config['BOUNDARY_LAYER'] or app.config['BOUNDARY_LAYER'][layer_name]['url'] == '':
+        return 'Not found', 404
+
+    url = app.config['BOUNDARY_LAYER'][layer_name]['url']
+    cache_file = os.path.join(
+        app.config['BOUNDARY_LAYER_CACHE_DIR'],
+        app.config['BOUNDARY_LAYER'][layer_name]['cache_file']
+    )
+    return make_json_response(get_wfs(url, cache_file))
 
 @app.route('/data/extreme_temp/intensity/<covariate>/<tauReturn>')
 def data_extreme_temp_intensity(covariate, tauReturn):

@@ -38,7 +38,11 @@ def make_json_response(json_data):
 
 @app.route('/boundaries/local_authorities')
 def bondaries_local_authorities():
-    return make_json_response(get_wfs(app.config['BOUNDARY_LAYER_URL']))
+    return make_json_response(
+        get_wfs(
+            app.config['BOUNDARY_LAYER_URL'],
+            app.config['BOUNDARY_LAYER_CACHE_FILE'],
+        ))
 
 @app.route('/data/extreme_temp/intensity/<covariate>/<tauReturn>')
 def data_extreme_temp_intensity(covariate, tauReturn):

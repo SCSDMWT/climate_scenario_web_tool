@@ -9,8 +9,6 @@ import Stroke from 'ol/style/Stroke.js'
 import VectorLayer from 'ol/layer/Vector.js'
 import {fromLonLat} from 'ol/proj';
 import {GeoJSON} from 'ol/format';
-import $ from 'jquery';
-//import { SVG } from '@svgdotjs/svg.js'
 import proj4 from 'proj4';
 import {get as getProjection} from 'ol/proj.js';
 import {register} from 'ol/proj/proj4.js';
@@ -31,11 +29,10 @@ proj27700.setExtent([0, 0, 700000, 1300000]);
 
 /// A class to wrap OpenLayers objects
 export class UIMap {
-    #layers = [null, new VectorLayer(), new VectorLayer()];
-    #layer_visible = [false, false, false];
+    #layers = [null, null, null];
     #base_layer_idx = 0;
     #data_layer_idx = 1;
-    #boundarylayer_idx = 2;
+    #boundary_layer_idx = 2;
     #map = null;
 
     constructor(div_id, tilelayerurl) {
@@ -84,8 +81,7 @@ export class UIMap {
         this.#layers[this.#base_layer_idx] = new TileLayer({
             source: make_baselayer_source(),
         });
-        this.#layer_visible[this.#base_layer_idx] = true;
-        this.#map.setLayers(this.#layers);
+        this.update_layers()
 
     }
 
@@ -134,11 +130,56 @@ export class UIMap {
         });
 
         // Reset the map layers
-        this.#map.setLayers(this.#layers);
+        this.update_layers()
     }
 
     set_data_layer_opacity(opacity) {
-        this.#layers[this.#data_layer_idx].setOpacity(opacity);
+        this.#layers[this.#data_layer_idx] && this.#layers[this.#data_layer_idx].setOpacity(opacity);
     }
 
+    update_boundary_layer(data) {
+
+        const styles = {
+            'Polygon': new Style({
+                stroke: new Stroke({
+                    color: "#000000",
+                }),
+            }),
+            'MultiPolygon': new Style({
+                stroke: new Stroke({
+                    color: "#000000",
+                }),
+            }),
+        };
+
+        const styleFunction = function (feature) {
+            const style = styles[feature.getGeometry().getType()];
+            return style;
+        };
+
+        // Creat the vector layer
+        const vectorSource = new VectorSource({
+            features: new GeoJSON().readFeatures(data),
+        });
+
+        // Add to the map
+        this.#layers[this.#boundary_layer_idx] = new VectorLayer({
+            source: vectorSource,
+            style: styleFunction,
+        });
+
+        // Reset the map layers
+        this.update_layers()
+    }
+
+    update_layers() {
+        this.#map.setLayers(
+            this.#layers.filter( (layer) => layer )
+        );
+    }
+
+    hide_boundary_layer() {
+        this.#layers[this.#boundary_layer_idx] = null;
+        this.update_layers();
+    }
 }

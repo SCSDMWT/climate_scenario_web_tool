@@ -72,10 +72,19 @@
               <label class="form-label">Legend:</label>
               <div id="legend"></div>
           </div>
+
           <hr/>
           <div class="p-2">
               <label for="opacityInput" class="form-label" id="opacityInputLabel">Data Layer Opacity:</label>
               <input type="range" class="form-range" min="0" max="1.0" step="0.1" defaultValue="1.0" id="opacityInput"/>
+          </div>
+
+          <div class="p-2">
+              <label for="boundaryLayer" class="form-label" id="boundaryLayerLabel">Boundaries:</label>
+              <select class="form-select" name="boundaryLayer" id="boundaryLayer">
+                  <option value="none">None</option>
+                  <option value="local_authorities">Local Council Areas</option>
+              </select>
           </div>
     </div>
   </div>

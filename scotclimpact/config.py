@@ -19,5 +19,9 @@ class Config:
         'BONDARY_LAYER_URL',
         ''
     )
+    BOUNDARY_LAYER_CACHE_FILE = os.environ.get(
+        'BONDARY_LAYER_CACHE_FILE',
+        'data/boundaries/local_councels.json'
+    )
 
     

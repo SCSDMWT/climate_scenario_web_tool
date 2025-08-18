@@ -61,6 +61,24 @@ async function update_data_layer(url, colorbar) {
     ui_map.update_data_layer(data, colorbar);
 }
 
+async function update_boundary_layer(layer_name) {
+    const valid_layers = {
+        'local_authorities': ''
+    };
+
+    if (!(layer_name in valid_layers)) {
+        ui_map.hide_boundary_layer();
+        return;
+    }
+
+    const url = new URL(
+        window.location.protocol + "//" + window.location.host + "/" +
+        window.location.pathname + "/boundaries/" + layer_name
+    ); 
+    const data = await fetch_data(url.href);
+    ui_map.update_boundary_layer(data);
+}
+
 function update_ui(slider_values) {
     
     const scenario = $("#scenario")[0].value;
@@ -120,12 +138,12 @@ function get_slider_values() {
     return result;
 }
 
-function on_user_input() {
+async function on_user_input() {
     /// Handler for UI events
     const slider_values = get_slider_values();
     const url_endpoint = make_data_url(slider_values)
     const colorbar = update_ui(slider_values);
-    update_data_layer(url_endpoint, colorbar);
+    await update_data_layer(url_endpoint, colorbar);
     //draw_legend(colorbar);
     draw_legend(colorbar.edges, colorbar.colors, colorbar.endpoint_type);
 }
@@ -146,4 +164,13 @@ opacityInput.oninput = function() {
     ui_map.set_data_layer_opacity(opacity);
 }
 
+var boundaryInput = $("#boundaryLayer")[0];
+boundaryInput.oninput = async function() {
+    const boundary_layer = boundaryInput.value;
+    await update_boundary_layer(boundary_layer);
+}
+
 on_user_input();
+
+boundaryInput.value = "none"
+await update_boundary_layer("none");

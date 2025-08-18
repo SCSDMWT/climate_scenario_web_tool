@@ -17,298 +17,128 @@ import {register} from 'ol/proj/proj4.js';
 import ImageTile from 'ol/source/ImageTile.js';
 import TileGrid from 'ol/tilegrid/TileGrid.js';
 
-import {apply_color_map, legend_endpoints} from "../src/color_map.js";
-import {draw_legend} from "../src/legend.js";
+import {apply_color_map} from "../src/color_map.js";
 
 /// Setup the British National Grid projection
 // See: https://openlayers.org/doc/tutorials/raster-reprojection.html
 proj4.defs('EPSG:27700', '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 ' +
-    '+x_0=400000 +y_0=-100000 +ellps=airy ' +
-    '+towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 ' +
-    '+units=m +no_defs');
+           '+x_0=400000 +y_0=-100000 +ellps=airy ' +
+           '+towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 ' +
+           '+units=m +no_defs');
 register(proj4);
 const proj27700 = getProjection('EPSG:27700');
 proj27700.setExtent([0, 0, 700000, 1300000]);
 
+/// A class to wrap OpenLayers objects
+export class UIMap {
+    #layers = [null, new VectorLayer(), new VectorLayer()];
+    #layer_visible = [false, false, false];
+    #base_layer_idx = 0;
+    #data_layer_idx = 1;
+    #boundarylayer_idx = 2;
+    #map = null;
 
-/// The background map
-function make_baselayer_source() {
-    // Use OSM if a tile layer is not specified
-    if (tilelayerurl === '') {
-        return new OSM({
-            projection: 'EPSG:3857'
+    constructor(div_id, tilelayerurl) {
+        /// Default view that includes Scotland
+        const view = new View({
+            projection: 'EPSG:27700',
+            center: fromLonLat([-4.352258, 57.009659], 'EPSG:27700'),
+            zoom: 3,
+            //resolutions: tilegrid.getResolutions(),
         });
+
+        this.#map = new Map({
+            target: div_id,
+            layers: [],
+            view: view,
+        });
+
+        window.onload = () => this.resizeMap();
+        window.onresize = () => this.resizeMap();
+        this.make_baselayer(tilelayerurl);
     }
 
-    // Create the OS tile source
-    const tilegrid = new TileGrid({
-        resolutions: [ 896.0, 448.0, 224.0, 112.0, 56.0, 28.0, 14.0, 7.0, 3.5, 1.75 ],
-        origin: [ -238375.0, 1376256.0 ]
-    });
-    return new ImageTile({
-        projection: 'EPSG:27700',
-        url: tilelayerurl,
-        tileGrid: tilegrid,
-    })
-}
+    /// Adds the background map
+    make_baselayer(tilelayerurl) {
+        /// The background map
+        function make_baselayer_source() {
+            // Use OSM if a tile layer is not specified
+            if (tilelayerurl === '') {
+                return new OSM({
+                    projection: 'EPSG:3857'
+                });
+            }
 
-const baselayer = new TileLayer({
-    source: make_baselayer_source(),
-})
+            // Create the OS tile source
+            const tilegrid = new TileGrid({
+                resolutions: [ 896.0, 448.0, 224.0, 112.0, 56.0, 28.0, 14.0, 7.0, 3.5, 1.75 ],
+                origin: [ -238375.0, 1376256.0 ]
+            });
+            return new ImageTile({
+                projection: 'EPSG:27700',
+                url: tilelayerurl,
+                tileGrid: tilegrid,
+            })
+        }
 
-/// Default view that includes Scotland
-const view = new View({
-    projection: 'EPSG:27700',
-    center: fromLonLat([-4.352258, 57.009659], 'EPSG:27700'),
-    zoom: 3,
-    //resolutions: tilegrid.getResolutions(),
-});
+        this.#layers[this.#base_layer_idx] = new TileLayer({
+            source: make_baselayer_source(),
+        });
+        this.#layer_visible[this.#base_layer_idx] = true;
+        this.#map.setLayers(this.#layers);
 
-// Source items for the vector layer
-var vectorSource = null;
+    }
 
-/// The map object
-var map = new Map({
-    target: 'map',
-    layers: [baselayer/*, tmp_layer*/],
-    view: view,
-});
+    /// A method to handle browser window resizing.
+    resizeMap() {
+        const nav_height = document.getElementsByClassName('navbar')[0].clientHeight;
 
-/// A function to handle browser window resizing.
-function resizeMap() {
-    const nav_height = document.getElementsByClassName('navbar')[0].clientHeight;
+        const mapDiv = document.getElementById('map');
+        mapDiv.style.height = window.innerHeight-nav_height + 'px';
+        this.#map.updateSize();
+    }
 
-    const mapDiv = document.getElementById('map');
-    mapDiv.style.height = window.innerHeight-nav_height + 'px';
-    map.updateSize();
-}
-window.onload = resizeMap;
-window.onresize = resizeMap;
+    /// Update the values shown in the data layer.
+    update_data_layer(data, colorbar) {
+        //var data = await fetch_data(url);
 
+        data.features.forEach(function(element) {
+            element.properties.data = parseFloat(element.properties.data);
+        })
 
-/// Request data points 
-async function fetch_data(url) {
-    let response = await fetch(url);
-    let data = await response.json();
-    return data
-}
-
-async function update_data_layer(url, colorbar) {
-    var data = await fetch_data(url);
-
-    data.features.forEach(function(element) {
-        element.properties.data = parseFloat(element.properties.data);
-    })
-    
-    const styles = {
-        'Polygon': new Style({
-            fill: new Fill({
-                color: "#11eeee",
+        const styles = {
+            'Polygon': new Style({
+                fill: new Fill({
+                    color: "#11eeee",
+                }),
             }),
-        }),
-    };
+        };
 
-    const styleFunction = function (feature) {
-        var style = styles[feature.getGeometry().getType()];
-        if (feature.getGeometry().getType() == 'Polygon') {
-            const color_value = apply_color_map(feature.values_.data, colorbar.edges, colorbar.colors, colorbar.endpoint_type);
-            console.log(feature.values_.data, color_value);
-            style.getFill().setColor(color_value);
-        }
-        return style;
-    };
-    
-    // Creat the vector layer
-    vectorSource = new VectorSource({
-        features: new GeoJSON().readFeatures(data),
-        //projection: 'EPSG:4326',
-    });
-    const vectorLayer = new VectorLayer({
-        source: vectorSource,
-        style: styleFunction,
-    });
+        const styleFunction = function (feature) {
+            var style = styles[feature.getGeometry().getType()];
+            if (feature.getGeometry().getType() == 'Polygon') {
+                const color_value = apply_color_map(feature.values_.data, colorbar.edges, colorbar.colors, colorbar.endpoint_type);
+                //console.log(feature.values_.data, color_value);
+                style.getFill().setColor(color_value);
+            }
+            return style;
+        };
 
-    // Add to the map
-    map.setLayers([baselayer, vectorLayer]);
+        // Update the vector layer
+        const vectorSource = new VectorSource({
+            features: new GeoJSON().readFeatures(data),
+        });
+        this.#layers[this.#data_layer_idx] = new VectorLayer({
+            source: vectorSource,
+            style: styleFunction,
+        });
 
-    // Hookup the opacity slider
-    var opacityInput = $("#opacityInput")[0];
-    opacityInput.oninput = function() {
-        const opacity = parseFloat(opacityInput.value);
-        vectorLayer.setOpacity(opacity);
-    }
-}
-
-async function add_boundary_layer() {
-
-
-    var url = new URL(
-        window.location.protocol + "//" + window.location.host + "/" +
-        window.location.pathname + "/boundaries/local_authorities";
-    ); 
-    var data = await fetch_data(url.href);
-
-    //data.features.forEach(function(element) {
-    //    element.properties.data = parseFloat(element.properties.data);
-    //})
-    
-    const styles = {
-        'Polygon': new Style({
-            stroke: new Stroke({
-                color: "#ffffff",
-            }),
-        }),
-    };
-
-    //const styleFunction = function (feature) {
-    //    var style = styles[feature.getGeometry().getType()];
-    //    if (feature.getGeometry().getType() == 'Polygon') {
-    //        const color_value = apply_color_map(feature.values_.data, colorbar.edges, colorbar.colors, colorbar.endpoint_type);
-    //        console.log(feature.values_.data, color_value);
-    //        style.getFill().setColor(color_value);
-    //    }
-    //    return style;
-    //};
-    
-    // Creat the vector layer
-    vectorSource = new VectorSource({
-        features: new GeoJSON().readFeatures(data),
-        //projection: 'EPSG:4326',
-    });
-    const vectorLayer = new VectorLayer({
-        source: vectorSource,
-        style: styles["Polygon"],
-    });
-
-    // Add to the map
-    map.setLayers([baselayer, vectorLayer]);
-
-    // Hookup the opacity slider
-    //var opacityInput = $("#opacityInput")[0];
-    //opacityInput.oninput = function() {
-    //    const opacity = parseFloat(opacityInput.value);
-    //    vectorLayer.setOpacity(opacity);
-    //}
-}
-
-const colorbar = {
-    extreme_temp: {
-        intensity: {
-            edges: [25, 27, 29, 31, 33, 35, 37, 39],
-            // Colorbrewer YlOrBr-9
-            colors: ["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#993404", "#662506"],
-            // Colorbrewer YlOrBr-8
-            //colors: ["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"].slice().reverse(),
-            // Colorbrewer YlOrBr-7
-            //colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
-            endpoint_type: legend_endpoints.out_of_range,
-        },
-        return_time: {
-            edges: [0, 10, 25, 50, 100, 200],
-            // Colorbrewer YlOrBr-7
-            //colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
-            // Colorbrewer YlOrBr-6
-            colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404" ].slice().reverse(),
-            endpoint_type: legend_endpoints.lower_in_range,
-        }
-    }
-};
-
-const selection_tree = {
-    extreme_temp: {
-        next_choice: "#calculation",
-        intensity: {
-            "#covariateGroup": true,
-            "#calculationGroup": true,
-            "#tauReturnGroup": true,
-            "#intensityGroup": false,
-        },
-        return_time: {
-            "#covariateGroup": true,
-            "#calculationGroup": true,
-            "#tauReturnGroup": false,
-            "#intensityGroup": true,
-        }
-    }
-};
-
-function update_ui(slider_values) {
-    
-    const scenario = $("#scenario")[0].value;
-    const next_choice = $(selection_tree[scenario].next_choice)[0].value;
-
-    // Update slider visibility
-    for (let ui_item_id in selection_tree[scenario][next_choice]) {
-        const ui_item = $(ui_item_id)[0];
-        const ui_item_is_visible = selection_tree[scenario][next_choice][ui_item_id];
-        ui_item.style.display = ui_item_is_visible ? "block" : "none";
+        // Reset the map layers
+        this.#map.setLayers(this.#layers);
     }
 
-    // Update slider labels
-    $('#covariateParamLabel').html("Covariate: <span style=\"font-weight:bold\">" + slider_values["#covariateParam"].toFixed(1) + "</span>");
-    $('#tauReturnParamLabel').html("Return time: <span style=\"font-weight:bold\">" + slider_values["#tauReturnParam"].toFixed(0) + "</span>");
-    $('#intensityParamLabel').html("Intensity: <span style=\"font-weight:bold\">" + slider_values["#intensityParam"].toFixed(0) + "</span>");
-
-    return colorbar[scenario][next_choice] // FIXME
-}
-
-function make_data_url(slider_values) {
-    const scenario = $("#scenario")[0].value;
-    var url_endpoint = new URL(
-        window.location.protocol + "//" + window.location.host + "/" +
-        window.location.pathname + "/data/" + scenario
-    ); 
-
-    if (scenario == "extreme_temp") {
-
-        // Update slider labels
-        const calculation = $("#calculation")[0].value;
-
-        url_endpoint.pathname += '/' + calculation;
-        url_endpoint.pathname += '/' + slider_values["#covariateParam"];
-        if (calculation == "intensity") {
-            url_endpoint.pathname += '/' + slider_values["#tauReturnParam"];
-        }
-        else if(calculation == "return_time") {
-            url_endpoint.pathname += '/' + slider_values["#intensityParam"];
-        }
+    set_data_layer_opacity(opacity) {
+        this.#layers[this.#data_layer_idx].setOpacity(opacity);
     }
-    return url_endpoint.href;
 
 }
-
-function get_slider_values() {
-    var result = new Object();
-    const slider_ids = [
-        "#covariateParam",
-        "#tauReturnParam",
-        "#intensityParam",
-    ];
-
-    for (const id of slider_ids) {
-        result[id] = parseFloat($(id).val());
-    }
-    return result;
-}
-
-function on_user_input() {
-    /// Handler for UI events
-    const slider_values = get_slider_values();
-    const url_endpoint = make_data_url(slider_values)
-    const colorbar = update_ui(slider_values);
-    update_data_layer(url_endpoint, colorbar);
-    //draw_legend(colorbar);
-    draw_legend(colorbar.edges, colorbar.colors, colorbar.endpoint_type);
-}
-
-$("#covariateParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">1.5</span>"; 
-$("#covariateParam")[0].oninput = on_user_input;
-$("#tauReturnParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">100</span>"; 
-$("#tauReturnParam")[0].oninput = on_user_input;
-$("#intensityParamLabel")[0].value = "Intensity: <span style=\"font-weight:bold\">100</span>"; 
-$("#intensityParam")[0].oninput = on_user_input;
-
-$("#scenario")[0].oninput = on_user_input; 
-$("#calculation")[0].oninput = on_user_input; 
-
-on_user_input();

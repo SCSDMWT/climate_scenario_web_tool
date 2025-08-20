@@ -8,11 +8,18 @@ direction: right
 
 Server: {
   Python: "Flask App" {
+    CLI {
+      style.stroke-dash: 3
+    }
     HTTP: "Web App"
-    CLI
   }
-  DB: "Postgres"
-  Mapserver
+  DB: "Postgres" {
+    style.stroke-dash: 3
+  }
+  Cache {
+    style.stroke-dash: 3
+  }
+  #Mapserver
 }
 
 Browser: {
@@ -23,14 +30,18 @@ Browser: {
 
 tiles: "Third party service"
 
-Server.Python.CLI -> Server.DB: "Setup\n+\nPopulate"
+Server.Python.CLI -> Server.DB #: "Setup\n+\nPopulate"
 #Server.Python.CLI -> Server.Mapserver: "Generate Mapfile"
 
 # Server.DB -> Server.Python.HTTP: "Parameters"
-Server.DB -> Server.Mapserver
+#Server.DB -> Server.Mapserver
+Server.Python.HTTP <-> Server.Cache
+Server.Python.HTTP <- Server.DB
 
-Server.Mapserver -> Browser.Mapjs: "Data Layer"
-Server.Python.HTTP -> Browser: "Serve App"
+#Server.Mapserver -> Browser.Mapjs: "Data Layer"
+#Server.Python.HTTP -> Browser: "Serve App"
+Server.Python.HTTP <- Browser.UI: "User Input"
+Server.Python.HTTP -> Browser.Mapjs: "Data"
 #Server.Python.HTTP <-> Browser.UI: "Calculations"
 
 # Browser.UI -> Browser.Mapjs

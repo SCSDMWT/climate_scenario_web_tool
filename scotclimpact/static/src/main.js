@@ -67,6 +67,7 @@ async function update_boundary_layer(layer_name) {
         'police': '',
         'fire_rescue': '',
         'health_boards': '',
+        'health_integration_authorities': '',
     };
 
     if (!(layer_name in valid_layers)) {

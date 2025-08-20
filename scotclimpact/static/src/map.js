@@ -14,6 +14,7 @@ import {get as getProjection} from 'ol/proj.js';
 import {register} from 'ol/proj/proj4.js';
 import ImageTile from 'ol/source/ImageTile.js';
 import TileGrid from 'ol/tilegrid/TileGrid.js';
+import Text from 'ol/style/Text.js';
 
 import {apply_color_map} from "../src/color_map.js";
 
@@ -137,24 +138,37 @@ export class UIMap {
         this.#layers[this.#data_layer_idx] && this.#layers[this.#data_layer_idx].setOpacity(opacity);
     }
 
-    update_boundary_layer(data) {
+    update_boundary_layer(data, get_text_func) {
+
+        function create_stroke() {
+            return new Stroke({
+                color: "#000000",
+            })
+        };
+        function create_text(feature) {
+            const font =  'bold 10pt/1 Verdana';
+            return new Text({
+                font: font,
+                text: get_text_func(feature),
+                fill: new Fill({color: "#000000"}),
+                stroke: new Stroke({color: "#eeeeee", width: 1}),
+            });
+        }
+        function create_style(feature) {
+            return new Style({
+                stroke: create_stroke(),
+                text: create_text(feature),
+            })
+        }
 
         const styles = {
-            'Polygon': new Style({
-                stroke: new Stroke({
-                    color: "#000000",
-                }),
-            }),
-            'MultiPolygon': new Style({
-                stroke: new Stroke({
-                    color: "#000000",
-                }),
-            }),
+            'Polygon': create_style,
+            'MultiPolygon': create_style,
         };
 
         const styleFunction = function (feature) {
-            const style = styles[feature.getGeometry().getType()];
-            return style;
+            const style_func = styles[feature.getGeometry().getType()];
+            return style_func(feature);
         };
 
         // Creat the vector layer

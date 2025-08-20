@@ -63,11 +63,11 @@ async function update_data_layer(url, colorbar) {
 
 async function update_boundary_layer(layer_name) {
     const valid_layers = {
-        'local_authorities': '',
-        'police': '',
-        'fire_rescue': '',
-        'health_boards': '',
-        'health_integration_authorities': '',
+        'local_authorities': (feature) => feature.values_.local_authority.replaceAll(' ', '\n'),
+        //'police': (feature) => "hi",
+        'fire_rescue': (feature) => feature.values_.sfrlsoname.replaceAll(',', ',\n').replaceAll(' and ', ' and\n'),
+        'health_boards': (feature) => feature.values_.HBName.replaceAll(' ', '\n'),
+        'health_integration_authorities': (feature) => feature.values_.HIAName.replaceAll(' ', '\n'),
     };
 
     if (!(layer_name in valid_layers)) {
@@ -80,7 +80,7 @@ async function update_boundary_layer(layer_name) {
         window.location.pathname + "/boundaries/" + layer_name
     ); 
     const data = await fetch_data(url.href);
-    ui_map.update_boundary_layer(data);
+    ui_map.update_boundary_layer(data, valid_layers[layer_name]);
 }
 
 function update_ui(slider_values) {

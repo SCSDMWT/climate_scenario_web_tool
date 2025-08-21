@@ -1,4 +1,3 @@
-import functools
 import io
 import json
 import os
@@ -13,11 +12,13 @@ from .extreme_temp import (
 )
 from .data_helpers import xarray_to_geojson, is_number
 from .boundary_layer import get_wfs
+from .cache import get_cache
 
 def menu_items():
     return []
 
 @app.route('/')
+@get_cache().cached(timeout=50)
 def index():
     return render_template(
         'map.html',
@@ -38,6 +39,7 @@ def make_json_response(json_data):
     return response
 
 @app.route('/boundaries/<layer_name>')
+@get_cache().cached(timeout=50)
 def bondaries_local_authorities(layer_name):
     if not layer_name in app.config['BOUNDARY_LAYER'] or app.config['BOUNDARY_LAYER'][layer_name]['url'] == '':
         return 'Not found', 404
@@ -50,6 +52,7 @@ def bondaries_local_authorities(layer_name):
     return make_json_response(get_wfs(url, cache_file))
 
 @app.route('/data/extreme_temp/intensity/<covariate>/<tauReturn>')
+@get_cache().cached(timeout=50)
 def data_extreme_temp_intensity(covariate, tauReturn):
 
     if not is_number(covariate):
@@ -75,6 +78,7 @@ def data_extreme_temp_intensity(covariate, tauReturn):
     return make_json_response(json_data)
 
 @app.route('/data/extreme_temp/return_time/<covariate>/<intensity>')
+@get_cache().cached(timeout=50)
 def data_extreme_temp_return_time(covariate, intensity):
 
     if not is_number(covariate):

@@ -1,8 +1,7 @@
 import geopandas as gpd
-import functools
 import os
 
-@functools.lru_cache(maxsize=8)
+
 def get_wfs(url, cache_file, tolerance=1000):
     '''Read geojson file and simplify it's resolution'''
     if not os.path.exists(cache_file):

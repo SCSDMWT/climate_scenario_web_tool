@@ -494,6 +494,9 @@ def return_time_from_intensity(compositeFit, covariate, intensity):
     return compositeFit.return_time_from_intensity(intensity).return_time
 
 def change_in_intensity(compositeFit, return_time, cov0, cov1):
-    #compositeFit.set_covariate(cov0)
     #intensity_from_return_time(compositeFit, cov0, return_time)
     return compositeFit.change_in_intensity(return_time, cov0, cov1).intensity_change
+
+def change_in_frequency(compositeFit, intensity, cov0, cov1):
+    #intensity_from_return_time(compositeFit, cov0, return_time)
+    return compositeFit.times_more_likely(intensity, cov0, cov1).times_more_likely

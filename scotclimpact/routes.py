@@ -10,6 +10,7 @@ from .extreme_temp import (
     intensity_from_return_time,
     return_time_from_intensity,
     change_in_intensity,
+    change_in_frequency,
 )
 from .data_helpers import xarray_to_geojson, is_number
 from .boundary_layer import is_valid_boundary_layer, get_boundary_layer
@@ -122,5 +123,31 @@ def data_extreme_temp_intensity_change(covariate0, return_time, covariate1):
     result = change_in_intensity(composite_fit, return_time, covariate0, covariate1)
     # Make the response object
     json_data = xarray_to_geojson('extreme_temp/intensity_change', result)
+    return make_json_response(json_data)
+
+
+@app.route('/data/extreme_temp/frequency_change/<covariate0>/<intensity>/<covariate1>')
+@get_cache().cached(timeout=50)
+def data_extreme_temp_frequency_change(covariate0, intensity, covariate1):
+    if not is_number(covariate0):
+        return "Covariate0 must be float", 400
+    if not is_number(covariate1):
+        return "Covariate1 must be float", 400
+    if not is_number(intensity):
+        return "intensity must be int", 400
+
+    covariate0 = float(covariate0)
+    covariate1 = float(covariate1)
+    intensity = float(intensity)
+
+    composite_fit = init_composite_fit(
+        app.config['DATA_FILE_DESC'],
+        simParams='c,loc1,scale1',
+        nVariates=1000,
+        preProcess=True,
+    )
+    result = change_in_frequency(composite_fit, intensity, covariate0, covariate1)
+    # Make the response object
+    json_data = xarray_to_geojson('extreme_temp/frequency_change', result)
     return make_json_response(json_data)
 

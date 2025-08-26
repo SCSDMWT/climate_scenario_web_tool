@@ -27,3 +27,11 @@ def test_data_extreme_temp_intensity_change(client):
     assert response.status_code == 200
     assert b"extreme_temp/intensity_change" in response.data
     assert b"FeatureCollection" in response.data
+
+def test_data_extreme_temp_intensity_change(client):
+    '''The index should load the map, which contains the div and map.js'''
+    response = client.get("/data/extreme_temp/frequency_change/2/30/4")
+
+    assert response.status_code == 200
+    assert b"extreme_temp/frequency_change" in response.data
+    assert b"FeatureCollection" in response.data

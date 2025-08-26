@@ -31,7 +31,16 @@ const colorbar = {
             colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404" ].slice().reverse(),
             endpoint_type: legend_endpoints.lower_in_range,
             decimal_places: 0,
-        }
+        },
+        frequency_change: {
+            edges: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+            // Colorbrewer YlOrBr-7
+            //colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
+            // Colorbrewer YlOrBr-6
+            colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404" ],
+            endpoint_type: legend_endpoints.lower_in_range,
+            decimal_places: 0,
+        },
     }
 };
 
@@ -58,7 +67,14 @@ const selection_tree = {
             "#tauReturnGroup": false,
             "#intensityGroup": true,
             "#covariate2Group": false,
-        }
+        },
+        frequency_change: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": false,
+            "#intensityGroup": true,
+            "#covariate2Group": true,
+        },
     }
 };
 
@@ -143,6 +159,9 @@ function make_data_url(slider_values) {
         }
         else if(calculation == "return_time") {
             url_endpoint.pathname += '/' + slider_values["#intensityParam"];
+        }
+        else if(calculation == "frequency_change") {
+            url_endpoint.pathname += '/' + slider_values["#intensityParam"] + '/' + slider_values["#covariate2Param"];
         }
     }
     return url_endpoint.href;

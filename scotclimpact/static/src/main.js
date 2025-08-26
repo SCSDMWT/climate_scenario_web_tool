@@ -134,6 +134,10 @@ function update_ui(slider_values) {
     $('#tauReturnParamLabel').html("Return time: <span style=\"font-weight:bold\">" + slider_values["#tauReturnParam"].toFixed(0) + "</span>");
     $('#intensityParamLabel').html("Intensity: <span style=\"font-weight:bold\">" + slider_values["#intensityParam"].toFixed(0) + "</span>");
 
+    $('#covariate2Param').prop({
+        'min': slider_values["#covariateParam"] + 0.5,
+        'max': 4.0,
+    });
     return colorbar[scenario][next_choice] // FIXME
 }
 

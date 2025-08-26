@@ -114,6 +114,9 @@ def data_extreme_temp_intensity_change(covariate0, return_time, covariate1):
     covariate1 = float(covariate1)
     return_time = float(return_time)
 
+    if covariate1 <= covariate0:
+        return "covariate1 > covariate0 is required", 400
+
     composite_fit = init_composite_fit(
         app.config['DATA_FILE_DESC'],
         simParams='c,loc1,scale1',
@@ -139,6 +142,9 @@ def data_extreme_temp_frequency_change(covariate0, intensity, covariate1):
     covariate0 = float(covariate0)
     covariate1 = float(covariate1)
     intensity = float(intensity)
+
+    if covariate1 <= covariate0:
+        return "covariate1 > covariate0 is required", 400
 
     composite_fit = init_composite_fit(
         app.config['DATA_FILE_DESC'],

@@ -1,13 +1,15 @@
-import geopandas as gpd
-import os
+from flask import current_app
 
+from .data import get_pooch
 
-def get_wfs(url, cache_file, tolerance=1000):
-    '''Read geojson file and simplify it's resolution'''
-    if not os.path.exists(cache_file):
-        gdf = gpd.read_file(url)
-        with open(cache_file, 'w') as file:
-            file.write(gdf.to_json())
-        
-    with open(cache_file, 'r') as file:
+def is_valid_boundary_layer(layer_name):
+    '''Returns True if layer_name is a valid boundary layer.'''
+    pooch = get_pooch(current_app)
+    return f'boundaries/{layer_name}.json' in pooch.registry
+
+def get_boundary_layer(layer_name):
+    '''Loads the GeoJSON content of a boundary layer.'''
+    pooch = get_pooch(current_app)
+    local_filename = pooch.fetch(f'boundaries/{layer_name}.json')
+    with open(local_filename, 'r') as file:
         return file.read()

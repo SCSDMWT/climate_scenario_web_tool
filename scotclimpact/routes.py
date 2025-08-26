@@ -11,7 +11,7 @@ from .extreme_temp import (
     return_time_from_intensity,
 )
 from .data_helpers import xarray_to_geojson, is_number
-from .boundary_layer import get_wfs
+from .boundary_layer import is_valid_boundary_layer, get_boundary_layer
 from .cache import get_cache
 
 def menu_items():
@@ -41,15 +41,9 @@ def make_json_response(json_data):
 @app.route('/boundaries/<layer_name>')
 @get_cache().cached(timeout=50)
 def bondaries_local_authorities(layer_name):
-    if not layer_name in app.config['BOUNDARY_LAYER'] or app.config['BOUNDARY_LAYER'][layer_name]['url'] == '':
+    if not is_valid_boundary_layer(layer_name):
         return 'Not found', 404
-
-    url = app.config['BOUNDARY_LAYER'][layer_name]['url']
-    cache_file = os.path.join(
-        app.config['BOUNDARY_LAYER_CACHE_DIR'],
-        app.config['BOUNDARY_LAYER'][layer_name]['cache_file']
-    )
-    return make_json_response(get_wfs(url, cache_file))
+    return get_boundary_layer(layer_name)
 
 @app.route('/data/extreme_temp/intensity/<covariate>/<tauReturn>')
 @get_cache().cached(timeout=50)

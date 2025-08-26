@@ -11,8 +11,10 @@ def create_app(test_config=None):
     with app.app_context():
         from . import routes
         from . import db
+        from . import data
 
         flask_static_digest.init_app(app)
         db.init_app(app)
+        data.init_data(app)
 
         return app

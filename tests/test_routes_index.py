@@ -9,7 +9,7 @@ def test_index(client):
 
     assert response.status_code == 200
     assert b"<div id='map' class='map'></div>" in response.data
-    assert b"src=\"/static/dist/map.js\"" in response.data
+    assert b"src=\"/static/dist/main.js\"" in response.data
 
 
 def test_data_extreme_temp(client):

@@ -4,6 +4,8 @@ from scipy.stats    import genextreme as genex
 from scipy.stats    import multivariate_normal
 import xarray as xr
 
+from .cache import get_cache
+
 #import matplotlib.pyplot as plt
 
 class Fitted_Obs_Sim():
@@ -172,7 +174,6 @@ def init_composite_fit(file, simParams='c,loc1,scale1', nVariates=10000, preProc
                   projection_x_coordinate = slice(0,5e5))
     
     result = Fitted_Obs_Sim(dsObs, dsSim, grid, simParams = simParams, nVariates = nVariates, preProcess = preProcess)
-    #result.set_covariate(covariate)
     return result
 
 

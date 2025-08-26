@@ -1,33 +1,40 @@
 import functools
-import numpy as np
-from scipy.stats    import genextreme as genex
-from scipy.stats    import multivariate_normal
+
+import numpy  as np
 import xarray as xr
+from scipy.stats     import genextreme as genex
+from scipy.stats     import multivariate_normal
+from scipy.stats     import kstest
+from scipy.stats     import norm
+from scipy.stats     import lognorm
+from datetime        import datetime
 
 from .cache import get_cache
-
-#import matplotlib.pyplot as plt
 
 class Fitted_Obs_Sim():
     def __init__(self,
                  dsObs,
                  dsSim,
                  grid,
-                 simParams  = ['c','loc1','scale1'],
-                 preProcess = True,
-                 nVariates  = 1000):
+                 simParams      = ['c','loc1','scale1'],
+                 preProcess     = True,
+                 nVariates      = 1000,
+                 storeInput     = False,
+                 intensityUnits = 'degrees_Celsius'):
         '''
         initialise with fitted parameter files from simulations and observations.
         When we have confirmed exactly how we want to do the de-biasing of simulations,
         these steps can be skipped by only providing the fully processed composite file.
         '''
-        dsObs, dsSim, grid = xr.align(dsObs, dsSim, grid, join = 'inner')
+        self.intensityUnits = intensityUnits
+        if storeInput: # if there is a need to keep full input files
+            self.dsObsInput = self.dsObs.copy(deep = True)
+            self.dsSimInput = self.dsSim.copy(deep = True)
         
-        self.dsObs  = dsObs.broadcast_like(grid, 
-                        exclude = ['year','params','params_i','params_j'])
-        self.dsSim  = dsSim.broadcast_like(grid, 
-                        exclude = ['year','ensemble_member','params','params_i','params_j'])
-
+        self.dsObs, self.dsSim, grid = xr.align(dsObs, dsSim, grid, 
+                                      join = 'inner', exclude = ['year', 'ensemble_member'])
+        
+        
         self.gridDims = list(grid.dims)
         self.ds     = self.dsObs.copy(deep = True).load()
         self.grid   = grid.load()
@@ -53,6 +60,10 @@ class Fitted_Obs_Sim():
         self.bootstrapCov   = self.ds.bootstrap_covariance
         self.fCovariateType = self.ds.covariateFunction
         
+        self.dsObs = self.dsObs.stack(variate = ['year'])
+        self.dsSim = self.dsSim.stack(variate = ['year','ensemble_member'])
+
+        # a logarithmic scale function can be added here
         displays = dict(
                     stationary          = lambda x,p: np.array([p[0], 
                                                                 p[1], 
@@ -71,21 +82,10 @@ class Fitted_Obs_Sim():
                                                                 p[4] + p[5]*x + p[6]*x*x]))
         self.fCovariate = displays[self.fCovariateType]
 
-        ### pre-process bootstrap variates
-
+        ### pre-process bootstrap variates used to calculate confidence intervals
+        self.nVariates  = nVariates
         self.bsVariates = None
         if preProcess: self.variate_bootstrap_dist(nVariates)
-
-    def get_GEV_params(self, covariate, fit):
-        # not used as this loops rather than using matrix operation
-        return xr.apply_ufunc(
-                        self.fCovariate,
-                        covariate,
-                        fit,
-                        input_core_dims = [[],['params']],
-                        output_core_dims = [['fit']],
-                        exclude_dims = set(('params',)),
-                        vectorize = True)
 
     def variate_bootstrap_dist(self, nVariates = 1000):
         '''
@@ -104,7 +104,28 @@ class Fitted_Obs_Sim():
                         input_core_dims = [['params'],['params_i','params_j'],[]],
                         output_core_dims = [['variate','params']],
                         vectorize = True).compute()
-        
+
+    def get_temperature_anomaly_params(self, Tanomaly):
+        '''
+        convert a set global temperature anomaly into the covariate.
+        Equation in report, uses fits to: 
+        Scotland average temperature using HadUK-Grid,
+        Scotland sensitivity using UKCP18 60km GCM and 12km RCP,
+        global temperature anomaly using HadCRUT5 ensemble,
+        '''
+        m = [-0.264, 0.825, 0.998]#mu from normal fits
+        s = [ 0.090, 0.094, 0.040]#sigma from normal fits
+        mean = m[0] + m[1] * (Tanomaly - m[2])
+        if type(self.bsVariates) == type(None):
+            return mean
+        else:
+            std  = np.sqrt(s[0]**2 + (s[1]*(Tanomaly - m[2]))**2 + (m[1]*s[2])**2)
+            return mean, norm.rvs(mean, std, self.nVariates)
+    
+    def set_temperature_anomaly(self, Tanomaly):
+        m,v = self.get_temperature_anomaly_params(Tanomaly)
+        self.set_covariate(m, bsCovariates = v)
+       
     def set_covariate(self, covariate, bsCovariates = None):
         '''
         set the covariate, can accept an array of bootstrap covariates (same length as number of bootstrap variates)
@@ -120,48 +141,332 @@ class Fitted_Obs_Sim():
             self.ds['bsfitGEV'] = (['paramsGEV']+self.gridDims+['variate'], 
                      self.fCovariate(bsCovariates, [self.bsVariates.sel(params = p) for p in self.ds.params]))
             self.bsfitGEV = genex(c     = self.ds.bsfitGEV.sel(paramsGEV='c'),
-                              loc   = self.ds.bsfitGEV.sel(paramsGEV='loc'),
-                              scale = self.ds.bsfitGEV.sel(paramsGEV='scale'))
+                                  loc   = self.ds.bsfitGEV.sel(paramsGEV='loc'),
+                                  scale = self.ds.bsfitGEV.sel(paramsGEV='scale'))
         else:
             self.bsGEV = None
+            
+    def apply_units(self, da, 
+                    units = '',
+                    attrs = dict()):
+        da.attrs['units'] = units
+        for k in attrs.keys():
+            da.attrs[k] = attrs[k]
+        return da
+    
+    def output_modes(self, x, grid, output, units = '', attrs = dict()):
+        if output != 'dataarray':
+            return x
+        else:
+            return self.apply_units(x*grid, units, attrs)
 
     def intensity_from_return_time(self, tauReturn, mode = 'fit', output = 'dataarray'):
         if mode == 'fit':
-            grid = self.grid
-            x = self.fitGEV.ppf(1-1/tauReturn)
+                x    = self.fitGEV.ppf(1-1/tauReturn)
+                grid = self.grid.mask.rename('intensity')
         elif mode == 'bs':
-            grid = self.bsGrid
-            x = self.bsfitGEV.ppf(1-1/tauReturn)
-        if output != 'dataarray':
-            return x
-        else:
-            return x*grid.rename(mask='intensity')
-        
+                x    = self.bsfitGEV.ppf(1-1/tauReturn)
+                grid = self.bsGrid.mask.rename('intensity')
+        return self.output_modes(x, grid, output, 
+            units = self.intensityUnits,
+            attrs = dict(
+                description = 'intensity at %d year return time'%tauReturn),
+                    ).to_dataset()
+
     def return_time_from_intensity(self, intensity, mode = 'fit', output = 'dataarray'):
         if mode == 'fit':
-            grid = self.grid
-            x = 1/self.fitGEV.sf(intensity)
+                x    = 1/self.fitGEV.sf(intensity)
+                grid = self.grid.mask.rename('return_time')
         elif mode == 'bs':
-            grid = self.bsGrid
-            x = 1/self.bsfitGEV.sf(intensity)
-        if output != 'dataarray':
-            return x
-        else: 
-            return x*grid.rename(mask='return_time')
+                x    = 1/self.bsfitGEV.sf(intensity)
+                grid = self.bsGrid.mask.rename('return_time')
+        return self.output_modes(x, grid, output, 
+            units = 'year',
+            attrs = dict(
+                description = 'return time of %0.1f %s'%(intensity,self.intensityUnits)),
+                    ).to_dataset()
         
     def intensity_from_return_time_quantiles(self, tauReturn, quantiles = [0.025,0.975]):
         '''
         call bootstrap version of intensity function and return quantiles
         '''
         x = self.intensity_from_return_time(tauReturn, mode = 'bs', output = 'dataarray')
-        return x.intensity.quantile(quantiles, dim = 'variate')
+        return x.quantile(quantiles, dim = 'variate')
 
     def return_time_from_intensity_quantiles(self, intensity, quantiles = [0.025,0.975]):
         '''
         call bootstrap version of return_time function and return quantiles
         '''
         x = self.return_time_from_intensity(intensity, mode = 'bs', output = 'dataarray')
-        return x.return_time.quantile(quantiles, dim = 'variate')
+        return x.quantile(quantiles, dim = 'variate')
+
+    def quantiles(self, function, userArgument, quantiles = [0.025,0.975]):
+        '''
+        call quantiles more generally with user argument and function
+        '''
+        x = function(userArgument, mode = 'bs', output = 'default')*self.bsGrid
+        return x.mask.quantile(quantiles, dim = 'variate')
+
+    def times_more_likely(self, intensity, cov0, cov1, 
+                          bsCovs0 = None, bsCovs1 = None,
+                          mode = 'quantiles',
+                          quantiles = [0.025,0.975]):
+        '''
+        compare how many times more likely an event is at cov1 than at cov0
+        '''
+        self.set_covariate(cov0, bsCovs0)
+        r0   = self.return_time_from_intensity(intensity, mode = 'fit', output = 'dataarray')
+        bsR0 = self.return_time_from_intensity(intensity, mode =  'bs', output = 'dataarray')
+        
+        self.set_covariate(cov1, bsCovs1)
+        r1   = self.return_time_from_intensity(intensity, mode = 'fit', output = 'dataarray')
+        bsR1 = self.return_time_from_intensity(intensity, mode =  'bs', output = 'dataarray')
+
+        if mode == 'quantiles':
+            return self.apply_units(xr.merge([
+                (r0/r1).rename(return_time = 'times_more_likely'),
+                (bsR0/bsR1).rename(return_time='times_more_likely_quantiles')\
+                                    .times_more_likely_quantiles.quantile(quantiles, dim = 'variate')]),
+                    'times_more_likely',
+                            attrs = dict(
+                    description = 'ratio of return times at cov%0.1f vs cov%0.1f of %0.1f %s'\
+                                %(cov0, cov1, intensity, self.intensityUnits)))
+        if mode == 'variates':
+            return self.apply_units(xr.merge([
+                (r0/r1).rename(return_time = 'times_more_likely'),
+                         (bsR0/bsR1).rename(return_time='times_more_likely_variates')]),
+                    'times_more_likely',
+                            attrs = dict(
+                    description = 'ratio of return times at cov%0.1f vs cov%0.1f of %0.1f %s'\
+                                %(cov0, cov1, intensity, self.intensityUnits)))
+            
+    def times_more_likely_T(self, intensity, T0, T1,
+                          mode = 'quantiles',
+                          quantiles = [0.025,0.975]):
+        
+        cov0, bsCovs0 = self.get_temperature_anomaly_params(T0)
+        cov1, bsCovs1 = self.get_temperature_anomaly_params(T1)
+        
+        return self.times_more_likely(intensity, cov0, cov1, 
+                          bsCovs0, bsCovs1,
+                          mode = mode,
+                          quantiles = quantiles)
+    
+    def change_in_intensity(self, return_time, cov0, cov1, 
+                          bsCovs0 = None, bsCovs1 = None,
+                          mode = 'quantiles',
+                          quantiles = [0.025,0.975]):
+        '''
+        compare how many times more likely an event is at cov1 than at cov0
+        '''
+        self.set_covariate(cov0, bsCovs0)
+        r0   = self.intensity_from_return_time(return_time, mode = 'fit', output = 'dataarray')
+        bsR0 = self.intensity_from_return_time(return_time, mode =  'bs', output = 'dataarray')
+        
+        self.set_covariate(cov1, bsCovs1)
+        r1   = self.intensity_from_return_time(return_time, mode = 'fit', output = 'dataarray')
+        bsR1 = self.intensity_from_return_time(return_time, mode =  'bs', output = 'dataarray')
+
+        if mode == 'quantiles':
+            return self.apply_units(xr.merge([
+                (r1-r0).rename(intensity = 'intensity_change'),
+                (bsR1-bsR0).rename(intensity='intensity_change_quantiles')\
+                                    .intensity_change_quantiles.quantile(quantiles, dim = 'variate')]),
+                    self.intensityUnits,
+                            attrs = dict(
+                    description = 'change in intensity at cov%0.1f vs cov%0.1f at return time of %d years'\
+                                %(cov0, cov1, return_time)))
+        if mode == 'variates':
+            return self.apply_units(xr.merge([
+                (r1-r0).rename(intensity = 'intensity_change'),
+                (bsR1-bsR0).rename(intensity='intensity_change_variates')]),
+                    self.intensityUnits,
+                            attrs = dict(
+                    description = 'change in intensity at cov%0.1f vs cov%0.1f at return time of %d years'\
+                                %(cov0, cov1, return_time)))
+
+    def change_in_intensity_T(self, return_time, T0, T1,
+                              mode = 'quantiles',
+                              quantiles = [0.025,0.975]):
+            
+        cov0, bsCovs0 = self.get_temperature_anomaly_params(T0)
+        cov1, bsCovs1 = self.get_temperature_anomaly_params(T1)
+            
+        return self.change_in_intensity(return_time, cov0, cov1, 
+                              bsCovs0, bsCovs1,
+                              mode = mode,
+                              quantiles = quantiles)
+
+    def get_KS_test_p(self, data, distribution, nParams):
+        def fit_and_p(variates,distribution,nParams):
+            if not np.isfinite(variates).all():
+                fit = np.nan*np.empty(nParams)
+                p   = np.array([np.nan])
+            else:
+                fit = np.array(distribution.fit(variates))
+                p   = np.array([kstest(variates, fit, alternative = 'less').pvalue])
+            return fit, p
+        fit, p = xr.apply_ufunc(
+                    fit_and_p,
+                    data,
+                    distribution,
+                    nParams,
+                    input_core_dims = [['variate'],[],[]],
+                    output_core_dims = [['fit'],[]],
+                    exclude_dims = set(('variate',)),
+                    vectorize = True)
+        return xr.merge(
+                [fit.to_dataset(name = 'dist_fit'), 
+                   p.to_dataset(name = 'KS_test')])
+        
+    def test_dist(self, data, distribution = 'default', 
+                  nParams = 3, threshold = 0.05, return_fit = False):
+        if distribution == 'default': distribution = lognorm
+        ks   = self.get_KS_p(data, distribution, nParams)
+        test = xr.where(np.isnan(ks.KS_test), np.nan, 
+                        xr.where(ks.KS_test<threshold, 1, 0))
+        if return_fit: return test, ks
+        else: return test
+
+    def renormalise(self, data = 'obs', dataCovariate = 'obs', dataFit = 'obs'):
+        if data == 'obs':
+            data          = self.dsObs.tasmax
+            dataCovariate = self.dsObs.covariate
+            dataFit       = self.dsObs.fit
+        elif data == 'sim':
+            data          = self.dsSim.tasmax
+            dataCovariate = self.dsSim.covariate
+            dataFit       = self.dsSim.fit
+        shape, loc, scale = self.fCovariate(
+                    dataCovariate,
+                    [dataFit.sel(params = p).broadcast_like(data)\
+                     for p in self.ds.params])
+        renorm = ((data - loc)/scale).to_dataset(name = 'renormalised_data')
+        return renorm
+
+    def ks_compare(self):
+        '''
+        identify if the input observations and simulations follow the same distribution
+        '''
+        renormObs = self.renormalise(data = 'obs')
+        renormSim = self.renormalise(data = 'sim')
+        return xr.apply_ufunc(
+            lambda a,b: np.array( [kstest(a,b).pvalue]),
+            renormObs,
+            renormSim,
+            input_core_dims = [['variate'],['variate']],
+            output_core_dims = [[]],
+            exclude_dims = set(('variate',)),
+            vectorize = True)\
+            .rename(renormalised_data = 'test')
+
+    def calculate_overlap(self, n = 1e4, calculationMode = 'array'):
+        '''
+        calculate the overlap of the distributions of parameters in 
+        observations and simulations
+        '''
+        x = self.dsObs
+        xVar = x.bootstrap_covariance.where(x.params_i == x.params_j, 0)
+        xMu  = x.fit
+        y = self.dsSim
+        yVar = y.bootstrap_covariance.where(y.params_i == y.params_j, 0)        
+        yMu  = y.fit
+        
+        def overlap(m0, v0, m1, v1, n = 1000, nd = (5,)): 
+            '''
+            estimate shared area
+            '''
+            n = int(n)
+            s0 = np.sqrt(v0.diagonal(axis1 = -2, axis2 = -1))
+            s1 = np.sqrt(v1.diagonal(axis1 = -2, axis2 = -1))
+        
+            N0       = norm(m0, s0)
+            N1       = norm(m1, s1)
+            
+            bounds   = [np.nan_to_num(np.min([m0-3*s0, m1-3*s1], axis = 0),0),
+                        np.nan_to_num(np.max([m0+3*s0, m1+3*s1], axis = 0),0)]
+        
+            scale    = bounds[1]-bounds[0]
+            tests    = np.random.uniform(bounds[0],bounds[1],(n,) + nd)
+            overlap  = np.min([N0.pdf(tests), N1.pdf(tests)], axis = 0)
+            return overlap.sum(axis = 0) * scale / n
+
+        if calculationMode == 'array':#fast for small memory
+            self.ds['overlap'] = (['projection_y_coordinate',
+                                   'projection_x_coordinate',
+                                   'params'],
+                        overlap(xMu.values,xVar.values,
+                                yMu.values,yVar.values,
+                                nd = (self.ds.projection_y_coordinate.size, 
+                                      self.ds.projection_x_coordinate.size, 
+                                      self.ds.params.size), 
+                                n = n))
+        if calculationMode == 'cellwise':#less memory intensive
+            self.ds['overlap'] = xr.apply_ufunc(
+                        overlap,
+                        xMu,xVar,
+                        yMu,yVar,
+                        n,
+                        input_core_dims = [['params'],['params_i','params_j'],
+                                           ['params'],['params_i','params_j'],[],],
+                        output_core_dims = [['params']],
+                        vectorize = True).compute()
+        return self.ds.overlap
+
+    def apply_metadata(self, da,
+                       other    = dict(),
+                       creator  = 'default',#this needs to be decided by adaptation team
+                       user     = 'default',#let users credit themselves for their request
+                      ):
+        da.attrs[      'creator'] = creator
+        da.attrs[       'source'] = 'Scottish Climate Scenario Decision-Making Web-Tool'
+        da.attrs[         'user'] = user
+        da.attrs['creation_date'] = datetime.today().strftime('%Y-%m-%d')
+        for k in other.keys(): da.attrs[k] = other[k]
+        return da
+
+    def list_dataset_info(self, ds, mode = 'full'):
+        '''
+        list dataset info for including with output.
+        '''
+        info = []
+        if type(ds) == 'xarray.core.dataset.Dataset':
+            info.append("=== GLOBAL ATTRIBUTES ===")
+        else:
+            info.append("=== ATTRIBUTES ===")
+        for attr, value in ds.attrs.items():
+            info.append(f"{attr}: {value}")
+        info.append("\n" + "="*50 + "\n")
+
+        if mode == 'full':
+            if type(ds) == 'xarray.core.dataset.Dataset':
+                info.append("=== VARIABLES ===")
+                for var_name in ds.data_vars:
+                    var = ds[var_name]
+                    info.append(f"{var_name}:")
+                    info.append(f"  Dimensions: {var.dims}")
+                    info.append(f"  Shape: {var.shape}")
+                    info.append(f"  Data type: {var.dtype}")
+                    if var.attrs:
+                        info.append("  Attributes:")
+                        for attr, val in var.attrs.items():
+                            info.append(f"    {attr}: {val}")
+                    info.append('')
+                info.append("="*50 + "\n")
+            
+            info.append("=== COORDINATES ===")
+            for coord_name in ds.coords:
+                coord = ds[coord_name]
+                info.append(f"{coord_name}:")
+                info.append(f"  Dimensions: {coord.dims}")
+                info.append(f"  Shape: {coord.shape}")
+                info.append(f"  Data type: {coord.dtype}")
+                if coord.attrs:
+                    info.append("  Attributes:")
+                    for attr, val in coord.attrs.items():
+                        info.append(f"    {attr}: {val}")
+                info.append('')
+        return info
 
 
 @functools.lru_cache(maxsize=16)
@@ -187,3 +492,8 @@ def return_time_from_intensity(compositeFit, covariate, intensity):
     bsCovariates = multivariate_normal(2, 1).rvs(10000) # model accepts lots of variates of covariate
     compositeFit.set_covariate(covariate=covariate, bsCovariates=bsCovariates)
     return compositeFit.return_time_from_intensity(intensity).return_time
+
+def change_in_intensity(compositeFit, return_time, cov0, cov1):
+    #compositeFit.set_covariate(cov0)
+    #intensity_from_return_time(compositeFit, cov0, return_time)
+    return compositeFit.change_in_intensity(return_time, cov0, cov1).intensity_change

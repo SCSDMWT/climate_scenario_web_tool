@@ -15,6 +15,13 @@ const colorbar = {
             // Colorbrewer YlOrBr-7
             //colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
             endpoint_type: legend_endpoints.out_of_range,
+            decimal_places: 0,
+        },
+        intensity_change: {
+            edges: [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
+            colors: ["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
+            endpoint_type: legend_endpoints.lower_in_range,
+            decimal_places: 1,
         },
         return_time: {
             edges: [0, 10, 25, 50, 100, 200],
@@ -23,6 +30,7 @@ const colorbar = {
             // Colorbrewer YlOrBr-6
             colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404" ].slice().reverse(),
             endpoint_type: legend_endpoints.lower_in_range,
+            decimal_places: 0,
         }
     }
 };
@@ -35,12 +43,21 @@ const selection_tree = {
             "#calculationGroup": true,
             "#tauReturnGroup": true,
             "#intensityGroup": false,
+            "#covariate2Group": false,
+        },
+        intensity_change: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": true,
+            "#intensityGroup": false,
+            "#covariate2Group": true,
         },
         return_time: {
             "#covariateGroup": true,
             "#calculationGroup": true,
             "#tauReturnGroup": false,
             "#intensityGroup": true,
+            "#covariate2Group": false,
         }
     }
 };
@@ -97,6 +114,7 @@ function update_ui(slider_values) {
 
     // Update slider labels
     $('#covariateParamLabel').html("Covariate: <span style=\"font-weight:bold\">" + slider_values["#covariateParam"].toFixed(1) + "</span>");
+    $('#covariate2ParamLabel').html("Covariate 2: <span style=\"font-weight:bold\">" + slider_values["#covariate2Param"].toFixed(1) + "</span>");
     $('#tauReturnParamLabel').html("Return time: <span style=\"font-weight:bold\">" + slider_values["#tauReturnParam"].toFixed(0) + "</span>");
     $('#intensityParamLabel').html("Intensity: <span style=\"font-weight:bold\">" + slider_values["#intensityParam"].toFixed(0) + "</span>");
 
@@ -120,6 +138,9 @@ function make_data_url(slider_values) {
         if (calculation == "intensity") {
             url_endpoint.pathname += '/' + slider_values["#tauReturnParam"];
         }
+        else if(calculation == "intensity_change") {
+            url_endpoint.pathname += '/' + slider_values["#tauReturnParam"] + '/' + slider_values["#covariate2Param"];
+        }
         else if(calculation == "return_time") {
             url_endpoint.pathname += '/' + slider_values["#intensityParam"];
         }
@@ -132,6 +153,7 @@ function get_slider_values() {
     var result = new Object();
     const slider_ids = [
         "#covariateParam",
+        "#covariate2Param",
         "#tauReturnParam",
         "#intensityParam",
     ];
@@ -148,12 +170,13 @@ async function on_user_input() {
     const url_endpoint = make_data_url(slider_values)
     const colorbar = update_ui(slider_values);
     await update_data_layer(url_endpoint, colorbar);
-    //draw_legend(colorbar);
-    draw_legend(colorbar.edges, colorbar.colors, colorbar.endpoint_type);
+    draw_legend(colorbar.edges, colorbar.colors, colorbar.endpoint_type, colorbar.decimal_places);
 }
 
 $("#covariateParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">1.5</span>"; 
 $("#covariateParam")[0].oninput = on_user_input;
+$("#covariate2ParamLabel")[0].value = "Covariate 2: <span style=\"font-weight:bold\">1.5</span>"; 
+$("#covariate2Param")[0].oninput = on_user_input;
 $("#tauReturnParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">100</span>"; 
 $("#tauReturnParam")[0].oninput = on_user_input;
 $("#intensityParamLabel")[0].value = "Intensity: <span style=\"font-weight:bold\">100</span>"; 

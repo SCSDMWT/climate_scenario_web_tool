@@ -34,6 +34,7 @@
               <label for="calculation" class="form-label" id="calculationLabel">Calculation:</label>
               <select class="form-select" name="calculation" id="calculation">
                   <option value="intensity">Intensity</option>
+                  <option value="intensity_change">Change in Intensity</option>
                   <option value="return_time">Return Time</option>
               </select>
           </div>
@@ -67,6 +68,10 @@
               <input type="range" class="form-range" min="30" max="40" step="1" defaultValue="25" id="intensityParam" list="intensityValues"/>
           </div>
 
+          <div class="p-2" id="covariate2Group">
+              <label for="covariate2Param" class="form-label" id="covariate2ParamLabel">Covariate 2: <span style="font-weight:bold">0</span></label>
+              <input type="range" class="form-range" min="0" max="4" step="0.5" defaultValue="2.0" id="covariate2Param" list="covariateValues"/>
+          </div>
 
           <div class="p-2">
               <label class="form-label">Legend:</label>

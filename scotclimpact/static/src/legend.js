@@ -2,8 +2,8 @@ import $ from 'jquery';
 import { SVG } from '@svgdotjs/svg.js'
 import {make_legend_labels} from "../src/color_map.js";
 
-export function draw_legend(edges, colors, endpoint_type, div_id = "#legend", box_size = 30, legend_width = 300) {
-    const labels = make_legend_labels(edges, endpoint_type);
+export function draw_legend(edges, colors, endpoint_type, decimal_places, div_id = "#legend", box_size = 30, legend_width = 300) {
+    const labels = make_legend_labels(edges, endpoint_type, decimal_places);
 
     for (const svg of $("svg"))
         svg.remove();

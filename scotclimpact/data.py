@@ -26,7 +26,7 @@ def get_pooch(app):
 def from_private_github_repo(url, output_file, mypooch):
     '''A custom Pooch downloader to fetch files from a private github repository'''
     api_request_headers = dict(
-        Authorization=f"token {current_app.config['DATA_PASSWORD']}",
+        Authorization=f"token {current_app.config['GITHUB_TOKEN']}",
     )
     r = requests.get(url + f'?ref={DATA_REPO_VERSION}', headers=api_request_headers)
     if not r.status_code == 200:

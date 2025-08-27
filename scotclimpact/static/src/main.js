@@ -138,6 +138,12 @@ function update_ui(slider_values) {
         'min': slider_values["#covariateParam"] + 0.5,
         'max': 4.0,
     });
+    $('#download_netcdf').prop({
+        'href': make_data_url(slider_values) + '/netcdf',
+    });
+    $('#download_csv').prop({
+        'href': make_data_url(slider_values) + '/csv',
+    });
     return colorbar[scenario][next_choice] // FIXME
 }
 
@@ -190,7 +196,7 @@ function get_slider_values() {
 async function on_user_input() {
     /// Handler for UI events
     const slider_values = get_slider_values();
-    const url_endpoint = make_data_url(slider_values)
+    const url_endpoint = make_data_url(slider_values);
     const colorbar = update_ui(slider_values);
     await update_data_layer(url_endpoint, colorbar);
     draw_legend(colorbar.edges, colorbar.colors, colorbar.endpoint_type, colorbar.decimal_places);

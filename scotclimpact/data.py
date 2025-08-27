@@ -3,13 +3,13 @@ import pooch
 import requests
 
 DATA_REPO_VERSION = "v0.0.2"
-GITHUB_API_URL = "https://api.github.com/repos/SCSDMWT/climate_scenario_web_tool_data/contents/{file}?ref={version}"
+GITHUB_API_URL = "https://api.github.com/repos/SCSDMWT/climate_scenario_web_tool_data/contents/"
 
 def get_pooch(app):
     if not 'pooch' in g:
         g.pooch = pooch.create(
             path=app.config['DATA_DIR'],
-            base_url='https://api.github.com/repos/SCSDMWT/climate_scenario_web_tool_data/contents/',
+            base_url=GITHUB_API_URL,
             version=DATA_REPO_VERSION,
             version_dev="main",
             registry={

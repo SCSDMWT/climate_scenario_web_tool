@@ -21,7 +21,8 @@
     "@svgdotjs/svg.js": "^3.2.4",
     "jquery": "^3.7.1",
     "ol": "^10.6.1",
-    "proj4": "^2.19.10"
+    "proj4": "^2.19.10",
+    "tinycolor2": "^1.6.0"
   },
   "devDependencies": {
     "jest": "^30.0.5",

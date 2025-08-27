@@ -15,6 +15,7 @@ import {register} from 'ol/proj/proj4.js';
 import ImageTile from 'ol/source/ImageTile.js';
 import TileGrid from 'ol/tilegrid/TileGrid.js';
 import Text from 'ol/style/Text.js';
+import tinycolor from "tinycolor2";
 
 import {apply_color_map} from "../src/color_map.js";
 
@@ -30,11 +31,13 @@ proj27700.setExtent([0, 0, 700000, 1300000]);
 
 /// A class to wrap OpenLayers objects
 export class UIMap {
-    #layers = [null, null, null];
+    #layers = [null, null, null, null];
     #base_layer_idx = 0;
     #data_layer_idx = 1;
     #boundary_layer_idx = 2;
+    #selection_layer_idx = 3;
     #map = null;
+    #selection = {};
 
     constructor(div_id, tilelayerurl) {
         /// Default view that includes Scotland
@@ -83,7 +86,61 @@ export class UIMap {
             source: make_baselayer_source(),
         });
         this.update_layers()
+        this.init_selection_events();
+    }
 
+    /// Register event listeners for clicking on the data layer
+    init_selection_events() {
+        this.#map.on(['click'], (event) => {
+            const data_layer = this.#layers[this.#data_layer_idx];
+            if (!data_layer) {
+                return;
+            }
+
+            data_layer.getFeatures(event.pixel).then((features) => {
+                if (!features.length) {
+                    this.#selection = {};
+                    this.#layers[this.#selection_layer_idx].changed();
+                    return;
+                }
+
+                const feature = features[0];
+                if (!feature)
+                    return;
+
+                this.#selection = {};
+                this.#selection[feature.ol_uid] = feature;
+                    
+                this.#layers[this.#selection_layer_idx].changed();
+            });
+        });
+    }
+    /// Adds the selection layer to the map
+    update_selection_layer(data_layer, data_layer_source) {
+        this.#layers[this.#selection_layer_idx] = new VectorLayer({
+            source: data_layer_source,
+            style: (feature) => {
+                if (!(feature.ol_uid in this.#selection)) 
+                    return;
+
+                const selected_style = data_layer.styleFunction_(feature);
+                //const stroke = selected_style.getStroke();
+                const fill = selected_style.getFill();
+                const fill_color = tinycolor(fill.getColor());
+                const selection_color = 
+                    fill_color.isDark() 
+                    ? "#eeeeee" //fill_color.complement().brighten(20).toHexString()
+                    : "#111111" //fill_color.complement().brighten(-20).toHexString()
+                ;
+                return new Style({
+                    stroke: new Stroke({ 
+                        color: selection_color,
+                        width: 4,
+                    }),
+                });
+
+            }
+        })
     }
 
     /// A method to handle browser window resizing.
@@ -130,12 +187,18 @@ export class UIMap {
             style: styleFunction,
         });
 
+        this.update_selection_layer(this.#layers[this.#data_layer_idx], vectorSource);
         // Reset the map layers
         this.update_layers()
     }
 
     set_data_layer_opacity(opacity) {
         this.#layers[this.#data_layer_idx] && this.#layers[this.#data_layer_idx].setOpacity(opacity);
+    }
+
+    show_spinner() {
+        console.log('show spinner')
+        this.#map.getTargetElement().classList.add('spinner');
     }
 
     update_boundary_layer(data, get_text_func) {

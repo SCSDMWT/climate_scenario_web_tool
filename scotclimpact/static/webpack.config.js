@@ -8,6 +8,12 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
   },
   module: {
-    //rules: [{ test: /\.js$/, use: 'raw-loader' }],
+    rules: [
+        { 
+            test: /\.js$/, 
+            exclude: ['node_modules'],
+            use: 'babel-loader',
+        }
+    ],
   },
 };

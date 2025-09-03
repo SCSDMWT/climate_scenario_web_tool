@@ -26,7 +26,7 @@ class Config:
     )
 
     ## Input Datasets
-    GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
+    DATA_REPO_GITHUB_TOKEN = os.environ.get('DATA_REPO_GITHUB_TOKEN', '')
     DATA_DIR = os.environ.get(
         'DATA_DIR',
         pooch.os_cache('scotclimpact'),

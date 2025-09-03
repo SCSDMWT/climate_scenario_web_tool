@@ -32,25 +32,30 @@ def get_pooch(app):
     return g.pooch
 
 
-def from_private_github_repo(url, output_file, mypooch):
+def from_private_github_repo(data_repo_github_token):
     '''A custom Pooch downloader to fetch files from a private github repository'''
-    api_request_headers = dict(
-        Authorization=f"token {current_app.config['DATA_REPO_GITHUB_TOKEN']}",
-    )
-    r = requests.get(url + f'?ref={DATA_REPO_VERSION}', headers=api_request_headers)
-    if not r.status_code == 200:
-        print(f"[{r.status_code}] {r.text}")
-        return
+    def _downloader(url, output_file, mypooch):
+        api_request_headers = dict(
+            Authorization=f"token {data_repo_github_token}",
+        )
+        r = requests.get(url + f'?ref={DATA_REPO_VERSION}', headers=api_request_headers)
+        if not r.status_code == 200:
+            print(f"[{r.status_code}] {r.text}")
+            return
 
-    download_url = r.json()['download_url']
-    downloader = pooch.HTTPDownloader()
-    downloader(download_url, output_file, mypooch)
+        download_url = r.json()['download_url']
+        downloader = pooch.HTTPDownloader()
+        downloader(download_url, output_file, mypooch)
+    return _downloader
 
 
 def fetch_file(filename):
     '''Downloads a file in the registry and returns it's local filename.'''
     pooch_ = get_pooch(current_app)
-    return pooch_.fetch(filename, downloader=from_private_github_repo)
+    return pooch_.fetch(
+        filename, 
+        downloader=from_private_github_repo(current_app.config['DATA_REPO_GITHUB_TOKEN'])
+    )
 
 
 def init_data(app):

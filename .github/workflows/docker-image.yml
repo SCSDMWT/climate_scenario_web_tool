@@ -44,5 +44,5 @@ jobs:
         context: .
         push: true
         tags: |
-          ghcr.io/SCSDMWT/climate_scenario_web_tool:${{ github.ref_name }}
-          ghcr.io/SCSDMWT/climate_scenario_web_tool:latest
+          ghcr.io/scsdmwt/climate_scenario_web_tool:${{ github.ref_name }}
+          ghcr.io/scsdmwt/climate_scenario_web_tool:latest

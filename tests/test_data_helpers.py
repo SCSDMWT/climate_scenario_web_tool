@@ -4,7 +4,7 @@ import xarray as xr
 
 from scotclimpact.data_helpers import xarray_to_geojson, is_number
 #from scotclimpact.data import fetch_files
-from fixtures import pooch
+from fixtures import pooch_fetcher
 
 
 @pytest.mark.parametrize(
@@ -33,8 +33,8 @@ def test_is_number(input, result):
 
 
 @pytest.fixture()
-def test_nc_data(pooch):
-    filename = pooch.fetch('extreme_temp/GEV_covaraite_fit_tasmax_linear_loc_scale_nFits_1000_parametric_False.nc')
+def test_nc_data(pooch_fetcher):
+    filename = pooch_fetcher('extreme_temp/GEV_covaraite_fit_tasmax_linear_loc_scale_nFits_1000_parametric_False.nc')
     data = xr.load_dataset(filename)
     return data['tasmax'][:, :, 0, 0]
 

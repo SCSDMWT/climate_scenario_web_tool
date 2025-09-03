@@ -1,5 +1,6 @@
 import pytest
 from scotclimpact import create_app
+from scotclimpact.data import make_pooch
 
 @pytest.fixture(scope='session')
 def test_app():
@@ -20,3 +21,7 @@ def client(test_app):
 @pytest.fixture()
 def runner(test_app):
     return test_app.test_cli_runner()
+
+@pytest.fixture()
+def pooch():
+    return make_pooch()

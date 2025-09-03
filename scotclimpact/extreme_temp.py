@@ -10,6 +10,7 @@ from scipy.stats     import lognorm
 from datetime        import datetime
 
 from .cache import get_cache
+from .data import fetch_file
 
 class Fitted_Obs_Sim():
     def __init__(self,
@@ -472,9 +473,9 @@ class Fitted_Obs_Sim():
 @functools.lru_cache(maxsize=16)
 def init_composite_fit(file, simParams='c,loc1,scale1', nVariates=10000, preProcess=True):
     simParams = simParams.split(',')
-    dsObs = xr.open_dataset('HadUK_%s.nc'%file)
-    dsSim = xr.open_dataset('%s.nc'%file)
-    grid = xr.open_dataset('gridWide_g12.nc')\
+    dsObs = xr.open_dataset(fetch_file('extreme_temp/HadUK_%s.nc'%file))
+    dsSim = xr.open_dataset(fetch_file('extreme_temp/%s.nc'%file))
+    grid = xr.open_dataset(fetch_file('extreme_temp/gridWide_g12.nc'))\
              .sel(projection_y_coordinate = slice(4e5,13e5),
                   projection_x_coordinate = slice(0,5e5))
     

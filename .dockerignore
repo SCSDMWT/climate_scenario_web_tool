@@ -1,7 +1,12 @@
-.venv/
+.*
 docker/
+data/
 mapserver/
-.git/
 tests/
-.pytest_cache/
+scotclimpact/static/node_modules/
+scotclimpact/static/src/
+scotclimpact/static/tests/
+scotclimpact/static/*.json
+scotclimpact/static/*.config.js
+
 

@@ -1,3 +1,7 @@
+## Config
+.app-env
+.dev-env
+
 ## Data
 data/
 *.nc

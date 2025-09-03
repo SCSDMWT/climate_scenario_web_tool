@@ -18,9 +18,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Set environment variables
-      env:
-        DATA_REPO_GITHUB_TOKEN: ${{ secrets.DATA_REPO_GITHUB_TOKEN }}
     - uses: actions/checkout@v4
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -41,5 +38,7 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         uv run flake8 scotclimpact/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
+      env:
+        DATA_REPO_GITHUB_TOKEN: ${{ secrets.DATA_REPO_GITHUB_TOKEN }}
       run: |
         uv run pytest

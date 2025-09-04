@@ -12,7 +12,7 @@ from .extreme_temp import (
     change_in_intensity,
     change_in_frequency,
 )
-from .data_helpers import xarray_to_geojson, is_number
+from .data_helpers import xarray_to_geojson, is_number, validate_args, str_lower
 from .boundary_layer import is_valid_boundary_layer, get_boundary_layer
 from .cache import get_cache
 
@@ -67,6 +67,11 @@ def make_csv_response(dataset, endpoint_name, params):
 
 
 SUPPORTED_FORMATS = ['geojson', 'netcdf', 'csv']
+
+def is_supported_format(fmt):
+    '''Predicate to check if fmt is a supported data format'''
+    return fmt.lower() in SUPPORTED_FORMATS
+
 def make_data_response(dataset, format, endpoint_name, params):
     # Make the response object
     if format == 'geojson':
@@ -80,25 +85,19 @@ def make_data_response(dataset, format, endpoint_name, params):
 
 @app.route('/boundaries/<layer_name>')
 @get_cache().cached(timeout=50)
+@validate_args(('layer_name', is_valid_boundary_layer, str))
 def bondaries_local_authorities(layer_name):
-    if not is_valid_boundary_layer(layer_name):
-        return 'Not found', 404
     return get_boundary_layer(layer_name)
 
 @app.route('/data/extreme_temp/intensity/<covariate>/<tauReturn>')
 @app.route('/data/extreme_temp/intensity/<covariate>/<tauReturn>/<format>')
 @get_cache().cached(timeout=50)
+@validate_args(
+    ('covariate', is_number, float),
+    ('tauReturn', is_number, float),
+    ('format', is_supported_format, str_lower),
+)
 def data_extreme_temp_intensity(covariate, tauReturn, format='geojson'):
-
-    if not is_number(covariate):
-        app.logger.warn("Covariate must be float. Got {covariate}")
-        return "Covariate must be float", 400
-    if not is_number(tauReturn):
-        app.logger.warn("tauReturn must be int. Got {tauReturn}")
-        return "tauReturn must be int", 400
-    format = format.lower()
-    if not format in SUPPORTED_FORMATS:
-        return f"format must be one of {SUPPORTED_FORMATS}. Recieved {format}", 400
 
     composite_fit = init_composite_fit(
         app.config['DATA_FILE_DESC'],
@@ -118,17 +117,12 @@ def data_extreme_temp_intensity(covariate, tauReturn, format='geojson'):
 @app.route('/data/extreme_temp/return_time/<covariate>/<intensity>')
 @app.route('/data/extreme_temp/return_time/<covariate>/<intensity>/<format>')
 @get_cache().cached(timeout=50)
+@validate_args(
+    ('covariate', is_number, float),
+    ('intensity', is_number, float),
+    ('format', is_supported_format, str_lower),
+)
 def data_extreme_temp_return_time(covariate, intensity, format='geojson'):
-
-    if not is_number(covariate):
-        app.logger.warn("Covariate must be float. Got {covariate}")
-        return "Covariate must be float", 400
-    if not is_number(intensity):
-        app.logger.warn("Intensity must be int. Got {tauReturn}")
-        return "Intensity must be int", 400
-    format = format.lower()
-    if not format in SUPPORTED_FORMATS:
-        return f"format must be one of {SUPPORTED_FORMATS}. Recieved {format}", 400
 
     composite_fit = init_composite_fit(
         app.config['DATA_FILE_DESC'],
@@ -148,20 +142,13 @@ def data_extreme_temp_return_time(covariate, intensity, format='geojson'):
 @app.route('/data/extreme_temp/intensity_change/<covariate0>/<return_time>/<covariate1>')
 @app.route('/data/extreme_temp/intensity_change/<covariate0>/<return_time>/<covariate1>/<format>')
 @get_cache().cached(timeout=50)
+@validate_args(
+    ('covariate0', is_number, float),
+    ('return_time', is_number, float),
+    ('covariate1', is_number, float),
+    ('format', is_supported_format, str_lower),
+)
 def data_extreme_temp_intensity_change(covariate0, return_time, covariate1, format='geojson'):
-    if not is_number(covariate0):
-        return "Covariate0 must be float", 400
-    if not is_number(covariate1):
-        return "Covariate1 must be float", 400
-    if not is_number(return_time):
-        return "return_time must be int", 400
-    format = format.lower()
-    if not format in SUPPORTED_FORMATS:
-        return f"format must be one of {SUPPORTED_FORMATS}. Recieved {format}", 400
-
-    covariate0 = float(covariate0)
-    covariate1 = float(covariate1)
-    return_time = float(return_time)
 
     if covariate1 <= covariate0:
         return "covariate1 > covariate0 is required", 400
@@ -181,20 +168,13 @@ def data_extreme_temp_intensity_change(covariate0, return_time, covariate1, form
 @app.route('/data/extreme_temp/frequency_change/<covariate0>/<intensity>/<covariate1>')
 @app.route('/data/extreme_temp/frequency_change/<covariate0>/<intensity>/<covariate1>/<format>')
 @get_cache().cached(timeout=50)
+@validate_args(
+    ('covariate0', is_number, float),
+    ('intensity', is_number, float),
+    ('covariate1', is_number, float),
+    ('format', is_supported_format, str_lower),
+)
 def data_extreme_temp_frequency_change(covariate0, intensity, covariate1, format='geojson'):
-    if not is_number(covariate0):
-        return "Covariate0 must be float", 400
-    if not is_number(covariate1):
-        return "Covariate1 must be float", 400
-    if not is_number(intensity):
-        return "intensity must be int", 400
-    format = format.lower()
-    if not format in SUPPORTED_FORMATS:
-        return f"format must be one of {SUPPORTED_FORMATS}. Recieved {format}", 400
-
-    covariate0 = float(covariate0)
-    covariate1 = float(covariate1)
-    intensity = float(intensity)
 
     if covariate1 <= covariate0:
         return "covariate1 > covariate0 is required", 400
@@ -210,3 +190,14 @@ def data_extreme_temp_frequency_change(covariate0, intensity, covariate1, format
     # Make the response object
     return make_data_response(result, format, 'extreme_temp/frequency_change', (covariate0, intensity, covariate1))
 
+
+@app.route('/data/extreme_temp/frequency_change_ci_report/<covariate0>/<intensity>/covariate1>/<x_idx>/<y_idx>')
+@validate_args(
+    ('covariate0', is_number, float),
+    ('intensity', is_number, float),
+    ('covariate1', is_number, float),
+    ('x_idx', is_number, int),
+    ('y_idx', is_number, int),
+)
+def data_extreme_temp_frequency_change_ci_report(covariate0, intensity, covariate1, x_idx, y_idx):
+    pass

@@ -2,7 +2,7 @@ import pytest
 
 import xarray as xr
 
-from scotclimpact.data_helpers import xarray_to_geojson, is_number
+from scotclimpact.data_helpers import xarray_to_geojson, is_number, validate_args
 #from scotclimpact.data import fetch_files
 from fixtures import pooch_fetcher
 
@@ -31,6 +31,20 @@ def test_is_number(input, result):
     result and float(input) # if result is True, float should not throw exceptions
     assert is_number(input) == result 
 
+#@pytest.mark.parametrize()
+def test_validate_args():
+
+    @validate_args(
+        ('a', is_number, int),
+        ('b', is_number, int),
+        ('c', is_number, int),
+    )
+    def test(a, b, c='10'):
+        return f'{a+b+c}', 200
+
+    assert test('10', '20', c='10') == ('40', 200)
+    assert test('x', '20')[1] == 400
+    #assert test('a', 'b')[1] == 400
 
 @pytest.fixture()
 def test_nc_data(pooch_fetcher):

@@ -1,7 +1,7 @@
 [project]
 name = "scotclimpact"
 description = "A web tool to esmitate the impact of climate change in Scotland"
-version = '0.0.5'
+version = '0.0.6'
 requires-python = ">=3.10"
 dependencies = [
     "flask>=3.1.1",

@@ -22,8 +22,6 @@ def validate_args(*types):
     def decorator(func):
         @wraps(func)
         def wrapper(*f_args, **f_kwargs):
-            print(f_args, f_kwargs)
-
             converted_args = []
             for arg, type_ in zip(f_args, types):
                 arg_name, checker, converter = type_
@@ -48,7 +46,7 @@ def str_lower(s):
     return s.lower()
 
 
-def xarray_to_geojson(dataset_name, dataset, x_key='projection_x_coordinate', y_key='projection_y_coordinate'):
+def xarray_to_geojson(dataset_name, dataset, x_key='projection_x_coordinate', y_key='projection_y_coordinate', ci_report_url=''):
     '''Convert an xarray.DataArray object to GeoJSON compatible object.'''
     x_dim = dataset[x_key].to_numpy()
     y_dim = dataset[y_key].to_numpy()
@@ -71,8 +69,7 @@ def xarray_to_geojson(dataset_name, dataset, x_key='projection_x_coordinate', y_
             type='Feature',
             properties=dict(
                 data=value if not value == float("inf") else 10000,
-                x_idx=int(coord_idx[0]),
-                y_idx=int(coord_idx[1]),
+                ci_report_url=ci_report_url.format(x_idx=int(coord_idx[0]), y_idx=int(coord_idx[1])),
             ),
             geometry=dict(
                 type='Polygon',

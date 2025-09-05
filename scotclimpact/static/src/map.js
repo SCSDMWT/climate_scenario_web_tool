@@ -15,7 +15,10 @@ import {register} from 'ol/proj/proj4.js';
 import ImageTile from 'ol/source/ImageTile.js';
 import TileGrid from 'ol/tilegrid/TileGrid.js';
 import Text from 'ol/style/Text.js';
+import Overlay from 'ol/Overlay.js';
+
 import tinycolor from "tinycolor2";
+import $ from 'jquery';
 
 import {apply_color_map} from "../src/color_map.js";
 
@@ -37,6 +40,8 @@ export class UIMap {
     #boundary_layer_idx = 2;
     #selection_layer_idx = 3;
     #map = null;
+    #overlay = null;
+    #overlay_content = null;
     #selection = {};
 
     constructor(div_id, tilelayerurl) {
@@ -57,6 +62,7 @@ export class UIMap {
         window.onload = () => this.resizeMap();
         window.onresize = () => this.resizeMap();
         this.make_baselayer(tilelayerurl);
+        this.init_popup();
     }
 
     /// Adds the background map
@@ -89,6 +95,10 @@ export class UIMap {
         this.init_selection_events();
     }
 
+    clear_selection() {
+        this.#selection = {};
+        this.#layers[this.#selection_layer_idx].changed();
+    }
     /// Register event listeners for clicking on the data layer
     init_selection_events() {
         this.#map.on(['click'], (event) => {
@@ -97,10 +107,9 @@ export class UIMap {
                 return;
             }
 
-            data_layer.getFeatures(event.pixel).then((features) => {
+            data_layer.getFeatures(event.pixel).then(async (features) => {
                 if (!features.length) {
-                    this.#selection = {};
-                    this.#layers[this.#selection_layer_idx].changed();
+                    this.clear_selection()
                     return;
                 }
 
@@ -112,6 +121,28 @@ export class UIMap {
                 this.#selection[feature.ol_uid] = feature;
                     
                 this.#layers[this.#selection_layer_idx].changed();
+
+                // Early exit if the overlay DOM element was not found
+                if (!this.#overlay_content || !this.#overlay)
+                    return;
+
+                // Fetch ci report
+                const ci_report_url =  new URL(
+                    window.location.protocol + "//" + window.location.host + "/" +
+                    window.location.pathname + "/" + feature.values_.ci_report_url
+                ); 
+                let response = await fetch(ci_report_url);
+                if (!response.ok)
+                    return;
+                let ci_report = await response.text();
+                ci_report = ci_report.replaceAll('\n', '</p><p>');
+                ci_report = ci_report.replaceAll('degrees_Celsius', '°C');
+
+                // set overlay content
+                this.#overlay_content.innerHTML = "<p>" + ci_report + "</p>"
+                // show the overlay.
+                const event_coordinate = event.coordinate;
+                this.#overlay.setPosition(event_coordinate);
             });
         });
     }
@@ -258,5 +289,34 @@ export class UIMap {
     hide_boundary_layer() {
         this.#layers[this.#boundary_layer_idx] = null;
         this.update_layers();
+    }
+
+    init_popup() {
+
+        const container = $("#popup")[0];
+        this.#overlay_content = $("#popup-content")[0];
+        const closer = $("#popup-closer")[0];
+        if (!popup || !this.#overlay_content) return;
+
+        this.#overlay = new Overlay({
+            element: container,
+            autoPan: {
+                animation: 250,
+            },
+            position: undefined,
+        });
+        this.#map.addOverlay(this.#overlay);
+        //this.#overlay.setPosition(undefined);
+        
+        if (closer) {
+            closer.onclick = () => {
+                this.#overlay.setPosition(undefined);
+                this.clear_selection();
+                closer.blur();
+                return false;
+            }
+        }
+
+
     }
 }

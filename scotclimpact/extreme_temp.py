@@ -589,16 +589,15 @@ def change_in_frequency(compositeFit, intensity, cov0, cov1):
     #intensity_from_return_time(compositeFit, cov0, return_time)
     return compositeFit.times_more_likely(intensity, cov0, cov1).times_more_likely
 
-def intensity_ci_report(compositeFit, return_time, cov0, cov1, x_idx, y_idx):
+def intensity_ci_report(compositeFit, return_time, cov, x_idx, y_idx):
 
     bsCovariates = multivariate_normal(2, 1).rvs(1000)
-    compositeFit.set_covariate(covariate=cov0, bsCovariates=bsCovariates)
+    compositeFit.set_covariate(covariate=cov, bsCovariates=bsCovariates)
     return compositeFit.get_CI_report(
         'intensity_from_return_time',
         report='calibrated_confidence',
         return_time=return_time,
-        T0=cov0,
-        T1=cov1,
+        T0=cov,
         xIndex=x_idx,
         yIndex=y_idx,
     )

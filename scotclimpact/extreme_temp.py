@@ -572,32 +572,60 @@ def init_composite_fit(file, simParams='c,loc1,scale1', nVariates=10000, preProc
 
 
 def intensity_from_return_time(compositeFit, covariate, tauReturn):
-    bsCovariates = multivariate_normal(2, 1).rvs(10000) # model accepts lots of variates of covariate
+    bsCovariates = multivariate_normal(2, 1).rvs(compositeFit.nVariates) # model accepts lots of variates of covariate
     compositeFit.set_covariate(covariate=covariate, bsCovariates=bsCovariates)
     return compositeFit.intensity_from_return_time(tauReturn).intensity
 
 def return_time_from_intensity(compositeFit, covariate, intensity):
-    bsCovariates = multivariate_normal(2, 1).rvs(10000) # model accepts lots of variates of covariate
+    bsCovariates = multivariate_normal(2, 1).rvs(compositeFit.nVariates) # model accepts lots of variates of covariate
     compositeFit.set_covariate(covariate=covariate, bsCovariates=bsCovariates)
     return compositeFit.return_time_from_intensity(intensity).return_time
 
 def change_in_intensity(compositeFit, return_time, cov0, cov1):
-    #intensity_from_return_time(compositeFit, cov0, return_time)
     return compositeFit.change_in_intensity(return_time, cov0, cov1).intensity_change
 
 def change_in_frequency(compositeFit, intensity, cov0, cov1):
-    #intensity_from_return_time(compositeFit, cov0, return_time)
     return compositeFit.times_more_likely(intensity, cov0, cov1).times_more_likely
 
 def intensity_ci_report(compositeFit, return_time, cov, x_idx, y_idx):
-
-    bsCovariates = multivariate_normal(2, 1).rvs(1000)
-    compositeFit.set_covariate(covariate=cov, bsCovariates=bsCovariates)
+    compositeFit.set_temperature_anomaly(cov)
     return compositeFit.get_CI_report(
         'intensity_from_return_time',
         report='calibrated_confidence',
         return_time=return_time,
         T0=cov,
+        xIndex=x_idx,
+        yIndex=y_idx,
+    )
+
+def return_time_ci_report(compositeFit, cov, intensity, x_idx, y_idx):
+    compositeFit.set_temperature_anomaly(cov)
+    return compositeFit.get_CI_report(
+        'return_time_from_intensity',
+        report='calibrated_confidence',
+        intensity=intensity,
+        xIndex=x_idx,
+        yIndex=y_idx,
+    )
+
+def change_in_intensity_ci_report(compositeFit, return_time, cov0, cov1, x_idx, y_idx):
+    return compositeFit.get_CI_report(
+        'change_in_intensity',
+        report='calibrated_confidence',
+        return_time=return_time,
+        T0=cov0,
+        T1=cov1,
+        xIndex=x_idx,
+        yIndex=y_idx,
+    )
+
+def change_in_frequency_ci_report(compositeFit, intensity, cov0, cov1, x_idx, y_idx):
+    return compositeFit.get_CI_report(
+        'times_more_likely',
+        report='calibrated_confidence',
+        intensity=intensity,
+        T0=cov0,
+        T1=cov1,
         xIndex=x_idx,
         yIndex=y_idx,
     )

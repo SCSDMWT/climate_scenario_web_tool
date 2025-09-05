@@ -12,6 +12,9 @@ from .extreme_temp import (
     change_in_intensity,
     change_in_frequency,
     intensity_ci_report,
+    return_time_ci_report,
+    change_in_intensity_ci_report,
+    change_in_frequency_ci_report,
 )
 from .data_helpers import xarray_to_geojson, is_number, validate_args, str_lower
 from .boundary_layer import is_valid_boundary_layer, get_boundary_layer
@@ -151,13 +154,31 @@ def data_extreme_temp_return_time(covariate, intensity, format='geojson'):
         nVariates=10000,
         preProcess=False,
     )
-    intensity = int(intensity)
-    covariate = float(covariate)
 
     return_time = return_time_from_intensity(composite_fit, covariate, intensity)
 
     # Make the response object
     return make_data_response(return_time, format, 'extreme_temp/return_time', (covariate, intensity))
+
+
+@app.route('/data/extreme_temp/return_time_ci_report/<covariate>/<intensity>/<x_idx>/<y_idx>')
+@get_cache().cached(timeout=50)
+@validate_args(
+    ('covariate', is_number, float),
+    ('intensity', is_number, float),
+    ('x_idx', is_number, int),
+    ('y_idx', is_number, int),
+)
+def data_extreme_temp_return_time_ci_report(covariate, intensity, x_idx, y_idx):
+
+    composite_fit = init_composite_fit(
+        app.config['DATA_FILE_DESC'],
+        simParams='c,loc1,scale1',
+        nVariates=1000,
+        preProcess=True,
+    )
+    result = return_time_ci_report(composite_fit, covariate, intensity, x_idx, y_idx)
+    return result, 200
 
 
 @app.route('/data/extreme_temp/intensity_change/<covariate0>/<return_time>/<covariate1>')
@@ -185,6 +206,28 @@ def data_extreme_temp_intensity_change(covariate0, return_time, covariate1, form
     # Make the response object
     return make_data_response(result, format, 'extreme_temp/intensity_change', (covariate0, return_time, covariate1))
 
+@app.route('/data/extreme_temp/intensity_change_ci_report/<covariate0>/<return_time>/<covariate1>/<x_idx>/<y_idx>')
+@get_cache().cached(timeout=50)
+@validate_args(
+    ('covariate0', is_number, float),
+    ('return_time', is_number, float),
+    ('covariate1', is_number, float),
+    ('x_idx', is_number, int),
+    ('y_idx', is_number, int),
+)
+def data_extreme_temp_intensity_change_ci_report(covariate0, return_time, covariate1, x_idx, y_idx):
+
+    if covariate1 <= covariate0:
+        return "covariate1 > covariate0 is required", 400
+
+    composite_fit = init_composite_fit(
+        app.config['DATA_FILE_DESC'],
+        simParams='c,loc1,scale1',
+        nVariates=1000,
+        preProcess=True,
+    )
+    result = change_in_intensity_ci_report(composite_fit, return_time, covariate0, covariate1, x_idx, y_idx)
+    return result, 200
 
 @app.route('/data/extreme_temp/frequency_change/<covariate0>/<intensity>/<covariate1>')
 @app.route('/data/extreme_temp/frequency_change/<covariate0>/<intensity>/<covariate1>/<format>')
@@ -212,4 +255,26 @@ def data_extreme_temp_frequency_change(covariate0, intensity, covariate1, format
     return make_data_response(result, format, 'extreme_temp/frequency_change', (covariate0, intensity, covariate1))
 
 
+@app.route('/data/extreme_temp/frequency_change_ci_report/<covariate0>/<intensity>/<covariate1>/<x_idx>/<y_idx>')
+@get_cache().cached(timeout=50)
+@validate_args(
+    ('covariate0', is_number, float),
+    ('intensity', is_number, float),
+    ('covariate1', is_number, float),
+    ('x_idx', is_number, int),
+    ('y_idx', is_number, int),
+)
+def data_extreme_temp_frequency_change_ci_report(covariate0, intensity, covariate1, x_idx, y_idx):
+
+    if covariate1 <= covariate0:
+        return "covariate1 > covariate0 is required", 400
+
+    composite_fit = init_composite_fit(
+        app.config['DATA_FILE_DESC'],
+        simParams='c,loc1,scale1',
+        nVariates=1000,
+        preProcess=True,
+    )
+    result = change_in_frequency_ci_report(composite_fit, intensity, covariate0, covariate1, x_idx, y_idx)
+    return result, 200
 

@@ -97,11 +97,16 @@ export class UIMap {
 
     clear_selection() {
         this.#selection = {};
-        this.#layers[this.#selection_layer_idx].changed();
+        if (this.#layers[this.#selection_layer_idx])
+            this.#layers[this.#selection_layer_idx].changed();
     }
     /// Register event listeners for clicking on the data layer
     init_selection_events() {
         this.#map.on(['click'], (event) => {
+
+            if (this.#overlay)
+                this.#overlay.setPosition(undefined);
+
             const data_layer = this.#layers[this.#data_layer_idx];
             if (!data_layer) {
                 return;
@@ -185,7 +190,8 @@ export class UIMap {
 
     /// Update the values shown in the data layer.
     update_data_layer(data, colorbar) {
-        //var data = await fetch_data(url);
+
+        this.hide_overlay();
 
         data.features.forEach(function(element) {
             element.properties.data = parseFloat(element.properties.data);
@@ -310,13 +316,16 @@ export class UIMap {
         
         if (closer) {
             closer.onclick = () => {
-                this.#overlay.setPosition(undefined);
-                this.clear_selection();
+                this.hide_overlay();
                 closer.blur();
                 return false;
             }
         }
+    }
 
-
+    hide_overlay() {
+        if (this.#overlay)
+            this.#overlay.setPosition(undefined);
+        this.clear_selection();
     }
 }

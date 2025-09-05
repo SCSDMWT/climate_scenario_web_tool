@@ -90,6 +90,7 @@ async function fetch_data(url) {
 }
 
 async function update_data_layer(url, colorbar) {
+    ui_map.hide_overlay();
     const data = await fetch_data(url);
     ui_map.update_data_layer(data, colorbar);
 }

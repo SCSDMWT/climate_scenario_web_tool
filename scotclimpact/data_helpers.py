@@ -70,14 +70,17 @@ def xarray_to_geojson(dataset_name, dataset, x_key='projection_x_coordinate', y_
         dict(
             type='Feature',
             properties=dict(
-                data=value if not value == float("inf") else 10000
+                data=value if not value == float("inf") else 10000,
+                x_idx=int(coord_idx[0]),
+                y_idx=int(coord_idx[1]),
             ),
             geometry=dict(
                 type='Polygon',
                 coordinates=[[tr, tl, bl, br, tr]],
             ),
         )
-        for tr, tl, br, bl, value in zip(top_right, top_left, bottom_right, bottom_left, dataset[idx])
+        for tr, tl, br, bl, value, coord_idx 
+        in zip(top_right, top_left, bottom_right, bottom_left, dataset[idx], zip(*idx))
     ]
 
     crs = dict(

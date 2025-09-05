@@ -21,12 +21,14 @@ class Fitted_Obs_Sim():
                  preProcess     = True,
                  nVariates      = 1000,
                  storeInput     = False,
-                 intensityUnits = 'degrees_Celsius'):
+                 intensityUnits = 'degrees_Celsius',
+                 TScotVariates  = True):
         '''
         initialise with fitted parameter files from simulations and observations.
         When we have confirmed exactly how we want to do the de-biasing of simulations,
         these steps can be skipped by only providing the fully processed composite file.
         '''
+        self.TScotVariates  = TScotVariates
         self.intensityUnits = intensityUnits
         if storeInput: # if there is a need to keep full input files
             self.dsObsInput = self.dsObs.copy(deep = True)
@@ -88,6 +90,10 @@ class Fitted_Obs_Sim():
         self.bsVariates = None
         if preProcess: self.variate_bootstrap_dist(nVariates)
 
+    def get_xy_indices(self, x, y):
+        return np.argmin(np.abs(self.grid.projection_x_coordinate.values - x)),\
+               np.argmin(np.abs(self.grid.projection_y_coordinate.values - y))
+
     def variate_bootstrap_dist(self, nVariates = 1000):
         '''
         produce random variates of the bootstrap parameters
@@ -119,6 +125,8 @@ class Fitted_Obs_Sim():
         mean = m[0] + m[1] * (Tanomaly - m[2])
         if type(self.bsVariates) == type(None):
             return mean
+        elif self.TScotVariates == False:#if we don't want to unclude uncertainty in TScot
+            return mean, np.array([mean]*self.nVariates)            
         else:
             std  = np.sqrt(s[0]**2 + (s[1]*(Tanomaly - m[2]))**2 + (m[1]*s[2])**2)
             return mean, norm.rvs(mean, std, self.nVariates)
@@ -161,8 +169,17 @@ class Fitted_Obs_Sim():
         else:
             return self.apply_units(x*grid, units, attrs)
 
-    def intensity_from_return_time(self, tauReturn, mode = 'fit', output = 'dataarray'):
-        if mode == 'fit':
+    def intensity_from_return_time(self, tauReturn, mode = 'fit', output = 'dataarray', quantiles = [0.025,0.975]):
+        if (mode == 'variates') or (mode == 'quantiles'):
+            fit = self.intensity_from_return_time(tauReturn, mode = 'fit')
+            bss = self.intensity_from_return_time(tauReturn, mode = 'bs')
+            if mode == 'quantiles':
+                ds = xr.merge([fit, bss.quantile(quantiles, dim = 'variate')\
+                         .rename(intensity = 'intensity_quantiles')])
+            else:
+                ds = xr.merge([fit, bss.rename(intensity = 'intensity_variates')])
+            return self.apply_units(ds, units = self.intensityUnits)
+        elif mode == 'fit':
                 x    = self.fitGEV.ppf(1-1/tauReturn)
                 grid = self.grid.mask.rename('intensity')
         elif mode == 'bs':
@@ -174,8 +191,17 @@ class Fitted_Obs_Sim():
                 description = 'intensity at %d year return time'%tauReturn),
                     ).to_dataset()
 
-    def return_time_from_intensity(self, intensity, mode = 'fit', output = 'dataarray'):
-        if mode == 'fit':
+    def return_time_from_intensity(self, intensity, mode = 'fit', output = 'dataarray', quantiles = [0.025,0.975]):
+        if (mode == 'variates') or (mode == 'quantiles'):
+            fit = self.return_time_from_intensity(intensity, mode = 'fit')
+            bss = self.return_time_from_intensity(intensity, mode = 'bs')
+            if mode == 'quantiles':
+                ds = xr.merge([fit, bss.quantile(quantiles, dim = 'variate')\
+                         .rename(return_time = 'return_time_quantiles')])
+            else:
+                ds = xr.merge([fit, bss.rename(return_time = 'return_time_variates')])
+            return self.apply_units(ds, units = 'years')
+        elif mode == 'fit':
                 x    = 1/self.fitGEV.sf(intensity)
                 grid = self.grid.mask.rename('return_time')
         elif mode == 'bs':
@@ -187,27 +213,6 @@ class Fitted_Obs_Sim():
                 description = 'return time of %0.1f %s'%(intensity,self.intensityUnits)),
                     ).to_dataset()
         
-    def intensity_from_return_time_quantiles(self, tauReturn, quantiles = [0.025,0.975]):
-        '''
-        call bootstrap version of intensity function and return quantiles
-        '''
-        x = self.intensity_from_return_time(tauReturn, mode = 'bs', output = 'dataarray')
-        return x.quantile(quantiles, dim = 'variate')
-
-    def return_time_from_intensity_quantiles(self, intensity, quantiles = [0.025,0.975]):
-        '''
-        call bootstrap version of return_time function and return quantiles
-        '''
-        x = self.return_time_from_intensity(intensity, mode = 'bs', output = 'dataarray')
-        return x.quantile(quantiles, dim = 'variate')
-
-    def quantiles(self, function, userArgument, quantiles = [0.025,0.975]):
-        '''
-        call quantiles more generally with user argument and function
-        '''
-        x = function(userArgument, mode = 'bs', output = 'default')*self.bsGrid
-        return x.mask.quantile(quantiles, dim = 'variate')
-
     def times_more_likely(self, intensity, cov0, cov1, 
                           bsCovs0 = None, bsCovs1 = None,
                           mode = 'quantiles',
@@ -228,7 +233,7 @@ class Fitted_Obs_Sim():
                 (r0/r1).rename(return_time = 'times_more_likely'),
                 (bsR0/bsR1).rename(return_time='times_more_likely_quantiles')\
                                     .times_more_likely_quantiles.quantile(quantiles, dim = 'variate')]),
-                    'times_more_likely',
+                    'times_more_frequent',
                             attrs = dict(
                     description = 'ratio of return times at cov%0.1f vs cov%0.1f of %0.1f %s'\
                                 %(cov0, cov1, intensity, self.intensityUnits)))
@@ -236,7 +241,7 @@ class Fitted_Obs_Sim():
             return self.apply_units(xr.merge([
                 (r0/r1).rename(return_time = 'times_more_likely'),
                          (bsR0/bsR1).rename(return_time='times_more_likely_variates')]),
-                    'times_more_likely',
+                    'times_more_frequent',
                             attrs = dict(
                     description = 'ratio of return times at cov%0.1f vs cov%0.1f of %0.1f %s'\
                                 %(cov0, cov1, intensity, self.intensityUnits)))
@@ -297,6 +302,88 @@ class Fitted_Obs_Sim():
                               bsCovs0, bsCovs1,
                               mode = mode,
                               quantiles = quantiles)
+    def get_variates_dist(self, calculation,
+                 xIndex    = None,      yIndex = None,
+                 intensity = None, return_time = None,
+                 T0        = None,          T1 = None):
+        '''
+        can add raise statements here
+        '''
+        if calculation == 'intensity_from_return_time':
+            dataset = self.intensity_from_return_time(return_time, mode = 'variates')
+        elif calculation == 'return_time_from_intensity':
+            dataset = self.return_time_from_intensity(intensity, mode = 'variates')
+        elif calculation == 'change_in_intensity':
+            dataset = self.change_in_intensity_T(return_time, T0 = T0, T1 = T1, mode = 'variates')
+        elif calculation == 'times_more_likely':
+            dataset = self.times_more_likely_T(intensity, T0 = T0, T1 = T1, mode = 'variates')
+        
+        if (type(xIndex) != type(None)) and (type(yIndex) != type(None)):
+            dataset = dataset.isel(projection_x_coordinate = xIndex,
+                                   projection_y_coordinate = yIndex)
+        return dataset
+
+    def get_CI_report(self, calculation, 
+                 report    = 'central_CI',
+                 quantiles = [0.025,0.975],
+                 xIndex    = None,      yIndex = None,
+                 intensity = None, return_time = None,
+                 T0        = None,          T1 = None):
+        '''
+        can add raise statements here
+        '''
+        if report == 'calibrated_confidence':
+            quantiles = [0.05,0.1,0.25,0.75,0.9,0.95]
+        #-----------------------------------------------------------
+        if calculation == 'intensity_from_return_time':
+            dataset = self.intensity_from_return_time(return_time, 
+                                                      mode = 'quantiles', quantiles = quantiles)
+            var     = 'intensity'
+        #-----------------------------------------------------------            
+        elif calculation == 'return_time_from_intensity':
+            dataset = self.return_time_from_intensity(intensity, 
+                                                      mode = 'quantiles', quantiles = quantiles)
+            var     = 'return_time'
+        #-----------------------------------------------------------           
+        elif calculation == 'change_in_intensity':
+            dataset = self.change_in_intensity_T(return_time, T0 = T0, T1 = T1, 
+                                                      mode = 'quantiles', quantiles = quantiles)
+            var     = 'intensity_change'
+        #-----------------------------------------------------------            
+        elif calculation == 'times_more_likely':
+            dataset = self.times_more_likely_T(intensity, T0 = T0, T1 = T1,
+                                                      mode = 'quantiles', quantiles = quantiles)
+            var     = 'times_more_likely'
+        #-----------------------------------------------------------        
+        if (type(xIndex) != type(None)) and (type(yIndex) != type(None)):
+            dataset = dataset.isel(projection_x_coordinate = xIndex,
+                                   projection_y_coordinate = yIndex)
+            if report == 'central_CI':
+                return '%0.1f, [%0.1f, %0.1f] %s'%(dataset[var], 
+                                                dataset[var+'_quantiles']\
+                                                    .isel(quantile = 0).values,
+                                                dataset[var+'_quantiles']\
+                                                    .isel(quantile =-1).values,
+                                                dataset.attrs['units'])
+            if report == 'calibrated_confidence':# calibrated language for 90%, 80%, 50% confidence intervals from IPCC AR4 guidance
+                return\
+                       'Central estimate:     %0.1f %s\n'%(dataset[var],dataset.attrs['units'])\
+                      +'Very High confidence: %0.1f to %0.1f %s\n'%(dataset[var+'_quantiles']\
+                                                    .sel(quantile = 0.05).values,
+                                                           dataset[var+'_quantiles']\
+                                                    .sel(quantile = 0.95).values,
+                                                           dataset.attrs['units'])\
+                      +'High confidence:      %0.1f to %0.1f %s\n'%(dataset[var+'_quantiles']\
+                                                    .sel(quantile = 0.1).values,
+                                                           dataset[var+'_quantiles']\
+                                                    .sel(quantile = 0.9).values,
+                                                           dataset.attrs['units'])\
+                      +'Medium confidence:    %0.1f to %0.1f %s\n'%(dataset[var+'_quantiles']\
+                                                    .sel(quantile = 0.25).values,
+                                                           dataset[var+'_quantiles']\
+                                                    .sel(quantile = 0.75).values,
+                                                           dataset.attrs['units'])
+        return dataset
 
     def get_KS_test_p(self, data, distribution, nParams):
         def fit_and_p(variates,distribution,nParams):
@@ -501,3 +588,17 @@ def change_in_intensity(compositeFit, return_time, cov0, cov1):
 def change_in_frequency(compositeFit, intensity, cov0, cov1):
     #intensity_from_return_time(compositeFit, cov0, return_time)
     return compositeFit.times_more_likely(intensity, cov0, cov1).times_more_likely
+
+def intensity_ci_report(compositeFit, return_time, cov0, cov1, x_idx, y_idx):
+
+    bsCovariates = multivariate_normal(2, 1).rvs(1000)
+    compositeFit.set_covariate(covariate=cov0, bsCovariates=bsCovariates)
+    return compositeFit.get_CI_report(
+        'intensity_from_return_time',
+        report='calibrated_confidence',
+        return_time=return_time,
+        T0=cov0,
+        T1=cov1,
+        xIndex=x_idx,
+        yIndex=y_idx,
+    )

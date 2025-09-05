@@ -1,0 +1,29 @@
+<!-- -*- vim :set ts=2 sw=2 sts=2 et ft=html : -*- -->
+{% set page = namespace(path='/disclaimer') %}
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col"></div>
+    <div class="col-9"> 
+      <div> {{ disclaimer_text | safe }} </div>
+      <form>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="" id="accept">
+          <label class="form-check-label" for="accept">I accept these Terms and Conditions</label>
+        </div>
+      </form>
+    </div>
+    <div class="col"></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script type="module" src="{{ static_url_for('static', filename='dist/disclaimer.js') }}"></script>
+
+{% endblock %}

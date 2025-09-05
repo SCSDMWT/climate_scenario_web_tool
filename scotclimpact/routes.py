@@ -1,5 +1,7 @@
+from collections import namedtuple
 import io
 import json
+import markdown
 import os
 
 from flask import current_app as app
@@ -21,7 +23,10 @@ from .boundary_layer import is_valid_boundary_layer, get_boundary_layer
 from .cache import get_cache
 
 def menu_items():
-    return []
+    MenuItem = namedtuple("MenuItem", "title path order")
+    return [
+        MenuItem("Disclaimer", "disclaimer", 2),
+    ]
 
 @app.route('/')
 @get_cache().cached(timeout=50)
@@ -31,6 +36,18 @@ def index():
         navigation=menu_items(),
         mapserverurl=app.config['MAPSERVER_URL'],
         tilelayerurl=app.config['TILE_LAYER_URL'],
+    )
+
+@app.route('/disclaimer')
+@get_cache().cached(timeout=50)
+def disclaimer():
+    with open("scotclimpact/pages/disclaimer.md", "r") as f:
+        disclaimer_text = markdown.markdown(f.read())
+
+    return render_template(
+        'disclaimer.html',
+        disclaimer_text=disclaimer_text,
+        navigation=menu_items(),
     )
 
 def make_json_response(json_data):

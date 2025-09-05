@@ -5,8 +5,8 @@ if [ -f .dev-env ]; then
 fi
 
 cd scotclimpact/static
-npm install
-npm run build
+npm install || exit 1
+npm run build || exit 1
 cd -
 
 uv run -- flask --app scotclimpact run -p 8000

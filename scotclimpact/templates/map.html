@@ -1,3 +1,4 @@
+<!-- -*- vim :set ts=2 sw=2 sts=2 et ft=html : -*- -->
 {% set page = namespace(path='/') %}
 {% extends "base.html" %}
 
@@ -10,100 +11,203 @@
     </div>
 
     <div class="col-md-3">
-      <div style="grid-template-columns: 1fr"  class="d-grid gap-0 row-gap-3">
+      <div style="grid-template-columns: 1fr"  class="d-grid gap-0 row-gap input-group-3">
 
-          <div class="p-2">
-              <label for="scenario" class="form-label" id="scenarioLabel">Scenario:</label>
-              <select class="form-select" name="scenario" id="scenario">
-                  <option value="extreme_temp">Extreme Temperature</option>
-              </select>
+        <div class="p-2 input-section">
+          <label for="scenario" class="form-label" id="scenarioLabel">Scenario:</label>
+          <select class="form-select" name="scenario" id="scenario">
+            <option value="extreme_temp">Extreme Temperature</option>
+          </select>
+        </div>
+
+        <datalist id="covariateValues">
+          <option value="0"></option>
+          <option value="0.5"></option>
+          <option value="1.0"></option>
+          <option value="1.5"></option>
+          <option value="2.0"></option>
+          <option value="2.5"></option>
+          <option value="3.0"></option>
+          <option value="3.5"></option>
+          <option value="4.0"></option>
+        </datalist>
+        <div class="p-2 input-section" id="covariateGroup">
+          <label for="covariateParam" class="form-label" id="covariateParamLabel">Global temperature anomaly (in °C):</label>
+          <div class="slider-options">
+            <input type="range" class="slider" min="0" max="4" step="0.5" defaultValue="2.0" id="covariateParam" list="covariateValues"/>
+            <div id="covariateTicks" class="ticks">
+              <span class="ticks-txt">0.0</span>
+              <span class="ticks-txt">0.5</span>
+              <span class="ticks-txt">1.0</span>
+              <span class="ticks-txt">1.5</span>
+              <span class="ticks-txt">2.0</span>
+              <span class="ticks-txt">2.5</span>
+              <span class="ticks-txt">3.0</span>
+              <span class="ticks-txt">3.5</span>
+              <span class="ticks-txt">4.0</span>
+            </div>
           </div>
-
-          <datalist id="covariateValues">
-            <option value="0"></option>
-            <option value="1.5"></option>
-            <option value="2"></option>
-            <option value="4"></option>
-          </datalist>
-          <div class="p-2" id="covariateGroup">
-              <label for="covariateParam" class="form-label" id="covariateParamLabel">Covariate: <span style="font-weight:bold">0</span></label>
-              <input type="range" class="form-range" min="0" max="4" step="0.5" defaultValue="2.0" id="covariateParam" list="covariateValues"/>
+          <div class="accordion" id="covariateDescription">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="covariateHeading">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAttribute" aria-expanded="true" aria-controls="collapseAttribute">
+                  <div>Description</div>
+                </button>
+              </h2>
+              <div id="collapseAttribute" class="accordion-collapse collapse show" aria-labelledby="covariateHeading" data-bs-parent="#covariateDescription">
+                <div class="accordion-body" id='covariate_description'>
+                  <p>The global temperature anomaly is the global near surface temperature change from the average between 1850 and 1900.</p>
+                  <p>This tool models what climate hazards might look like in conditions compared to the average of the historical period between 1850 and 1900.</p>
+                  <p>A value of 1 °C is the estimated average global temperature anomaly between 2000 and 2020.</p>
+                  <p>Current advice is to plan for 2 °C and asses against 4 °C.</p>
+                  <p>This has been calculated using the HadCRUT5.0.2.0 ensemble from <a href="https://doi.org/10.1029/2019JD032361">Morice et al. (2021)</a>.</p>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+      </div>
 
-          <div class="p-2" id="calculationGroup">
-              <label for="calculation" class="form-label" id="calculationLabel">Calculation:</label>
-              <select class="form-select" name="calculation" id="calculation">
-                  <option value="intensity">Intensity</option>
-                  <option value="intensity_change">Change in Intensity</option>
-                  <option value="return_time">Return Time</option>
-                  <option value="frequency_change">Change in Frequency</option>
-              </select>
+      <div class="p-3 input-section" id="calculationGroup">
+        <label for="calculation" class="form-label" id="calculationLabel">Calculation:</label>
+        <select class="form-select" name="calculation" id="calculation">
+          <option value="intensity">Intensity</option>
+          <option value="intensity_change">Change in Intensity</option>
+          <option value="return_time">Return Time</option>
+          <option value="frequency_change">Change in Frequency</option>
+        </select>
+
+        <datalist id="tauReturnValues">
+          <option value="10"></option>
+          <option value="20"></option>
+          <option value="30"></option>
+          <option value="40"></option>
+          <option value="50"></option>
+          <option value="60"></option>
+          <option value="70"></option>
+          <option value="80"></option>
+          <option value="90"></option>
+          <option value="100"></option>
+        </datalist>
+
+        <div id="tauReturnGroup" class="input-item">
+          <label for="tauReturnParam" class="form-label" id="tauReturnParamLabel">Return time (in years):</label>
+          <div class="slider-options">
+            <input type="range" class="slider" min="10" max="100" step="10" defaultValue="50" id="tauReturnParam" list="tauReturnValues"/>
+            <div id="tauReturnTicks" class="ticks">
+              <span class="ticks-txt">10</span>
+              <span class="ticks-txt">20</span>
+              <span class="ticks-txt">30</span>
+              <span class="ticks-txt">40</span>
+              <span class="ticks-txt">50</span>
+              <span class="ticks-txt">60</span>
+              <span class="ticks-txt">70</span>
+              <span class="ticks-txt">80</span>
+              <span class="ticks-txt">90</span>
+              <span class="ticks-txt">100</span>
+            </div>
           </div>
+        </div>
 
-          <datalist id="tauReturnValues">
-            <option value="10"></option>
-            <option value="20"></option>
-            <option value="30"></option>
-            <option value="40"></option>
-            <option value="50"></option>
-            <option value="60"></option>
-            <option value="70"></option>
-            <option value="80"></option>
-            <option value="90"></option>
-            <option value="100"></option>
-          </datalist>
+        <datalist id="intensityValues">
+          <option value="30"></option>
+          <option value="31"></option>
+          <option value="32"></option>
+          <option value="33"></option>
+          <option value="34"></option>
+          <option value="35"></option>
+          <option value="36"></option>
+          <option value="37"></option>
+          <option value="38"></option>
+          <option value="39"></option>
+          <option value="40"></option>
+        </datalist>
 
-          <div class="p-2" id="tauReturnGroup">
-              <label for="tauReturnParam" class="form-label" id="tauReturnParamLabel">Return time: <span style="font-weight:bold">0</span></label>
-              <input type="range" class="form-range" min="10" max="100" step="10" defaultValue="2.0" id="tauReturnParam" list="tauReturnValues"/>
+        <div id="intensityGroup" class="input-item">
+          <label for="intensityParam" class="form-label" id="intensityParamLabel">Intensity (in °C):</label>
+          <div class="slider-options">
+            <input type="range" class="slider" min="30" max="40" step="1" defaultValue="25" id="intensityParam" list="intensityValues"/>
+            <div id="intensityTicks" class="ticks">
+              <span class="ticks-txt">30</span>
+              <span class="ticks-txt">31</span>
+              <span class="ticks-txt">32</span>
+              <span class="ticks-txt">33</span>
+              <span class="ticks-txt">34</span>
+              <span class="ticks-txt">35</span>
+              <span class="ticks-txt">36</span>
+              <span class="ticks-txt">37</span>
+              <span class="ticks-txt">38</span>
+              <span class="ticks-txt">39</span>
+              <span class="ticks-txt">40</span>
+            </div>
           </div>
+        </div>
 
-          <datalist id="intensityValues">
-            <option value="30"></option>
-            <option value="35"></option>
-            <option value="40"></option>
-          </datalist>
-
-          <div class="p-2" id="intensityGroup">
-              <label for="intensityParam" class="form-label" id="intensityParamLabel">Intensity: <span style="font-weight:bold">0</span></label>
-              <input type="range" class="form-range" min="30" max="40" step="1" defaultValue="25" id="intensityParam" list="intensityValues"/>
+        <div id="covariate2Group" class="input-item">
+          <label for="covariate2Param" class="form-label" id="covariate2ParamLabel">Comparitative global temperature anomaly (in °C):</label>
+          <div class="slider-options">
+            <input type="range" class="slider" min="0" max="4" step="0.5" defaultValue="2.0" id="covariate2Param" list="covariateValues"/>
+            <div id="covariate2Ticks" class="ticks">
+              <span class="ticks-txt">0.0</span>
+              <span class="ticks-txt">0.5</span>
+              <span class="ticks-txt">1.0</span>
+              <span class="ticks-txt">1.5</span>
+              <span class="ticks-txt">2.0</span>
+              <span class="ticks-txt">2.5</span>
+              <span class="ticks-txt">3.0</span>
+              <span class="ticks-txt">3.5</span>
+              <span class="ticks-txt">4.0</span>
+            </div>
           </div>
-
-          <div class="p-2" id="covariate2Group">
-              <label for="covariate2Param" class="form-label" id="covariate2ParamLabel">Covariate 2: <span style="font-weight:bold">0</span></label>
-              <input type="range" class="form-range" min="0" max="4" step="0.5" defaultValue="2.0" id="covariate2Param" list="covariateValues"/>
+        </div>
+        <div class="input-item">
+          <label class="form-label">Legend:</label>
+          <div id="legend"></div>
+        </div>
+        <div class="accordion input-item" id="calculationDescription">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="calculationHeading">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCalculationDescription" aria-expanded="true" aria-controls="collapseCalculationDescription">
+                <div>Description</div>
+              </button>
+            </h2>
+            <div id="collapseCalculationDescription" class="accordion-collapse collapse show" aria-labelledby="calculationHeading" data-bs-parent="#calculationDescription">
+              <div class="accordion-body" id='calculation_description'>
+                <p>[Description of calculations to be added here.]</p>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div class="p-2">
-              <label class="form-label">Legend:</label>
-              <div id="legend"></div>
+      </div>
+      <div class="p-2 input-section">
+
+        <div class="input-item">
+          Download this dataset in 
+          <a id="download_netcdf" href="#">NetCDF</a>
+          or
+          <a id="download_csv" href="#">CSV</a>.
+        </div>
+
+        <div class="input-item">
+          <label for="opacityInput" class="form-label" id="opacityInputLabel">Data Layer Opacity:</label>
+          <div>
+            <input type="range" class="slider" min="0" max="1.0" step="0.1" defaultValue="1.0" id="opacityInput"/>
           </div>
+        </div>
 
-          <div class="p-2">
-              Download this dataset in 
-              <a id="download_netcdf" href="#">NetCDF</a>
-              or
-              <a id="download_csv" href="#">CSV</a>
-          </div>
-
-          <hr/>
-          <div class="p-2">
-              <label for="opacityInput" class="form-label" id="opacityInputLabel">Data Layer Opacity:</label>
-              <input type="range" class="form-range" min="0" max="1.0" step="0.1" defaultValue="1.0" id="opacityInput"/>
-          </div>
-
-          <div class="p-2">
-              <label for="boundaryLayer" class="form-label" id="boundaryLayerLabel">Boundaries:</label>
-              <select class="form-select" name="boundaryLayer" id="boundaryLayer">
-                  <option value="none">None</option>
-                  <option value="local_authorities">Local Council Areas</option>
-                  <option value="health_boards">NHS Health Boards</option>
-                  <option value="health_integration_authorities">NHS Health Integration Authorities</option>
-                  <option value="fire_rescue">Scottish Fire and Rescue</option>
-                  <!--<option value="police">Scottish Police Divisions</option>-->
-              </select>
-          </div>
-
+        <div class="input-item">
+          <label for="boundaryLayer" class="form-label" id="boundaryLayerLabel">Boundaries:</label>
+          <select class="form-select" name="boundaryLayer" id="boundaryLayer">
+            <option value="none">None</option>
+            <option value="local_authorities">Local Council Areas</option>
+            <option value="health_boards">NHS Health Boards</option>
+            <!--<option value="health_integration_authorities">NHS Health Integration Authorities</option>-->
+            <!--<option value="fire_rescue">Scottish Fire and Rescue</option>-->
+            <!--<option value="police">Scottish Police Divisions</option>-->
+          </select>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -111,23 +215,23 @@
 <div id="popup" class="ol-popup">
   <a href="#" id="popup-closer" class="ol-popup-closer"></a>
   <div id="popup-content">
-  <!--
-    <table class="table table-sm" id="popup-data">
+    <!--
+      <table class="table table-sm" id="popup-data">
       <thead></thead>
       <tbody></tbody>
-    </table>
-    <div id="popupInfoText"></div>
-  -->
+      </table>
+      <div id="popupInfoText"></div>
+    -->
   </div>
 </div>
 <!--
-<div id="qual-popup" class="ol-popup">
+  <div id="qual-popup" class="ol-popup">
   <a href="#" id="qual-popup-closer" class="ol-popup-closer"></a>
   <table class="table table-sm" id="popup-data">
-    <thead></thead>
-    <tbody></tbody>
+  <thead></thead>
+  <tbody></tbody>
   </table>
-</div>
+  </div>
 -->
 
 {% endblock %}
@@ -137,60 +241,92 @@
 
 <style>
   .map {
-      width: 100%;
-      height: 400px;
+    width: 100%;
+    height: 400px;
   }
   .ol-popup {
-      position: absolute;
-      background-color: white;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-      padding: 15px;
-      border-radius: 10px;
-      border: 1px solid #cccccc;
-      bottom: 12px;
-      left: -50px;
-      min-width: 350px;
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+    bottom: 12px;
+    left: -50px;
+    min-width: 350px;
   }
   .ol-popup:after, .ol-popup:before {
-      top: 100%;
-      border: solid transparent;
-      content: " ";
-      height: 0;
-      width: 0;
-      position: absolute;
-      pointer-events: none;
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
   }
   .ol-popup:after {
-      border-top-color: white;
-      border-width: 10px;
-      left: 48px;
-      margin-left: -10px;
+    border-top-color: white;
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
   }
   .ol-popup:before {
-      border-top-color: #cccccc;
-      border-width: 11px;
-      left: 48px;
-      margin-left: -11px;
+    border-top-color: #cccccc;
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
   }
   .ol-popup-closer {
-      text-decoration: none;
-      position: absolute;
-      top: 2px;
-      right: 8px;
+    text-decoration: none;
+    position: absolute;
+    top: 2px;
+    right: 8px;
   }
   .ol-popup-closer:after {
-      content: "✖";
+    content: "✖";
   }
   .legend-icon {
-      width: 25px;
-      display: inline-block;
-      text-align: center;
+    width: 25px;
+    display: inline-block;
+    text-align: center;
   }
   .legend-text {
-      padding-left: 5px;
-      display: inline-block;
+    padding-left: 5px;
+    display: inline-block;
   }
-  </style>
+  .input-section {
+    border: 1px solid silver;
+    border-radius: 5px;
+    margin-bottom: 1em;
+  }
+  .input-item {
+    padding-top: 1em;
+  }
+  .slider-options {
+    //width: 30em;
+    //border: 1px solid silver;
+    //border-radius: 0em;
+    //background-color: ghostwhite;
+  padding: 0 0 1em 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  }
+  .ticks {
+    display: flex;
+  }
+  .ticks-txt {
+    flex: 1;
+  }
+  .ticks-on {
+    font-weight: bold;
+  }
+  .slider {
+    width: 93%; /* manually adjust this to look right */
+    margin: auto;
+    cursor: grab;
+  }
+</style>
 {% endblock %}
 {% block scripts %}
 <script type='text/javascript'>

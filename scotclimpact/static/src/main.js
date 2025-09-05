@@ -1,8 +1,16 @@
 import $ from 'jquery';
+import Cookies from "js-cookie";
 
 import {apply_color_map, legend_endpoints} from "../src/color_map.js";
 import {draw_legend} from "../src/legend.js";
 import {UIMap} from "../src/map.js";
+
+function check_disclaimer_cookie() {
+    /// Redirects to the disclaimer page if the ToS have not been accepted.
+    if (!Cookies.get('accepted_tos')) {
+        window.location.replace(window.location.href + '/disclaimer');
+    }
+}
 
 const colorbar = {
     extreme_temp: {
@@ -129,16 +137,34 @@ function update_ui(slider_values) {
         ui_item.style.display = ui_item_is_visible ? "block" : "none";
     }
 
-    // Update slider labels
-    $('#covariateParamLabel').html("Covariate: <span style=\"font-weight:bold\">" + slider_values["#covariateParam"].toFixed(1) + "</span>");
-    $('#covariate2ParamLabel').html("Covariate 2: <span style=\"font-weight:bold\">" + slider_values["#covariate2Param"].toFixed(1) + "</span>");
-    $('#tauReturnParamLabel').html("Return time: <span style=\"font-weight:bold\">" + slider_values["#tauReturnParam"].toFixed(0) + "</span>");
-    $('#intensityParamLabel').html("Intensity: <span style=\"font-weight:bold\">" + slider_values["#intensityParam"].toFixed(0) + "</span>");
+    // Enforce Covariate 1/2 value constraints
+    const calculation = $("#calculation")[0].value;
+    const covariate_max = parseFloat($('#covariateParam')[0].max);
+    const covariate_step = parseFloat($('#covariateParam')[0].step);
+    if ((calculation.search('_change') > 0) && (slider_values['#covariateParam'] >= covariate_max - covariate_step)) {
+        $('#covariateParam')[0].value = covariate_max - covariate_step;
+    }
+    if (slider_values['#covariate2Param'] <= slider_values["#covariateParam"] + covariate_step) {
+        $('#covariate2Param')[0].value = slider_values["#covariateParam"] + covariate_step;
+    }
 
-    $('#covariate2Param').prop({
-        'min': slider_values["#covariateParam"] + 0.5,
-        'max': 4.0,
-    });
+    // Show selected tick with a special class.
+    const slider_ticks_pairs = [
+        ["#covariateParam", "#covariateTicks", 1],
+        ["#covariate2Param", "#covariate2Ticks", 1],
+        ["#tauReturnParam", "#tauReturnTicks", 0],
+        ["#intensityParam", "#intensityTicks", 0],
+    ];
+    for (const [slider_id, tick_collection, decimal_places] of slider_ticks_pairs) {
+        const slider_txt = slider_values[slider_id].toFixed(decimal_places);
+        for (var tick of $(tick_collection)[0].children) {
+            tick.classList = (tick.innerHTML === slider_txt)
+                ? "ticks-txt ticks-on"
+                : "ticks-txt";
+        }
+    }
+
+    // Update links for downloading datasets.
     $('#download_netcdf').prop({
         'href': make_data_url(slider_values) + '/netcdf',
     });
@@ -157,7 +183,6 @@ function make_data_url(slider_values) {
 
     if (scenario == "extreme_temp") {
 
-        // Update slider labels
         const calculation = $("#calculation")[0].value;
 
         url_endpoint.pathname += '/' + calculation;
@@ -191,17 +216,40 @@ function get_slider_values() {
     for (const id of slider_ids) {
         result[id] = parseFloat($(id).val());
     }
+
+    const calculation = $("#calculation")[0].value;
+    const covariate_max = parseFloat($('#covariateParam')[0].max);
+    const covariate_step = parseFloat($('#covariateParam')[0].step);
+
+    // Ensure covariate < 4.0 if comparing different scenarios
+    if (calculation.search('_change') > 0 && result['#covariateParam'] >= covariate_max - covariate_step) {
+        result["#covariateParam"] = covariate_max - covariate_step;
+    }
+
+    // Ensure covariate1 < covariate2
+    if (result['#covariate2Param'] <= result["#covariateParam"] + covariate_step) {
+        result['#covariate2Param'] = result["#covariateParam"] + covariate_step;
+    }
     return result;
 }
 
+var previous_slider_values = {};
 async function on_user_input() {
     /// Handler for UI events
     const slider_values = get_slider_values();
-    const url_endpoint = make_data_url(slider_values);
     const colorbar = update_ui(slider_values);
+
+    // Early exit if nothing changed.
+    if (JSON.stringify(previous_slider_values) === JSON.stringify(slider_values))
+        return;
+    previous_slider_values = slider_values;
+
+    const url_endpoint = make_data_url(slider_values);
     await update_data_layer(url_endpoint, colorbar);
     draw_legend(colorbar.edges, colorbar.colors, colorbar.endpoint_type, colorbar.decimal_places);
 }
+
+check_disclaimer_cookie();
 
 $("#covariateParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">1.5</span>"; 
 $("#covariateParam")[0].oninput = on_user_input;
@@ -216,6 +264,7 @@ $("#scenario")[0].oninput = on_user_input;
 $("#calculation")[0].oninput = on_user_input; 
 
 var opacityInput = $("#opacityInput")[0];
+opacityInput.value = 1.0;
 opacityInput.oninput = function() {
     const opacity = parseFloat(opacityInput.value);
     ui_map.set_data_layer_opacity(opacity);

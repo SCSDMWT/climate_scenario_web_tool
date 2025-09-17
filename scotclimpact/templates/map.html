@@ -330,7 +330,6 @@
 {% endblock %}
 {% block scripts %}
 <script type='text/javascript'>
-  const mapserverurl = "{{ mapserverurl }}";
   const tilelayerurl = "{{ tilelayerurl }}";
 </script>
 <script type="module" src="{{ static_url_for('static', filename='dist/main.js') }}"></script>

@@ -23,6 +23,7 @@ from .boundary_layer import is_valid_boundary_layer, get_boundary_layer
 from .cache import get_cache
 
 def menu_items():
+    '''Returns a list of named tuples describing the items in the navigation menu'''
     MenuItem = namedtuple("MenuItem", "title path order")
     return [
         MenuItem("Disclaimer", "disclaimer", 2),

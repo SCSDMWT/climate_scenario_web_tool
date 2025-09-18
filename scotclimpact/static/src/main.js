@@ -280,3 +280,17 @@ on_user_input();
 
 boundaryInput.value = "none"
 await update_boundary_layer("none");
+
+    // Update the legend label's units
+    var legend_label = $("#legend-label")[0];
+    console.log(legend_label);
+    if (calculation == "intensity") {
+        legend_label.innerHTML = "Legend (in °C):";
+    }
+    else if (calculation == "return_time") {
+        legend_label.innerHTML = "Legend (in years):";
+    }
+    else {
+        legend_label.innerHTML = "Legend:";
+    }
+

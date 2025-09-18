@@ -14,7 +14,7 @@
       <div style="grid-template-columns: 1fr"  class="d-grid gap-0 row-gap input-group-3">
 
         <div class="p-2 input-section">
-          <label for="scenario" class="form-label" id="scenarioLabel">Scenario:</label>
+          <label for="scenario" class="form-label" id="scenarioLabel">Hazard:</label>
           <select class="form-select" name="scenario" id="scenario">
             <option value="extreme_temp">Extreme Temperature</option>
           </select>
@@ -161,9 +161,10 @@
           </div>
         </div>
         <div class="input-item">
-          <label class="form-label">Legend:</label>
+          <label id="legend-label" class="form-label">Legend:</label>
           <div id="legend"></div>
         </div>
+
         <div class="accordion input-item" id="calculationDescription">
           <div class="accordion-item">
             <h2 class="accordion-header" id="calculationHeading">
@@ -173,7 +174,6 @@
             </h2>
             <div id="collapseCalculationDescription" class="accordion-collapse collapse show" aria-labelledby="calculationHeading" data-bs-parent="#calculationDescription">
               <div class="accordion-body" id='calculation_description'>
-                <p>[Description of calculations to be added here.]</p>
               </div>
             </div>
           </div>

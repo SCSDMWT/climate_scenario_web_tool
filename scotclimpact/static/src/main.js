@@ -86,6 +86,13 @@ const selection_tree = {
     }
 };
 
+const calculation_descriptions = {
+    "intensity": "<p>Intensity shows the hottest temperature that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
+    "intensity_change": "<p>Change in Intensity shows the change in the hottest temperature that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly of +X_COV °C.</p>",
+    "return_time": "<p>Return Time shows the number of years in which a maximum temperature of Z_INTENSITY °C is expected to be exceeded at least once at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
+    "frequency_change": "<p>Change in Frequency shows how many times more frequent a maximum temperature of Z_INTENSITY °C is expected to be seen at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly +X_COV °C.</p>",
+};
+
 const ui_map = new UIMap('map', tilelayerurl);
 
 
@@ -125,9 +132,9 @@ async function update_boundary_layer(layer_name) {
     ui_map.update_boundary_layer(data, valid_layers[layer_name]);
 }
 
-function update_ui(slider_values) {
+function update_ui(input_values) {
     
-    const scenario = $("#scenario")[0].value;
+    const scenario = input_values["#scenario"];
     const next_choice = $(selection_tree[scenario].next_choice)[0].value;
 
     // Update slider visibility
@@ -138,14 +145,14 @@ function update_ui(slider_values) {
     }
 
     // Enforce Covariate 1/2 value constraints
-    const calculation = $("#calculation")[0].value;
+    const calculation = input_values["#calculation"];
     const covariate_max = parseFloat($('#covariateParam')[0].max);
     const covariate_step = parseFloat($('#covariateParam')[0].step);
-    if ((calculation.search('_change') > 0) && (slider_values['#covariateParam'] >= covariate_max - covariate_step)) {
+    if ((calculation.search('_change') > 0) && (input_values['#covariateParam'] >= covariate_max - covariate_step)) {
         $('#covariateParam')[0].value = covariate_max - covariate_step;
     }
-    if (slider_values['#covariate2Param'] <= slider_values["#covariateParam"] + covariate_step) {
-        $('#covariate2Param')[0].value = slider_values["#covariateParam"] + covariate_step;
+    if (input_values['#covariate2Param'] <= input_values["#covariateParam"] + covariate_step) {
+        $('#covariate2Param')[0].value = input_values["#covariateParam"] + covariate_step;
     }
 
     // Show selected tick with a special class.
@@ -156,7 +163,7 @@ function update_ui(slider_values) {
         ["#intensityParam", "#intensityTicks", 0],
     ];
     for (const [slider_id, tick_collection, decimal_places] of slider_ticks_pairs) {
-        const slider_txt = slider_values[slider_id].toFixed(decimal_places);
+        const slider_txt = input_values[slider_id].toFixed(decimal_places);
         for (var tick of $(tick_collection)[0].children) {
             tick.classList = (tick.innerHTML === slider_txt)
                 ? "ticks-txt ticks-on"
@@ -166,16 +173,40 @@ function update_ui(slider_values) {
 
     // Update links for downloading datasets.
     $('#download_netcdf').prop({
-        'href': make_data_url(slider_values) + '/netcdf',
+        'href': make_data_url(input_values) + '/netcdf',
     });
     $('#download_csv').prop({
-        'href': make_data_url(slider_values) + '/csv',
+        'href': make_data_url(input_values) + '/csv',
     });
+
+    // Update the legend label's units
+    var legend_label = $("#legend-label")[0];
+    console.log(legend_label);
+    if (calculation == "intensity") {
+        legend_label.innerHTML = "Legend (in °C):";
+    }
+    else if (calculation == "return_time") {
+        legend_label.innerHTML = "Legend (in years):";
+    }
+    else {
+        legend_label.innerHTML = "Legend:";
+    }
+
+    // Insert slider values in the calculation description box
+    var calculation_description = $('#calculation_description')[0];
+    calculation_description.innerHTML = 
+        calculation_descriptions[calculation]
+            .replaceAll("X_COV", input_values["#covariateParam"])
+            .replaceAll("Y_COV", input_values["#covariate2Param"])
+            .replaceAll("Z_RETURN_TIME", input_values["#tauReturnParam"])
+            .replaceAll("Z_INTENSITY ", input_values["#intensityParam"]);
+
+
     return colorbar[scenario][next_choice] // FIXME
 }
 
-function make_data_url(slider_values) {
-    const scenario = $("#scenario")[0].value;
+function make_data_url(input_values) {
+    const scenario = input_values["#scenario"];
     var url_endpoint = new URL(
         window.location.protocol + "//" + window.location.host + "/" +
         window.location.pathname + "/data/" + scenario
@@ -183,28 +214,29 @@ function make_data_url(slider_values) {
 
     if (scenario == "extreme_temp") {
 
-        const calculation = $("#calculation")[0].value;
+        const calculation = input_values["#calculation"];
 
         url_endpoint.pathname += '/' + calculation;
-        url_endpoint.pathname += '/' + slider_values["#covariateParam"];
+        url_endpoint.pathname += '/' + input_values["#covariateParam"];
         if (calculation == "intensity") {
-            url_endpoint.pathname += '/' + slider_values["#tauReturnParam"];
+            url_endpoint.pathname += '/' + input_values["#tauReturnParam"];
         }
         else if(calculation == "intensity_change") {
-            url_endpoint.pathname += '/' + slider_values["#tauReturnParam"] + '/' + slider_values["#covariate2Param"];
+            url_endpoint.pathname += '/' + input_values["#tauReturnParam"] + '/' + input_values["#covariate2Param"];
         }
         else if(calculation == "return_time") {
-            url_endpoint.pathname += '/' + slider_values["#intensityParam"];
+            url_endpoint.pathname += '/' + input_values["#intensityParam"];
         }
         else if(calculation == "frequency_change") {
-            url_endpoint.pathname += '/' + slider_values["#intensityParam"] + '/' + slider_values["#covariate2Param"];
+            url_endpoint.pathname += '/' + input_values["#intensityParam"] + '/' + input_values["#covariate2Param"];
         }
     }
     return url_endpoint.href;
 
 }
 
-function get_slider_values() {
+/// Get the values of the input elements in the UI
+function get_input_values() {
     var result = new Object();
     const slider_ids = [
         "#covariateParam",
@@ -212,9 +244,16 @@ function get_slider_values() {
         "#tauReturnParam",
         "#intensityParam",
     ];
+    const dropdown_ids = [
+        "#scenario",
+        "#calculation",
+    ];
 
     for (const id of slider_ids) {
         result[id] = parseFloat($(id).val());
+    }
+    for (const id of dropdown_ids) {
+        result[id] = $(id)[0].value;
     }
 
     const calculation = $("#calculation")[0].value;
@@ -233,18 +272,18 @@ function get_slider_values() {
     return result;
 }
 
-var previous_slider_values = {};
+var previous_input_values = {};
 async function on_user_input() {
     /// Handler for UI events
-    const slider_values = get_slider_values();
-    const colorbar = update_ui(slider_values);
+    const input_values = get_input_values();
+    const colorbar = update_ui(input_values);
 
     // Early exit if nothing changed.
-    if (JSON.stringify(previous_slider_values) === JSON.stringify(slider_values))
+    if (JSON.stringify(previous_input_values) === JSON.stringify(input_values))
         return;
-    previous_slider_values = slider_values;
+    previous_input_values = input_values;
 
-    const url_endpoint = make_data_url(slider_values);
+    const url_endpoint = make_data_url(input_values);
     await update_data_layer(url_endpoint, colorbar);
     draw_legend(colorbar.edges, colorbar.colors, colorbar.endpoint_type, colorbar.decimal_places);
 }

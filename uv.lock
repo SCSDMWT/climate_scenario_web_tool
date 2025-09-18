@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -899,7 +899,7 @@ wheels = [
 
 [[package]]
 name = "scotclimpact"
-version = "0.0.7"
+version = "0.0.8"
 source = { editable = "." }
 dependencies = [
     { name = "flask" },

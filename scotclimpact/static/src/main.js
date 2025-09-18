@@ -86,6 +86,13 @@ const selection_tree = {
     }
 };
 
+const calculation_descriptions = {
+    "intensity": "<p>Intensity shows the hottest temperature that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
+    "intensity_change": "<p>Change in Intensity shows the change in the hottest temperature that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly of +X_COV °C.</p>",
+    "return_time": "<p>Return Time shows the number of years in which a maximum temperature of Z_INTENSITY °C is expected to be exceeded at least once at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
+    "frequency_change": "<p>Change in Frequency shows how many times more frequent a maximum temperature of Z_INTENSITY °C is expected to be seen at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly +X_COV °C.</p>",
+};
+
 const ui_map = new UIMap('map', tilelayerurl);
 
 
@@ -184,6 +191,16 @@ function update_ui(input_values) {
     else {
         legend_label.innerHTML = "Legend:";
     }
+
+    // Insert slider values in the calculation description box
+    var calculation_description = $('#calculation_description')[0];
+    calculation_description.innerHTML = 
+        calculation_descriptions[calculation]
+            .replaceAll("X_COV", input_values["#covariateParam"])
+            .replaceAll("Y_COV", input_values["#covariate2Param"])
+            .replaceAll("Z_RETURN_TIME", input_values["#tauReturnParam"])
+            .replaceAll("Z_INTENSITY ", input_values["#intensityParam"]);
+
 
     return colorbar[scenario][next_choice] // FIXME
 }

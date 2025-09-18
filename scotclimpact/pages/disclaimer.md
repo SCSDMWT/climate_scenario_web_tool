@@ -15,11 +15,10 @@ This service does NOT tell you about:
 ## What data underpins this service?
 
  
-
   * UK Climate Projections (UKCP18)
-  * HadUK-Grid
+  * UK observations (HadUK-Grid)
+  * Global temperature anomalies (HadCRUT5)
   * Regional boundaries from [spatialdata.gov.scot](https://spatialdata.gov.scot).
-
 
 This tool visualises projections of future climate hazards using UKCP18 data specific to Scotland at different global temperature anomalies, with a ‘bias correction’ based on observations of past weather in Scotland (HadUK-Grid). 
 Full details of the methods are available on the ClimateXChange website.

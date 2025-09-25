@@ -127,10 +127,10 @@ def data_extreme_temp_intensity(covariate, tauReturn, format='geojson'):
         app.config['DATA_FILE_DESC'],
         simParams='c,loc1,scale1',
         nVariates=10000,
-        preProcess=False,
+        preProcess=True,
     )
-    tauReturn = int(tauReturn)
-    covariate = float(covariate)
+    #tauReturn = int(tauReturn)
+    #covariate = float(covariate)
 
     intensity = intensity_from_return_time(composite_fit, covariate, tauReturn)
 
@@ -170,11 +170,10 @@ def data_extreme_temp_return_time(covariate, intensity, format='geojson'):
         app.config['DATA_FILE_DESC'],
         simParams='c,loc1,scale1',
         nVariates=10000,
-        preProcess=False,
+        preProcess=True,
     )
 
     return_time = return_time_from_intensity(composite_fit, covariate, intensity)
-
     # Make the response object
     return make_data_response(return_time, format, 'extreme_temp/return_time', (covariate, intensity))
 

@@ -572,13 +572,11 @@ def init_composite_fit(file, simParams='c,loc1,scale1', nVariates=10000, preProc
 
 
 def intensity_from_return_time(compositeFit, covariate, tauReturn):
-    bsCovariates = multivariate_normal(2, 1).rvs(compositeFit.nVariates) # model accepts lots of variates of covariate
-    compositeFit.set_covariate(covariate=covariate, bsCovariates=bsCovariates)
+    compositeFit.set_temperature_anomaly(covariate)
     return compositeFit.intensity_from_return_time(tauReturn).intensity
 
 def return_time_from_intensity(compositeFit, covariate, intensity):
-    bsCovariates = multivariate_normal(2, 1).rvs(compositeFit.nVariates) # model accepts lots of variates of covariate
-    compositeFit.set_covariate(covariate=covariate, bsCovariates=bsCovariates)
+    compositeFit.set_temperature_anomaly(covariate)
     return compositeFit.return_time_from_intensity(intensity).return_time
 
 def change_in_intensity(compositeFit, return_time, cov0, cov1):

@@ -18,6 +18,27 @@ in the future.
 
 ## Development
 
+There are quite a few steps needed to setup a working development environment. 
+
+  * [Software](#software)
+    * [Installing Git](#installing-git)
+    * [Installing NPM][#installing-npm]
+    * [Installing UV](#installing-uv)
+  * [Initial setup][#initial-setup]
+    * [Code](#code)
+    * [Data](#data)
+    * [Setup a Python virtual environment](#setup-a-python-virtual-environment)
+      * [UV](#uv)
+      * [Python venv/virtualenv](#python-venvvirtualenv)
+      * [Conda](#conda)
+    * [Initialise the NPM project](#initialise-the-npm-project)
+    * [Run the web app locally](#run-the-web-app-locally)
+  * [New Sessions](#new-sessions)
+  * [Working on the code](#working-on-the-code)
+    * [Python](#python)
+    * [JavaScript](#javascript)
+    
+
 ### Software
 
 Making changes to the code will require a Linux machine and 
@@ -45,10 +66,10 @@ at [nodejs.org/en/download/](https://nodejs.org/en/download/).
 
 #### Install UV
 
-UV can be installed without root prevelages by following the instructions 
+UV can be installed without root privileges by following the instructions 
 at [docs.astral.sh](https://docs.astral.sh/uv/getting-started/installation/).
 
-### Setup
+### Initial setup
 
 The following steps need to be performed once.
 
@@ -62,7 +83,7 @@ cd climate_scenario_web_tool
 
 #### Data
 
-Data is held in a separate [GitHub repository](https://github.com/SCSDMWT/climate_scenario_web_tool_data) and
+The project's data is held in a separate [GitHub repository](https://github.com/SCSDMWT/climate_scenario_web_tool_data) and
 automatically downloaded when needed.
 
 For the web app to access the data a [Fine Grained tokeni](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
@@ -73,7 +94,7 @@ has to be generated with
  * Under add permissions pick Contents.
    
 The token should be held in an environment variable called `DATA_REPO_GITHUB_TOKEN`, however
-care should be taken not to accedentally store the token in the shell's history.
+care should be taken not to accidentally store the token in the shell's history.
 
 Create a file called `env_vars` with the following content (replacing `...` with the value of the token):
 ```bash
@@ -90,16 +111,19 @@ The environment variable can now be set by running:
 
 #### Setup a Python virtual environment
 
-It is recommended to keep the Python dependancies for the project in a separate environment.
-This can be done with (atleast) three software packages.
+It is recommended to keep the Python dependencies for the project in a separate environment.
+This can be done with (at least) three software packages.
 
 ##### UV
 
-UV creates temporary envirnments whenever a Python script or program is run using `uv run`.
+UV creates temporary environments whenever a Python script or program is run using `uv run`.
 If `uv` is installed, no additional setup is needed at this stage.
 
 ##### Python venv/virtualenv
 
+Python has a builtin mechanism for creating virtual environments, however it uses the
+Python installation of the operating system. If the version is recent enough, a
+virtual environment can be created with:
 ```bash
 python -m venv .venv
 . .venv/bin/activate
@@ -108,6 +132,8 @@ pip install .
 
 ##### Conda
 
+Conda is a popular package manager and can install recent versions of Python without root permissions.
+A conda environment can be created with:
 ```bash
 conda create -n scotclimpact python=3.13.0
 conda activate scotclimpact
@@ -117,31 +143,32 @@ pip install .
 
 #### Initialise the NPM project
 
-JavaScript dependancies need to be downloaded and installed with:
+JavaScript dependencies need to be downloaded and the code compiled to a browser
+supported format with:
 ```bash
 cd scotclimpact/static
 npm install
+npm run build
 cd -
 ```
 
-#### Run the webapp locally
+#### Run the web app locally
 
-When using UV, the following command will download all Python dependancies and run the web app:
+When using UV, the following command will download all Python dependencies and run the web app:
 ```bash
 uv run -- flask --app scotclimpact run -p 8000
 ```
 
-With conda and a virtual environment, the same can be done with:
+With conda and a virtual environment, the web app can be started with:
 ```bash
 flask --app scotclimpact run -p 8000
 ```
-
-Local changes to the code should be running in [http://localhost:8000](http://localhost:8000).
+The web app should be running and available at [http://localhost:8000](http://localhost:8000).
 
 ### New sessions
 
-When starting a new terminal, conda or virtual environments should be reactivated. 
-The `env_vars` file should also be sourced again:
+When starting a new terminal, conda or virtual environments should be reactivated and
+the `env_vars` file should also be sourced again:
 ```bash
 cd climate_scenario_web_tool
 . env_vars
@@ -150,20 +177,20 @@ If using conda:
 ```bash
 conda activate scotclimpact
 ```
-If using venv/virtualenv:
+For venv/virtualenv:
 ```bash
 . .venv/bin/activate
 ```
 
 ### Working on the code
 
-Changes to the Python code might require additional steps, depending on how the Python environment
+Changes to the Python code might require additional steps to run, depending on how the Python environment
 is managed. Changes to the JavaScript code should be recompiled too.
 
 #### Python
 
-With UV no extra steps are needed, but conda and virtual environments might need the following to 
-install the updated code in the environment:
+With UV no extra steps are needed when changing the Python code, but conda and virtual environments 
+might need the following to install the updated code in the environment:
 ```
 pip install .
 ```

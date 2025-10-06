@@ -21,10 +21,11 @@ in the future.
 There are quite a few steps needed to setup a working development environment. 
 
   * [Software](#software)
-    * [Installing Git](#installing-git)
-    * [Installing NPM][#installing-npm]
-    * [Installing UV](#installing-uv)
-  * [Initial setup][#initial-setup]
+    * [Install Git](#install-git)
+    * [Install NPM](#install-npm)
+    * [Install UV](#install-uv)
+    * [Install Conda](#install-conda)
+  * [Initial setup](#initial-setup)
     * [Code](#code)
     * [Data](#data)
     * [Setup a Python virtual environment](#setup-a-python-virtual-environment)
@@ -49,12 +50,12 @@ the following software:
  * [uv](https://docs.astral.sh/uv)  -- A Python package manager (Optional and recommended) 
  * [conda]()  -- A package manager (Optional, if uv is not available and system installation of Python is older than 3.13) 
 
-#### Installing Git
+#### Install Git
 
 It is best [installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) via 
 the package manager of the Linux distribution.
 
-#### Installing NPM
+#### Install NPM
 
 On Ubuntu systems with root access, run
 ```bash
@@ -68,6 +69,10 @@ at [nodejs.org/en/download/](https://nodejs.org/en/download/).
 
 UV can be installed without root privileges by following the instructions 
 at [docs.astral.sh](https://docs.astral.sh/uv/getting-started/installation/).
+
+#### Install Conda
+
+Follow the installation instructions on the [conda web site](https://docs.conda.io/projects/conda/en/stable/user-guide/install/linux.html).
 
 ### Initial setup
 
@@ -86,7 +91,7 @@ cd climate_scenario_web_tool
 The project's data is held in a separate [GitHub repository](https://github.com/SCSDMWT/climate_scenario_web_tool_data) and
 automatically downloaded when needed.
 
-For the web app to access the data a [Fine Grained tokeni](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+For the web app to access the data a [Fine Grained token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 has to be generated with
 
  * the Resource owner set to SCSDMWT
@@ -112,7 +117,10 @@ The environment variable can now be set by running:
 #### Setup a Python virtual environment
 
 It is recommended to keep the Python dependencies for the project in a separate environment.
-This can be done with (at least) three software packages.
+This can be done with (at least) three software packages. 
+Any one of the following three will do the job, however UV is much more convenient to use.
+If UV is not available, Python venv/virtualenv should be considered before Conda environments, 
+unless the system installed version of Python is too old.
 
 ##### UV
 

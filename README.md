@@ -224,11 +224,11 @@ cd -
 
 #### Running the latest code
 
-Running the web app with the latest changes is the same as [Run the web app locally](#run-the-web-app-locally) above.
+Running the web app with the latest changes is the same as [run the web app locally](#run-the-web-app-locally) above.
 
 #### Using the `run_dev.sh` script
 
-The steps in the [Working on the code](#working-on-the-code) section are automated in the `run_dev.sh` script for
+The steps in the [working on the code](#working-on-the-code) section are automated in the `run_dev.sh` script for
 environments managed with UV.
 Latest changes to the code can be run with:
 ```bash

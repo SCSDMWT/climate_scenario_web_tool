@@ -38,6 +38,9 @@ There are quite a few steps needed to setup a working development environment.
   * [Working on the code](#working-on-the-code)
     * [Python](#python)
     * [JavaScript](#javascript)
+    * [Running the latest code](#running-the-latest-code)
+    * [Running the latest code](#running-the-latest-code)
+    * [Using the `run_dev.sh` script](#using-the-run_devsh-script)
     
 
 ### Software
@@ -76,7 +79,11 @@ Follow the installation instructions on the [conda web site](https://docs.conda.
 
 ### Initial setup
 
-The following steps need to be performed once.
+The initial setup involves getting the source code and data for the
+project and installing Python and JavaScript libraries needed to
+run the web app.
+
+The following steps need to be performed once. 
 
 #### Code
 
@@ -175,6 +182,9 @@ The web app should be running and available at [http://localhost:8000](http://lo
 
 ### New sessions
 
+The various environment variables needed to run the web app are only set temporarily
+for the duration of a terminal session.
+
 When starting a new terminal, conda or virtual environments should be reactivated and
 the `env_vars` file should also be sourced again:
 ```bash
@@ -210,6 +220,19 @@ Changes to `scotclimpact/static/src/` should be compiled with
 cd scotclimpact/static
 npm run build
 cd -
+```
+
+#### Running the latest code
+
+Running the web app with the latest changes is the same as [Run the web app locally](#run-the-web-app-locally) above.
+
+#### Using the `run_dev.sh` script
+
+The steps in the [Working on the code](#working-on-the-code) section are automated in the `run_dev.sh` script for
+environments managed with UV.
+Latest changes to the code can be run with:
+```bash
+./run_dev.sh
 ```
 
 ## Running with Docker

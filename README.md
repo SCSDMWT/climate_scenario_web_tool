@@ -1,12 +1,12 @@
 # Climate Scenario Web Tool
 
-This is the repository for the web component of the Scottish Climate Scenario 
+This is the repository for the web component of the Scottish Climate Scenario
 Decision-Making Web-Tool.
 
-The code is under active development and significant changes are likely, 
+The code is under active development and significant changes are likely,
 however the main components and their interactions are shown in the diagram below.
 
-![Archetecture Diagram](docs/architecture.svg)
+![Architecture Diagram](docs/architecture.svg)
 
 The main components is a Flask web app with the following supporting elements:
 
@@ -18,7 +18,19 @@ in the future.
 
 ## Development
 
-There are quite a few steps needed to setup a working development environment. 
+The server component uses the [Flask](https://flask.palletsprojects.com/en/stable/)
+web application framework.
+Flask has an excellent [tutorial](https://flask.palletsprojects.com/en/stable/tutorial/)
+that describe the concepts and layout of a typical Flask app.
+
+The browser component relies heavily on [OpenLayers](https://openlayers.org/)
+to show the interactive map.
+OpenLayers provide several learning resources including
+[tutorials](https://openlayers.org/doc/tutorials/),
+a [workshop](https://openlayers.org/workshop/en/) and
+an extensive set of [examples](https://openlayers.org/en/latest/examples/).
+
+There are quite a few steps needed to setup a working development environment.
 
   * [Software](#software)
     * [Install Git](#install-git)
@@ -40,21 +52,20 @@ There are quite a few steps needed to setup a working development environment.
     * [JavaScript](#javascript)
     * [Running the latest code](#running-the-latest-code)
     * [Using the `run_dev.sh` script](#using-the-run_devsh-script)
-    
 
 ### Software
 
-Making changes to the code will require a Linux machine and 
+Making changes to the code will require a Linux machine and
 the following software:
 
  * [git](https://git-scm.com) -- Source code version control
  * [npm](https://www.npmjs.com/) -- JavaScript package manager
- * [uv](https://docs.astral.sh/uv)  -- A Python package manager (Optional and recommended) 
- * [conda]()  -- A package manager (Optional, if uv is not available and system installation of Python is older than 3.13) 
+ * [uv](https://docs.astral.sh/uv)  -- A Python package manager (Optional and recommended)
+ * [conda](https://docs.conda.io/en/latest/)  -- A package manager (Optional, if uv is not available and system installation of Python is older than 3.13)
 
 #### Install Git
 
-It is best [installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) via 
+It is best [installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) via
 the package manager of the Linux distribution.
 
 #### Install NPM
@@ -64,12 +75,12 @@ On Ubuntu systems with root access, run
 sudo apt-get install npm
 ```
 
-NPM can be installed without root access by following the instructions 
+NPM can be installed without root access by following the instructions
 at [nodejs.org/en/download/](https://nodejs.org/en/download/).
 
 #### Install UV
 
-UV can be installed without root privileges by following the instructions 
+UV can be installed without root privileges by following the instructions
 at [docs.astral.sh](https://docs.astral.sh/uv/getting-started/installation/).
 
 #### Install Conda
@@ -82,7 +93,7 @@ The initial setup involves getting the source code and data for the
 project and installing Python and JavaScript libraries needed to
 run the web app.
 
-The following steps need to be performed once. 
+The following steps need to be performed once.
 
 #### Code
 
@@ -103,7 +114,7 @@ has to be generated with
  * the Resource owner set to SCSDMWT
  * Only Select repositories and pick SCSDMWT/climate_scenario_web_tool_data
  * Under add permissions pick Contents.
-   
+
 The token should be held in an environment variable called `DATA_REPO_GITHUB_TOKEN`, however
 care should be taken not to accidentally store the token in the shell's history.
 
@@ -123,9 +134,9 @@ The environment variable can now be set by running:
 #### Setup a Python virtual environment
 
 It is recommended to keep the Python dependencies for the project in a separate environment.
-This can be done with (at least) three software packages. 
+This can be done with (at least) three software packages.
 Any one of the following three will do the job, however UV is much more convenient to use.
-If UV is not available, Python venv/virtualenv should be considered before Conda environments, 
+If UV is not available, Python venv/virtualenv should be considered before Conda environments,
 unless the system installed version of Python is too old.
 
 ##### UV
@@ -206,7 +217,7 @@ is managed. Changes to the JavaScript code should be recompiled too.
 
 #### Python
 
-With UV no extra steps are needed when changing the Python code, but conda and virtual environments 
+With UV no extra steps are needed when changing the Python code, but conda and virtual environments
 might need the following to install the updated code in the environment:
 ```
 pip install .
@@ -236,12 +247,12 @@ Latest changes to the code can be run with:
 
 ## Running with Docker
 
-Running with [Docker](https://www.docker.com/) is the recommended way to serve the web app on a server. 
-This method requires two slightly different authentication methods to 
+Running with [Docker](https://www.docker.com/) is the recommended way to serve the web app on a server.
+This method requires two slightly different authentication methods to
 download the data from the data repository (see the Data section above) and
-to download the container. 
+to download the container.
 
-Generate a Personal Access Token (classic) and make sure to tick 'read:packages'. 
+Generate a Personal Access Token (classic) and make sure to tick 'read:packages'.
 Save the access token in the `GITHUB_PAT` environment variable.
 
 Login with docker (assuming the access token is the value of the environment variable `GITHUB_PAT`), pull the image and run:

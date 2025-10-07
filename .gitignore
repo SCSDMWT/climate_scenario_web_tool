@@ -1,6 +1,8 @@
 ## Config
 .app-env
 .dev-env
+env_vars
+.tools/
 
 ## Data
 data/

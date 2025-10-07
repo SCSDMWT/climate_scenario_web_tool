@@ -1,12 +1,12 @@
 # Climate Scenario Web Tool
 
-This is the repository for the web component of the Scottish Climate Scenario 
+This is the repository for the web component of the Scottish Climate Scenario
 Decision-Making Web-Tool.
 
-The code is under active development and significant changes are likely, 
+The code is under active development and significant changes are likely,
 however the main components and their interactions are shown in the diagram below.
 
-![Archetecture Diagram](docs/architecture.svg)
+![Architecture Diagram](docs/architecture.svg)
 
 The main components is a Flask web app with the following supporting elements:
 
@@ -18,63 +18,60 @@ in the future.
 
 ## Development
 
-There are quite a few steps needed to setup a working development environment. 
+
+The server component uses the [Flask](https://flask.palletsprojects.com/en/stable/)
+web application framework.
+Flask has an excellent [tutorial](https://flask.palletsprojects.com/en/stable/tutorial/)
+that describe the concepts and layout of a typical Flask app.
+
+The browser component relies heavily on [OpenLayers](https://openlayers.org/)
+to show the interactive map.
+OpenLayers provide several learning resources including
+[tutorials](https://openlayers.org/doc/tutorials/),
+a [workshop](https://openlayers.org/workshop/en/) and
+an extensive set of [examples](https://openlayers.org/en/latest/examples/).
+
+There are quite a few steps needed to setup a working development environment, however
+they are mostly automated in the [`run_dev.sh`](run_dev.sh) script.
+The following steps are needed to get up and running using the script:
 
   * [Software](#software)
-    * [Install Git](#install-git)
-    * [Install NPM](#install-npm)
-    * [Install UV](#install-uv)
-    * [Install Conda](#install-conda)
   * [Initial setup](#initial-setup)
     * [Code](#code)
     * [Data](#data)
+    * [Using the `run_dev.sh` script](#using-the-run_devsh-script)
+    * [The `PATH` variable](#the-path-variable)
+  * [New Sessions](#new-sessions)
+    
+The build environment can be setup manually without using the `run_dev.sh` script.
+This method is outlined in the following sections and a few alternatives to handle 
+Python dependencies are discussed too.
+    
+> [!NOTE]
+> The following steps are optional and only recommended if the `run_dev.sh` script is
+> is not suitable for your workflow and/or system.
+
+  * [Additional Software](#additional-software)
+    * [Install NPM](#install-npm)
+    * [Install UV](#install-uv)
+    * [Install Conda](#install-conda)
+  * [Extra Initial Setup](#extra-initial-setup)
     * [Setup a Python virtual environment](#setup-a-python-virtual-environment)
       * [UV](#uv)
       * [Python venv/virtualenv](#python-venvvirtualenv)
       * [Conda](#conda)
     * [Initialise the NPM project](#initialise-the-npm-project)
     * [Run the web app locally](#run-the-web-app-locally)
-  * [New Sessions](#new-sessions)
+  * [New Sessions 2](#new-sessions-2)
   * [Working on the code](#working-on-the-code)
     * [Python](#python)
     * [JavaScript](#javascript)
     * [Running the latest code](#running-the-latest-code)
-    * [Using the `run_dev.sh` script](#using-the-run_devsh-script)
-    
 
 ### Software
 
-Making changes to the code will require a Linux machine and 
-the following software:
-
- * [git](https://git-scm.com) -- Source code version control
- * [npm](https://www.npmjs.com/) -- JavaScript package manager
- * [uv](https://docs.astral.sh/uv)  -- A Python package manager (Optional and recommended) 
- * [conda]()  -- A package manager (Optional, if uv is not available and system installation of Python is older than 3.13) 
-
-#### Install Git
-
-It is best [installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) via 
-the package manager of the Linux distribution.
-
-#### Install NPM
-
-On Ubuntu systems with root access, run
-```bash
-sudo apt-get install npm
-```
-
-NPM can be installed without root access by following the instructions 
-at [nodejs.org/en/download/](https://nodejs.org/en/download/).
-
-#### Install UV
-
-UV can be installed without root privileges by following the instructions 
-at [docs.astral.sh](https://docs.astral.sh/uv/getting-started/installation/).
-
-#### Install Conda
-
-Follow the installation instructions on the [conda web site](https://docs.conda.io/projects/conda/en/stable/user-guide/install/linux.html).
+A few common Linux utilities must be installed from the distribution repositories.
+These include `git`, `tar`, `wget` and `curl`.
 
 ### Initial setup
 
@@ -82,7 +79,7 @@ The initial setup involves getting the source code and data for the
 project and installing Python and JavaScript libraries needed to
 run the web app.
 
-The following steps need to be performed once. 
+The following steps need to be performed once.
 
 #### Code
 
@@ -103,12 +100,14 @@ has to be generated with
  * the Resource owner set to SCSDMWT
  * Only Select repositories and pick SCSDMWT/climate_scenario_web_tool_data
  * Under add permissions pick Contents.
-   
+
 The token should be held in an environment variable called `DATA_REPO_GITHUB_TOKEN`, however
 care should be taken not to accidentally store the token in the shell's history.
 
 Create a file called `env_vars` with the following content (replacing `...` with the value of the token):
 ```bash
+#!/bin/bash
+
 export DATA_REPO_GITHUB_TOKEN=...
 ```
 It is good practice to restrict the file's permissions by running
@@ -120,12 +119,81 @@ The environment variable can now be set by running:
 . env_vars
 ```
 
+#### Using the `run_dev.sh` script
+
+The `run_dev.sh` script will download recent versions of the package managers
+(UV for Python and NPM for JavaScript) if they are not present
+and download all additional software dependencies.
+
+#### The `PATH` variable
+
+The `PATH` variable can be set so that your terminal will use the same version of the package
+managers as the `run_dev.sh` script. This can be done with
+```bash
+./run_dev.sh --print-export >> env_vars
+. env_vars
+```
+
+### New sessions
+
+The various environment variables needed to run the web app are only set temporarily
+for the duration of a terminal session.
+
+When starting a new terminal the `env_vars` file should also be sourced again:
+```bash
+cd climate_scenario_web_tool
+. env_vars
+```
+
+### Run the latest code
+
+The `run_dev.sh` script will also compile the latest changes to JavaScript code and run the
+web app in developer mode.
+
+Latest changes to the code can be run with:
+```bash
+./run_dev.sh
+```
+The script has a few additional features to override the versions and download location of 
+the package managers. Run `./run_dev.sh -h` for details.
+
+> [!NOTE]
+> You should now be able to make changes to the code and run it with the `run_dev.sh` script.
+> The rest of the section covers alternative ways to manage Python and JavaScript dependencies 
+> and installing the required tools manually.
+
+
+### Additional Software
+#### Install NPM
+
+NPM can be installed without root access with the following steps:
+
+ * Go to [nodejs.org/en/download/](https://nodejs.org/en/download/). 
+ * Selected the latest version from the first drop down
+ * Click the green 'Standalone Binary (.xz)' button
+ * Extract the tarball
+ * Add the `bin` directory to the `PATH` variable:
+   ```bash
+   export PATH=/full/path/to/node/bin:$PATH
+   ```
+
+
+#### Install UV
+
+UV can be installed without root privileges by following the instructions
+at [docs.astral.sh](https://docs.astral.sh/uv/getting-started/installation/).
+
+#### Install Conda
+
+Follow the installation instructions on the [conda web site](https://docs.conda.io/projects/conda/en/stable/user-guide/install/linux.html).
+
+
 #### Setup a Python virtual environment
 
 It is recommended to keep the Python dependencies for the project in a separate environment.
-This can be done with (at least) three software packages. 
+This can be done with (at least) three software packages.
 Any one of the following three will do the job, however UV is much more convenient to use.
-If UV is not available, Python venv/virtualenv should be considered before Conda environments, 
+If UV is not available, Python venv/virtualenv should be considered before Conda environments,
 unless the system installed version of Python is too old.
 
 ##### UV
@@ -179,18 +247,10 @@ flask --app scotclimpact run -p 8000
 ```
 The web app should be running and available at [http://localhost:8000](http://localhost:8000).
 
-### New sessions
+### New sessions 2
 
-The various environment variables needed to run the web app are only set temporarily
-for the duration of a terminal session.
-
-When starting a new terminal, conda or virtual environments should be reactivated and
-the `env_vars` file should also be sourced again:
-```bash
-cd climate_scenario_web_tool
-. env_vars
-```
-If using conda:
+In addition to sourcing `env_vars`, conda or virtual environments should be reactivated 
+in new terminal sessions. If using conda:
 ```bash
 conda activate scotclimpact
 ```
@@ -206,7 +266,7 @@ is managed. Changes to the JavaScript code should be recompiled too.
 
 #### Python
 
-With UV no extra steps are needed when changing the Python code, but conda and virtual environments 
+With UV no extra steps are needed when changing the Python code, but conda and virtual environments
 might need the following to install the updated code in the environment:
 ```
 pip install .
@@ -225,23 +285,15 @@ cd -
 
 Running the web app with the latest changes is the same as [run the web app locally](#run-the-web-app-locally) above.
 
-#### Using the `run_dev.sh` script
-
-The steps in the [working on the code](#working-on-the-code) section are automated in the `run_dev.sh` script for
-environments managed with UV.
-Latest changes to the code can be run with:
-```bash
-./run_dev.sh
-```
 
 ## Running with Docker
 
-Running with [Docker](https://www.docker.com/) is the recommended way to serve the web app on a server. 
-This method requires two slightly different authentication methods to 
+Running with [Docker](https://www.docker.com/) is the recommended way to serve the web app on a server.
+This method requires two slightly different authentication methods to
 download the data from the data repository (see the Data section above) and
-to download the container. 
+to download the container.
 
-Generate a Personal Access Token (classic) and make sure to tick 'read:packages'. 
+Generate a Personal Access Token (classic) and make sure to tick 'read:packages'.
 Save the access token in the `GITHUB_PAT` environment variable.
 
 Login with docker (assuming the access token is the value of the environment variable `GITHUB_PAT`), pull the image and run:

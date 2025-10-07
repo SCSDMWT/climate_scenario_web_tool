@@ -39,7 +39,6 @@ There are quite a few steps needed to setup a working development environment.
     * [Python](#python)
     * [JavaScript](#javascript)
     * [Running the latest code](#running-the-latest-code)
-    * [Running the latest code](#running-the-latest-code)
     * [Using the `run_dev.sh` script](#using-the-run_devsh-script)
     
 

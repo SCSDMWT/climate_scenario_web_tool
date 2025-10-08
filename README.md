@@ -97,7 +97,7 @@ A brief descriptions of some of the project files are given in the following:
 pyproject.toml               Python [package][flask-tut-install] configuration. Managed with [`uv`][uv-projects].
 Dockerfile                   Recipe to create the app's Docker container.
 scotclimpact/                The main Python package that contain the Flask app.
-├─ __init__.py              Initialization for the python package and Flask [`app` object][flask-tut-app].
+├─ \_\_init\_\_.py          Initialization for the python package and Flask [`app` object][flask-tut-app].
 ├─  config.py               The app's configuration object.
 ├─  routes.py               Definition and logic for HTTP endpoints.
 ├─  extreme_temp.py         Statistical calculations for extreme heat hazards.
@@ -121,7 +121,7 @@ scotclimpact/                The main Python package that contain the Flask app.
      │   └─  disclaimer.js  Logic to check that the disclaimer has been accepted.
      └─  tests/             JavaScript unit tests.
 tests/                       Python unit tests
-</pre> </big>
+</pre></big>
 
 ### Data
 
@@ -152,7 +152,7 @@ The following steps are needed to get up and running using the script:
   * [Run the latest code](#run-the-latest-code)
     
 The build environment can be setup manually without using the `run_dev.sh` script and
-is outlined [elsewhere in the documentation](docs/alternative_dev_setup.sh).
+is outlined [elsewhere in the documentation](docs/alternative_dev_setup.md).
     
 ### Software
 

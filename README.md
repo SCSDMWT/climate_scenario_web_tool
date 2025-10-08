@@ -42,6 +42,7 @@ The following steps are needed to get up and running using the script:
     * [Using the `run_dev.sh` script](#using-the-run_devsh-script)
     * [The `PATH` variable](#the-path-variable)
   * [New Sessions](#new-sessions)
+  * [Run the latest code](#run-the-latest-code)
     
 The build environment can be setup manually without using the `run_dev.sh` script.
 This method is outlined in the following sections and a few alternatives to handle 

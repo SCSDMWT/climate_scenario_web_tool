@@ -35,7 +35,7 @@ an extensive set of [examples](https://openlayers.org/en/latest/examples/).
 
 The typical user interaction with the web app is summarised in the sequence diagram below:
 
-![User Sequence Diagram](docs/main_sequence.svg)
+<img src="docs/main_sequence.svg" width="50%">
 
 #### Render `map.html`
 
@@ -63,9 +63,10 @@ The request is sent to a URL endpoint that is constructed based on the following
 The web app calls a function in [`scotclimpact/routes.py`](scotclimpact/routes.py)
 that corresponds to the request for the data set.
 
-The statistical calculation is done in [`scotclimpact/extreme_temp.py`] (other hazards to follow).
+The statistical calculation is done in [`scotclimpact/extreme_temp.py`](scotclimpact/extreme_temp.py) 
+(other hazards to follow).
 The calculation relies heavily on the Python [xarray][xarray] package.
-However, it is not possible to transfer xarray `DataSet` objects back to the browser.
+However, it is not possible to transfer Xarray `DataSet` objects back to the browser.
 Utility functions in [`scotclimpact/data_helpers.py`](scotclimpact/data_helpers.py) are
 used to convert the xarray object to GeoJSON which can be interpreted in the browser.
 
@@ -421,3 +422,4 @@ See [LICENCE](LICENCE).
 [pooch]: https://www.fatiando.org/pooch/latest/
 [gunicorn]: https://gunicorn.org/
 [open-layers]: https://openlayers.org/
+[xarray]: https://docs.xarray.dev/en/stable/

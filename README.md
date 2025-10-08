@@ -3,6 +3,9 @@
 This is the repository for the web component of the Scottish Climate Scenario
 Decision-Making Web-Tool.
 
+A [pre-production](https://www.geos.ed.ac.uk/dev/ddekler/) version of the Web Tool is
+served by the [School of GeoSciences](https://geosciences.ed.ac.uk/)
+
 ## Overview
 
 The code is under active development and significant changes are likely,
@@ -41,20 +44,20 @@ Each step in the process is described in a bit more detail below.
 
 #### Render `map.html`
 
-The Flask app calls the `index` function (defined in [`scotclimpact/routes.py`](scotclimpact/routes.py)) which 
+The Flask app calls the `index` function (defined in [`scotclimpact/routes.py`](scotclimpact/routes.py)) which
 in turn renders the [`scotclimpact/templates/map.html`](scotclimpact/templates/map.html) template.
 The templates includes an additional request for [`scotclimpact/static/src/main.js`](scotclimpact/static/src/main.js).
 
 #### Select dataset on user input
 
-The logic in [`scotclimpact/static/src/main.js`](scotclimpact/static/src/main.js) runs in the browser and 
+The logic in [`scotclimpact/static/src/main.js`](scotclimpact/static/src/main.js) runs in the browser and
 does several things:
 
-  * Record the values of the drop down menus and slider positions. Default values are 
+  * Record the values of the drop down menus and slider positions. Default values are
     used when the page is first loaded.
   * Hide sliders that are not relevant to the current selection in drop down menus.
   * Make an additional request to the server to calculate the dataset associated with
-    the values of UI elements. 
+    the values of UI elements.
 
 The request is sent to a URL endpoint that is constructed based on the following template:
 ```
@@ -66,7 +69,7 @@ The request is sent to a URL endpoint that is constructed based on the following
 The web app calls a function in [`scotclimpact/routes.py`](scotclimpact/routes.py)
 that corresponds to the request for the data set.
 
-The statistical calculation is done in [`scotclimpact/extreme_temp.py`](scotclimpact/extreme_temp.py) 
+The statistical calculation is done in [`scotclimpact/extreme_temp.py`](scotclimpact/extreme_temp.py)
 (other hazards to follow).
 The calculation relies heavily on the Python [Xarray][xarray] package.
 However, it is not possible to transfer Xarray `DataSet` objects back to the browser.
@@ -75,56 +78,58 @@ used to convert the Xarray object to GeoJSON which can be transferred to and int
 
 #### Update the Map
 
-The 'data layer' of the map is updated. This makes heavy use of [OpenLayers][open-layers] and 
+The 'data layer' of the map is updated. This makes heavy use of [OpenLayers][open-layers] and
 [`scotclimpact/static/src/map.js`](scotclimpact/static/src/map.js).
 The legend for the relevant dataset is also updated based on a description of the dataset
 in [`scotclimpact/static/src/main.js`](scotclimpact/static/src/main.js)
-and logic in 
+and logic in
 [`scotclimpact/static/src/color_map.js`](scotclimpact/static/src/color_map.js)
 and
 [`scotclimpact/static/src/legend.js`](scotclimpact/static/src/legend.js).
 
 ### Project directory layout
 
-Flask recommends a directory layout for web apps in the [tutorial](https://flask.palletsprojects.com/en/stable/tutorial/layout/) 
+Flask recommends a directory layout for web apps in the [tutorial](https://flask.palletsprojects.com/en/stable/tutorial/layout/)
 and this project follows their convention.
-A brief descriptions of some of the project files are given in the following table:
+A brief descriptions of some of the project files are given in the following:
 
-| File                         | Description                                                                                                                    |
-|------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
-| `pyproject.toml`             | Python [package][flask-tut-install] configuration.<br> Managed with [`uv`][uv-projects].                                       |
-| `Dockerfile`                 | Recipe to create the app's Docker container.                                                                                   |
-| `scotclimpact/`              | The main Python package that contain the Flask app.                                                                            |
-| `├─ __init__.py`             | Initialization for the python package and Flask<br>[`app` object][flask-tut-app].                                              |
-| `├─  config.py`              | The app's configuration object.                                                                                                |
-| `├─  routes.py`              | Definition and logic for HTTP endpoints.                                                                                       |
-| `├─  extreme_temp.py`        | Statistical calculations for extreme heat hazards.                                                                             |
-| `├─  wsgi.py`                | Entry point for WSGI servers like [gunicorn][gunicorn].                                                                        |
-| `├─  cache.py`               | Wrapper for the Flask-cache plugin; used to cache<br>HTTP requests in [routes.py](scotclimpact/routes.py).                     |
-| `├─  data.py`                | Wrapper for the [Pooch][pooch] library; used to download<br>[project data][data-repo].                                         |
-| `├─  data_helpers.py`        | Utilities to validate and transform data structures.                                                                           |
-| `├─  boundary_layer.py`      | Utilities to serve regional boundary data.                                                                                     |
-| `├─  db.py`                  | Utilities to initialise and populate the [database][flask-tut-db]<br> (unused).                                                |
-| `├─  schema.sql`             | Database schema (unused)                                                                                                       |
-| `├─  pages/`                 | Content for pages containing mostly textual content                                                                            |
-| `├─  templates/`             | HTML Jinja2 [templates][flask-tut-templates].                                                                                  |
-| `└─  static/`                | Content that needs to be accessible from [the browser][flask-tut-static].<br>Mostly JavaScript code managed as an NPM project. |
-| `     ├─  package.json`      | NPM project configuration.                                                                                                     |
-| `     ├─  webpack.config.js` | Webpack transpiler configuration.                                                                                              |
-| `     ├─  src/`              | JavaScript source code.                                                                                                        |
-| `     │   ├─  main.js`       | The main control logic for the map and UI elements on the main<br> page.                                                       |
-| `     │   ├─  map.js`        | Class to wrap the [OpenLayers][open-layers] logic for the<br>interactive map.                                                  |
-| `     │   ├─  legend.js`     | Utilities to draw the legend.                                                                                                  |
-| `     │   ├─  color_map.js`  | Utilities to calculate color values for the data shown on the<br>map.                                                          |
-| `     │   └─  disclaimer.js` | Logic to check that the disclaimer has been accepted.                                                                          |
-| `     └─  tests/`            | JavaScript unit tests.                                                                                                         |
-| `tests/`                     | Python unit tests                                                                                                              |
+<big><pre>
+**climate\_scenario\_web\_tool**/
+├─ pyproject.toml              Python [package][flask-tut-install] configuration. Managed as a [`uv`][uv-projects] project.
+├─ Dockerfile                  Recipe to create the app's Docker container.
+├─ run_dev.sh                  A script that runs the web tool in developer mode.
+├─ **scotclimpact**/               The main Python package that contain the Flask app.
+│  ├─ \_\_init\_\_.py              Initialization for the python package and Flask [`app` object][flask-tut-app].
+│  ├─  config.py               The app's configuration object.
+│  ├─  routes.py               Definition and logic for HTTP endpoints.
+│  ├─  extreme_temp.py         Statistical calculations for extreme heat hazards.
+│  ├─  wsgi.py                 Entry point for WSGI servers like [gunicorn][gunicorn].
+│  ├─  cache.py                Wrapper for the Flask-cache plugin; used to cache HTTP requests in [routes.py](scotclimpact/routes.py).
+│  ├─  data.py                 Wrapper for the [Pooch][pooch] library; used to download [project data][data-repo].
+│  ├─  data_helpers.py         Utilities to validate and transform data structures.
+│  ├─  boundary_layer.py       Utilities to serve regional boundary data.
+│  ├─  db.py                   Utilities to initialise and populate the [database][flask-tut-db]  (unused).
+│  ├─  schema.sql              Database schema (unused)
+│  ├─  **pages**/                  Content for pages containing mostly textual content
+│  ├─  **templates**/              HTML Jinja2 [templates][flask-tut-templates].
+│  └─  **static**/                 Content that needs to be accessible from [the browser][flask-tut-static]. Mostly JavaScript code managed as an [npm][npm-intro] project.
+│      ├─  package.json        npm project configuration.
+│      ├─  webpack.config.js   Webpack transpiler configuration.
+│      ├─  **src**/                JavaScript source code.
+│      │   ├─  main.js         The main control logic for the map and UI elements on the main page.
+│      │   ├─  map.js          Class to wrap the [OpenLayers][open-layers] logic for the interactive map.
+│      │   ├─  legend.js       Utilities to draw the legend.
+│      │   ├─  color_map.js    Utilities to calculate color values for the data shown on the map.
+│      │   └─  disclaimer.js   Logic to check that the disclaimer has been accepted.
+│      └─  **tests**/              JavaScript unit tests.
+└─ **tests**/                      Python unit tests
+</pre></big>
 
 ### Data
 
-The project's data is kept  in a [separate repository][data-repo] and automatically downloaded when the 
+The project's data is kept  in a [separate repository][data-repo] and automatically downloaded when the
 app is run.
-The default download location is in `~/.cache/scotclimpact`.
+The default download location is `~/.cache/scotclimpact`.
 Details of how to allow access to download the data is discussed in later sections.
 
 The statistical calculation uses datasets in [NetCDF][netcdf] format. The [Xarray][xarray] library
@@ -145,33 +150,12 @@ The following steps are needed to get up and running using the script:
     * [Data](#data)
     * [Using the `run_dev.sh` script](#using-the-run_devsh-script)
     * [The `PATH` variable](#the-path-variable)
+    * [Other environment variables](#other-environment-variables)
   * [New Sessions](#new-sessions)
   * [Run the latest code](#run-the-latest-code)
-    
-The build environment can be setup manually without using the `run_dev.sh` script.
-This method is outlined in the following sections and a few alternatives to handle 
-Python dependencies are discussed too.
-    
-> [!NOTE]
-> The following steps are optional and only recommended if the `run_dev.sh` script is
-> is not suitable for your workflow and/or system.
 
-  * [Additional Software](#additional-software)
-    * [Install NPM](#install-npm)
-    * [Install UV](#install-uv)
-    * [Install Conda](#install-conda)
-  * [Extra Initial Setup](#extra-initial-setup)
-    * [Setup a Python virtual environment](#setup-a-python-virtual-environment)
-      * [UV](#uv)
-      * [Python venv/virtualenv](#python-venvvirtualenv)
-      * [Conda](#conda)
-    * [Initialise the NPM project](#initialise-the-npm-project)
-    * [Run the web app locally](#run-the-web-app-locally)
-  * [New Sessions 2](#new-sessions-2)
-  * [Working on the code](#working-on-the-code)
-    * [Python](#python)
-    * [JavaScript](#javascript)
-    * [Running the latest code](#running-the-latest-code)
+The build environment can be setup manually without using the `run_dev.sh` script and
+is outlined [elsewhere in the documentation](docs/alternative_dev_setup.md).
 
 ### Software
 
@@ -190,7 +174,7 @@ The following steps need to be performed once.
 
 Clone the Git repository:
 ```bash
-git clone https://github.com/SCSDMWT/climate_scenario_web_tool
+git clone git@github.com/SCSDMWT/climate_scenario_web_tool.git
 cd climate_scenario_web_tool
 ```
 
@@ -227,7 +211,7 @@ The environment variable can now be set by running:
 #### Using the `run_dev.sh` script
 
 The `run_dev.sh` script will download recent versions of the package managers
-(UV for Python and NPM for JavaScript) if they are not present
+(uv for Python and npm for JavaScript) if they are not present
 and download all additional software dependencies.
 
 #### The `PATH` variable
@@ -238,6 +222,13 @@ managers as the `run_dev.sh` script. This can be done with
 ./run_dev.sh --print-export >> env_vars
 . env_vars
 ```
+
+#### Other environment variables
+
+The app can be configured using several environment variables which
+are defined in [`scotclimpact/config.py`](scotclimpact/config.py).
+If you want to set any of these, adding relevant `export` commands in `env_vars` is
+the best place to do so.
 
 ### New sessions
 
@@ -259,136 +250,8 @@ Latest changes to the code can be run with:
 ```bash
 ./run_dev.sh
 ```
-The script has a few additional features to override the versions and download location of 
+The script has a few additional features to override the versions and download location of
 the package managers. Run `./run_dev.sh -h` for details.
-
-> [!NOTE]
-> You should now be able to make changes to the code and run it with the `run_dev.sh` script.
-> The rest of the section covers alternative ways to manage Python and JavaScript dependencies 
-> and installing the required tools manually.
-
-
-### Additional Software
-#### Install NPM
-
-NPM can be installed without root access with the following steps:
-
- * Go to [nodejs.org/en/download/](https://nodejs.org/en/download/). 
- * Selected the latest version from the first drop down
- * Click the green 'Standalone Binary (.xz)' button
- * Extract the tarball
- * Add the `bin` directory to the `PATH` variable:
-   ```bash
-   export PATH=/full/path/to/node/bin:$PATH
-   ```
-
-
-#### Install UV
-
-UV can be installed without root privileges by following the instructions
-at [docs.astral.sh](https://docs.astral.sh/uv/getting-started/installation/).
-
-#### Install Conda
-
-Follow the installation instructions on the [conda web site](https://docs.conda.io/projects/conda/en/stable/user-guide/install/linux.html).
-
-
-#### Setup a Python virtual environment
-
-It is recommended to keep the Python dependencies for the project in a separate environment.
-This can be done with (at least) three software packages.
-Any one of the following three will do the job, however UV is much more convenient to use.
-If UV is not available, Python venv/virtualenv should be considered before Conda environments,
-unless the system installed version of Python is too old.
-
-##### UV
-
-UV creates temporary environments whenever a Python script or program is run using `uv run`.
-If `uv` is installed, no additional setup is needed at this stage.
-
-##### Python venv/virtualenv
-
-Python has a builtin mechanism for creating virtual environments, however it uses the
-Python installation of the operating system. If the version is recent enough, a
-virtual environment can be created with:
-```bash
-python -m venv .venv
-. .venv/bin/activate
-pip install .
-```
-
-##### Conda
-
-Conda is a popular package manager and can install recent versions of Python without root permissions.
-A conda environment can be created with:
-```bash
-conda create -n scotclimpact python=3.13.0
-conda activate scotclimpact
-pip install .
-```
-
-
-#### Initialise the NPM project
-
-JavaScript dependencies need to be downloaded and the code compiled to a browser
-supported format with:
-```bash
-cd scotclimpact/static
-npm install
-npm run build
-cd -
-```
-
-#### Run the web app locally
-
-When using UV, the following command will download all Python dependencies and run the web app:
-```bash
-uv run -- flask --app scotclimpact run -p 8000
-```
-
-With conda and a virtual environment, the web app can be started with:
-```bash
-flask --app scotclimpact run -p 8000
-```
-The web app should be running and available at [http://localhost:8000](http://localhost:8000).
-
-### New sessions 2
-
-In addition to sourcing `env_vars`, conda or virtual environments should be reactivated 
-in new terminal sessions. If using conda:
-```bash
-conda activate scotclimpact
-```
-For venv/virtualenv:
-```bash
-. .venv/bin/activate
-```
-
-### Working on the code
-
-Changes to the Python code might require additional steps to run, depending on how the Python environment
-is managed. Changes to the JavaScript code should be recompiled too.
-
-#### Python
-
-With UV no extra steps are needed when changing the Python code, but conda and virtual environments
-might need the following to install the updated code in the environment:
-```
-pip install .
-```
-
-#### JavaScript
-
-Changes to `scotclimpact/static/src/` should be compiled with
-```bash
-cd scotclimpact/static
-npm run build
-cd -
-```
-
-#### Running the latest code
-
-Running the web app with the latest changes is the same as [run the web app locally](#run-the-web-app-locally) above.
 
 
 ## Running with Docker
@@ -430,3 +293,4 @@ See [LICENCE](LICENCE).
 [open-layers]: https://openlayers.org/
 [xarray]: https://docs.xarray.dev/en/stable/
 [netcdf]: https://www.unidata.ucar.edu/software/netcdf
+[npm-intro]: https://nodejs.org/en/learn/getting-started/an-introduction-to-the-npm-package-manager

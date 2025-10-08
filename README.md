@@ -18,6 +18,7 @@ in the future.
 
 ## Development
 
+
 The server component uses the [Flask](https://flask.palletsprojects.com/en/stable/)
 web application framework.
 Flask has an excellent [tutorial](https://flask.palletsprojects.com/en/stable/tutorial/)
@@ -65,37 +66,8 @@ Python dependencies are discussed too.
 
 ### Software
 
-Making changes to the code will require a Linux machine and
-the following software:
-
- * [git](https://git-scm.com) -- Source code version control
- * [npm](https://www.npmjs.com/) -- JavaScript package manager
- * [uv](https://docs.astral.sh/uv)  -- A Python package manager (Optional and recommended)
- * [conda](https://docs.conda.io/en/latest/)  -- A package manager (Optional, if uv is not available and system installation of Python is older than 3.13)
-
-#### Install Git
-
-It is best [installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) via
-the package manager of the Linux distribution.
-
-#### Install NPM
-
-On Ubuntu systems with root access, run
-```bash
-sudo apt-get install npm
-```
-
-NPM can be installed without root access by following the instructions
-at [nodejs.org/en/download/](https://nodejs.org/en/download/).
-
-#### Install UV
-
-UV can be installed without root privileges by following the instructions
-at [docs.astral.sh](https://docs.astral.sh/uv/getting-started/installation/).
-
-#### Install Conda
-
-Follow the installation instructions on the [conda web site](https://docs.conda.io/projects/conda/en/stable/user-guide/install/linux.html).
+A few common Linux utilities must be installed from the distribution repositories.
+These include `git`, `wget` and `curl`.
 
 ### Initial setup
 
@@ -145,19 +117,9 @@ The environment variable can now be set by running:
 
 #### Using the `run_dev.sh` script
 
-The `run_dev.sh` script can be used to download recent versions of the package managers 
-(UV for Python and NPM for JavaScript) used to manage software dependencies.
-
-The `run_dev.sh` script will also compile the latest changes to JavaScript code and run the
-web app in developer mode.
-
-Latest changes to the code can be run with:
-```bash
-./run_dev.sh
-```
-The script has a few additional features to override the versions and download location of 
-the package managers. Run `./run_dev.sh -h` for details.
-
+The `run_dev.sh` script will download recent versions of the package managers
+(UV for Python and NPM for JavaScript) if they are not present
+and download all additional software dependencies.
 
 #### The `PATH` variable
 
@@ -178,6 +140,19 @@ When starting a new terminal the `env_vars` file should also be sourced again:
 cd climate_scenario_web_tool
 . env_vars
 ```
+
+### Run the latest code
+
+The `run_dev.sh` script will also compile the latest changes to JavaScript code and run the
+web app in developer mode.
+
+Latest changes to the code can be run with:
+```bash
+./run_dev.sh
+```
+The script has a few additional features to override the versions and download location of 
+the package managers. Run `./run_dev.sh -h` for details.
+
 > [!NOTE]
 > You should now be able to make changes to the code and run it with the `run_dev.sh` script.
 > The rest of the section covers alternative ways to manage Python and JavaScript dependencies 
@@ -185,6 +160,30 @@ cd climate_scenario_web_tool
 
 
 ### Additional Software
+#### Install NPM
+
+NPM can be installed without root access with the following steps:
+
+ * Go to [nodejs.org/en/download/](https://nodejs.org/en/download/). 
+ * Selected the latest version from the first drop down
+ * Click the green 'standalone binary' button
+ * untar the download
+ * add the bin directory to the PATH variable:
+   ```bash
+   export PATH=/full/path/to/node/bin:$PATH
+   ```
+
+
+#### Install UV
+
+UV can be installed without root privileges by following the instructions
+at [docs.astral.sh](https://docs.astral.sh/uv/getting-started/installation/).
+
+#### Install Conda
+
+Follow the installation instructions on the [conda web site](https://docs.conda.io/projects/conda/en/stable/user-guide/install/linux.html).
+
+
 #### Setup a Python virtual environment
 
 It is recommended to keep the Python dependencies for the project in a separate environment.

@@ -3,12 +3,14 @@
 This is the repository for the web component of the Scottish Climate Scenario
 Decision-Making Web-Tool.
 
+## Overview
+
 The code is under active development and significant changes are likely,
 however the main components and their interactions are shown in the diagram below.
 
 ![Architecture Diagram](docs/architecture.svg)
 
-The main components is a Flask web app with the following supporting elements:
+The main components is a [Flask][flask] web app with the following supporting elements:
 
  * JavaScript to handle the interactive parts of the map in the users browser.
  * Third party (Open Street Maps or Ordinance Survey) to serve the tile layer.
@@ -16,20 +18,115 @@ The main components is a Flask web app with the following supporting elements:
 There is currently no separate caching or database service, but they might be used
 in the future.
 
-## Development
 
-
-The server component uses the [Flask](https://flask.palletsprojects.com/en/stable/)
+The server component uses the [Flask][flask]
 web application framework.
 Flask has an excellent [tutorial](https://flask.palletsprojects.com/en/stable/tutorial/)
 that describe the concepts and layout of a typical Flask app.
 
-The browser component relies heavily on [OpenLayers](https://openlayers.org/)
+The browser component relies heavily on [OpenLayers][open-layers]
 to show the interactive map.
 OpenLayers provide several learning resources including
 [tutorials](https://openlayers.org/doc/tutorials/),
 a [workshop](https://openlayers.org/workshop/en/) and
 an extensive set of [examples](https://openlayers.org/en/latest/examples/).
+
+### Typical user interaction
+
+The typical user interaction with the web app is summarised in the sequence diagram below:
+
+![User Sequence Diagram](docs/main_sequence.svg)
+
+#### Render `map.html`
+
+The Flask app calls the `index` function ([`scotclimpact/routes.py`](scotclimpact/routes.py)) which in turn
+renders the [`scotclimpact/templates/map.html`](scotclimpact/templates/map.html) template.
+The templates includes an additional request for [`scotclimpact/static/src/main.js`](scotclimpact/static/src/main.js).
+
+#### Select dataset on user input
+
+The logic in [`scotclimpact/static/src/main.js`](scotclimpact/static/src/main.js) does several things:
+
+  * Record the values of the drop down menus and slider positions. Default values are 
+    used when the page is first loaded.
+  * Hide sliders that are not relevant to the current selection in drop down menus.
+  * Make an additional request to the server to calculate the dataset associated with
+    the values of UI elements. 
+
+The request is sent to a URL endpoint that is constructed based on the following template:
+```
+/<hazard>/<what_do_you_want_to_know>/<slider1>/<slider2>/...
+```
+
+#### Calculate hazard dataset
+
+The web app calls a function in [`scotclimpact/routes.py`](scotclimpact/routes.py)
+that corresponds to the request for the data set.
+
+The statistical calculation is done in [`scotclimpact/extreme_temp.py`] (other hazards to follow).
+The calculation relies heavily on the Python [xarray][xarray] package.
+However, it is not possible to transfer xarray `DataSet` objects back to the browser.
+Utility functions in [`scotclimpact/data_helpers.py`](scotclimpact/data_helpers.py) are
+used to convert the xarray object to GeoJSON which can be interpreted in the browser.
+
+#### Update the Map
+
+The 'data layer' of the map is updated. This makes heavy use of [OpenLayers][open-layers] and 
+[`scotclimpact/static/src/map.js`](scotclimpact/static/src/map.js).
+The legend for the relevant dataset is also updated based on a description of the dataset
+in [`scotclimpact/static/src/main.js`](scotclimpact/static/src/main.js)
+and logic in 
+[`scotclimpact/static/src/color_map.js`](scotclimpact/static/src/color_map.js)
+and
+[`scotclimpact/static/src/legend.js`](scotclimpact/static/src/legend.js).
+
+### Project directory layout
+
+Flask recommends a directory layout for web apps in the [tutorial](https://flask.palletsprojects.com/en/stable/tutorial/layout/) 
+and this project follows their convention.
+A brief descriptions of some of the project files are given in the following table:
+
+| File                                    | Description                                                                                             |
+|-----------------------------------------|---------------------------------------------------------------------------------------------------------|
+| `pyproject.toml`                        | Python [package][flask-tut-install] configuration. Managed with [`uv`][uv-project].                     |
+| `Dockerfile`                            | Recipe to create the app's Docker container.                                                            |
+| `scotclimpact/`                         | The main Python package that contain the Flask app.                                                     |
+| `scotclimpact/__init__.py`              | Initialization for the python package and Flask [`app` object][flask-tut-app].                          |
+| `scotclimpact/config.py`                | The app's configuration object.                                                                         |
+| `scotclimpact/routes.py`                | Definition and logic for HTTP endpoints.                                                                |
+| `scotclimpact/extreme_temp.py`          | Statistical calculations for extreme heat hazards.                                                      |
+| `scotclimpact/wsgi.py`                  | Entry point for WSGI servers like [gunicorn][gunicorn].                                                 |
+| `scotclimpact/cache.py`                 | Wrapper for the Flask-cache plugin; used to cache HTTP requests in [routes.py](scotclimpact/routes.py). |
+| `scotclimpact/data.py`                  | Wrapper for the [Pooch][pooch] library; used to download [project data][data-reo].                      |
+| `scotclimpact/data_helpers.py`          | Utilities to validate and transform data structures.                                                    |
+| `scotclimpact/boundary_layer.py`        | Utilities to serve regional boundary data.                                                              |
+| `scotclimpact/db.py`                    | Utilities to initialise and populate the [database][flask-tut-db] (unused).                             |
+| `scotclimpact/schema.sql`               | Database schema (unused)                                                                                |
+| `tests/`                                | Python unit tests                                                                                       |
+| `scotclimpact/pages/`                   | Content for pages containing mostly textual content                                                     |
+| `scotclimpact/templates/`               | HTML Jinja2 [templates][flask-tut-templates].                                                           |
+| `scotclimpact/static/`                  | Content that needs to be accessible from [the browser][flask-tut-static].                               |
+|                                         | Mostly JavaScript code managed as an NPM project.                                                       |
+| `scotclimpact/static/package.json`      | NPM project configuration.                                                                              |
+| `scotclimpact/static/webpack.config.js` | Webpack transpiler configuration.                                                                       |
+| `scotclimpact/static/src/`              | JavaScript source code.                                                                                 |
+| `scotclimpact/static/src/main.js`       | The main control logic for the map and UI elements on the main page.                                    |
+| `scotclimpact/static/src/map.js`        | Class to wrap the [OpenLayers][open-layers] logic for the interactive map.                              |
+| `scotclimpact/static/src/legend.js`     | Utilities to draw the legend.                                                                           |
+| `scotclimpact/static/src/color_map.js`  | Utilities to calculate color values for the data shown on the map.                                      |
+| `scotclimpact/static/src/disclaimer.js` | Logic to check that the disclaimer has been accepted.                                                   |
+| `scotclimpact/static/tests/`            | JavaScript unit tests.                                                                                  |
+
+### Data
+
+The project's data is kept  in a [separate repository][data-repo] and automatically downloaded when the 
+app is run.
+The default download location is in `~/.cache/scotclimpact`.
+Details of how to allow access to download the data is discussed in later sections.
+
+## Development
+
+
 
 There are quite a few steps needed to setup a working development environment, however
 they are mostly automated in the [`run_dev.sh`](run_dev.sh) script.
@@ -92,7 +189,7 @@ cd climate_scenario_web_tool
 
 #### Data
 
-The project's data is held in a separate [GitHub repository](https://github.com/SCSDMWT/climate_scenario_web_tool_data) and
+The project's data is held in a separate [GitHub repository][data-repo] and
 automatically downloaded when needed.
 
 For the web app to access the data a [Fine Grained token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
@@ -312,3 +409,15 @@ sudo docker run \
 ## Licence
 
 See [LICENCE](LICENCE).
+
+[flask]: https://flask.palletsprojects.com/en/stable/
+[flask-tut-static]: https://flask.palletsprojects.com/en/stable/tutorial/static/
+[flask-tut-templates]: https://flask.palletsprojects.com/en/stable/tutorial/templates/
+[flask-tut-app]: https://flask.palletsprojects.com/en/stable/tutorial/factory/#the-application-factory
+[flask-tut-db]: https://flask.palletsprojects.com/en/stable/tutorial/database/
+[flask-tut-install]: https://flask.palletsprojects.com/en/stable/tutorial/install/
+[uv-projects]: https://docs.astral.sh/uv/concepts/projects/
+[data-repo]: https://github.com/SCSDMWT/climate_scenario_web_tool_data
+[pooch]: https://www.fatiando.org/pooch/latest/
+[gunicorn]: https://gunicorn.org/
+[open-layers]: https://openlayers.org/

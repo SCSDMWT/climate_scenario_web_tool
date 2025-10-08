@@ -35,9 +35,7 @@ an extensive set of [examples](https://openlayers.org/en/latest/examples/).
 
 The typical user interaction with the web app is summarised in the sequence diagram below:
 
-<center>
-<img src="docs/main_sequence.svg" width="50%">
-</center>
+<p align="center""> <img src="docs/main_sequence.svg" width="50%"> </p>
 
 #### Render `map.html`
 

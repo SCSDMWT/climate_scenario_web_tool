@@ -90,35 +90,35 @@ Flask recommends a directory layout for web apps in the [tutorial](https://flask
 and this project follows their convention.
 A brief descriptions of some of the project files are given in the following table:
 
-| <div style="width:490px">File</div> | Description                                                                                                                 |
-|-------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| `pyproject.toml`                    | Python [package][flask-tut-install] configuration. Managed with [`uv`][uv-projects].                                        |
-| `Dockerfile`                        | Recipe to create the app's Docker container.                                                                                |
-| `scotclimpact/`                     | The main Python package that contain the Flask app.                                                                         |
-| `├─ __init__.py`                    | Initialization for the python package and Flask [`app` object][flask-tut-app].                                              |
-| `├─  config.py`                     | The app's configuration object.                                                                                             |
-| `├─  routes.py`                     | Definition and logic for HTTP endpoints.                                                                                    |
-| `├─  extreme_temp.py`               | Statistical calculations for extreme heat hazards.                                                                          |
-| `├─  wsgi.py`                       | Entry point for WSGI servers like [gunicorn][gunicorn].                                                                     |
-| `├─  cache.py`                      | Wrapper for the Flask-cache plugin; used to cache HTTP requests in [routes.py](scotclimpact/routes.py).                     |
-| `├─  data.py`                       | Wrapper for the [Pooch][pooch] library; used to download [project data][data-repo].                                         |
-| `├─  data_helpers.py`               | Utilities to validate and transform data structures.                                                                        |
-| `├─  boundary_layer.py`             | Utilities to serve regional boundary data.                                                                                  |
-| `├─  db.py`                         | Utilities to initialise and populate the [database][flask-tut-db] (unused).                                                 |
-| `├─  schema.sql`                    | Database schema (unused)                                                                                                    |
-| `├─  pages/`                        | Content for pages containing mostly textual content                                                                         |
-| `├─  templates/`                    | HTML Jinja2 [templates][flask-tut-templates].                                                                               |
-| `└─  static/`                       | Content that needs to be accessible from [the browser][flask-tut-static]. Mostly JavaScript code managed as an NPM project. |
-| `     ├─  package.json`             | NPM project configuration.                                                                                                  |
-| `     ├─  webpack.config.js`        | Webpack transpiler configuration.                                                                                           |
-| `     ├─  src/`                     | JavaScript source code.                                                                                                     |
-| `     │   ├─  main.js`              | The main control logic for the map and UI elements on the main page.                                                        |
-| `     │   ├─  map.js`               | Class to wrap the [OpenLayers][open-layers] logic for the interactive map.                                                  |
-| `     │   ├─  legend.js`            | Utilities to draw the legend.                                                                                               |
-| `     │   ├─  color_map.js`         | Utilities to calculate color values for the data shown on the map.                                                          |
-| `     │   └─  disclaimer.js`        | Logic to check that the disclaimer has been accepted.                                                                       |
-| `     └─  tests/`                   | JavaScript unit tests.                                                                                                      |
-| `tests/`                            | Python unit tests                                                                                                           |
+| File                         | Description                                                                                                                    |
+|------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| `pyproject.toml`             | Python [package][flask-tut-install] configuration.<br> Managed with [`uv`][uv-projects].                                       |
+| `Dockerfile`                 | Recipe to create the app's Docker container.                                                                                   |
+| `scotclimpact/`              | The main Python package that contain the Flask app.                                                                            |
+| `├─ __init__.py`             | Initialization for the python package and Flask<br>[`app` object][flask-tut-app].                                              |
+| `├─  config.py`              | The app's configuration object.                                                                                                |
+| `├─  routes.py`              | Definition and logic for HTTP endpoints.                                                                                       |
+| `├─  extreme_temp.py`        | Statistical calculations for extreme heat hazards.                                                                             |
+| `├─  wsgi.py`                | Entry point for WSGI servers like [gunicorn][gunicorn].                                                                        |
+| `├─  cache.py`               | Wrapper for the Flask-cache plugin; used to cache<br>HTTP requests in [routes.py](scotclimpact/routes.py).                     |
+| `├─  data.py`                | Wrapper for the [Pooch][pooch] library; used to download<br>[project data][data-repo].                                         |
+| `├─  data_helpers.py`        | Utilities to validate and transform data structures.                                                                           |
+| `├─  boundary_layer.py`      | Utilities to serve regional boundary data.                                                                                     |
+| `├─  db.py`                  | Utilities to initialise and populate the [database][flask-tut-db]<br> (unused).                                                |
+| `├─  schema.sql`             | Database schema (unused)                                                                                                       |
+| `├─  pages/`                 | Content for pages containing mostly textual content                                                                            |
+| `├─  templates/`             | HTML Jinja2 [templates][flask-tut-templates].                                                                                  |
+| `└─  static/`                | Content that needs to be accessible from [the browser][flask-tut-static].<br>Mostly JavaScript code managed as an NPM project. |
+| `     ├─  package.json`      | NPM project configuration.                                                                                                     |
+| `     ├─  webpack.config.js` | Webpack transpiler configuration.                                                                                              |
+| `     ├─  src/`              | JavaScript source code.                                                                                                        |
+| `     │   ├─  main.js`       | The main control logic for the map and UI elements on the main<br> page.                                                       |
+| `     │   ├─  map.js`        | Class to wrap the [OpenLayers][open-layers] logic for the<br>interactive map.                                                  |
+| `     │   ├─  legend.js`     | Utilities to draw the legend.                                                                                                  |
+| `     │   ├─  color_map.js`  | Utilities to calculate color values for the data shown on the<br>map.                                                          |
+| `     │   └─  disclaimer.js` | Logic to check that the disclaimer has been accepted.                                                                          |
+| `     └─  tests/`            | JavaScript unit tests.                                                                                                         |
+| `tests/`                     | Python unit tests                                                                                                              |
 
 ### Data
 

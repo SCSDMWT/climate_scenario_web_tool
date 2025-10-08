@@ -30,28 +30,38 @@ OpenLayers provide several learning resources including
 a [workshop](https://openlayers.org/workshop/en/) and
 an extensive set of [examples](https://openlayers.org/en/latest/examples/).
 
-There are quite a few steps needed to setup a working development environment.
+There are quite a few steps needed to setup a working development environment, however
+they are mostly automated in the [`run_dev.sh`](run_dev.sh) script.
+The following steps are needed to get up and running using the script:
 
   * [Software](#software)
-    * [Install Git](#install-git)
-    * [Install NPM](#install-npm)
-    * [Install UV](#install-uv)
-    * [Install Conda](#install-conda)
   * [Initial setup](#initial-setup)
     * [Code](#code)
     * [Data](#data)
+    * [Using the `run_dev.sh` script](#using-the-run_devsh-script)
+    * [The `PATH` variable](#the-path-variable)
+  * [New Sessions](#new-sessions)
+    
+The build environment can be setup manually without using the `run_dev.sh` script.
+This method is outlined in the following sections and a few alternatives to handle 
+Python dependencies are discussed too.
+    
+  * [Additional Software](#additional-software)
+    * [Install NPM](#install-npm)
+    * [Install UV](#install-uv)
+    * [Install Conda](#install-conda)
+  * [Extra Initial Setup](#extra-initial-setup)
     * [Setup a Python virtual environment](#setup-a-python-virtual-environment)
       * [UV](#uv)
       * [Python venv/virtualenv](#python-venvvirtualenv)
       * [Conda](#conda)
     * [Initialise the NPM project](#initialise-the-npm-project)
     * [Run the web app locally](#run-the-web-app-locally)
-  * [New Sessions](#new-sessions)
+  * [New Sessions 2](#new-sessions-2)
   * [Working on the code](#working-on-the-code)
     * [Python](#python)
     * [JavaScript](#javascript)
     * [Running the latest code](#running-the-latest-code)
-    * [Using the `run_dev.sh` script](#using-the-run_devsh-script)
 
 ### Software
 
@@ -120,6 +130,8 @@ care should be taken not to accidentally store the token in the shell's history.
 
 Create a file called `env_vars` with the following content (replacing `...` with the value of the token):
 ```bash
+#!/bin/bash
+
 export DATA_REPO_GITHUB_TOKEN=...
 ```
 It is good practice to restrict the file's permissions by running
@@ -131,6 +143,48 @@ The environment variable can now be set by running:
 . env_vars
 ```
 
+#### Using the `run_dev.sh` script
+
+The `run_dev.sh` script can be used to download recent versions of the package managers 
+(UV for Python and NPM for JavaScript) used to manage software dependencies.
+
+The `run_dev.sh` script will also compile the latest changes to JavaScript code and run the
+web app in developer mode.
+
+Latest changes to the code can be run with:
+```bash
+./run_dev.sh
+```
+The script has a few additional features to override the versions and download location of 
+the package managers. Run `./run_dev.sh -h` for details.
+
+
+#### The `PATH` variable
+
+The `PATH` variable can be set so that your terminal will use the same version of the package
+managers as the `run_dev.sh` script. This can be done with
+```bash
+./run_dev.sh --print-export >> env_vars
+. env_vars
+```
+
+### New sessions
+
+The various environment variables needed to run the web app are only set temporarily
+for the duration of a terminal session.
+
+When starting a new terminal the `env_vars` file should also be sourced again:
+```bash
+cd climate_scenario_web_tool
+. env_vars
+```
+> [!NOTE]
+> You should now be able to make changes to the code and run it with the `run_dev.sh` script.
+> The rest of the section covers alternative ways to manage Python and JavaScript dependencies 
+> and installing the required tools manually.
+
+
+### Additional Software
 #### Setup a Python virtual environment
 
 It is recommended to keep the Python dependencies for the project in a separate environment.
@@ -190,18 +244,10 @@ flask --app scotclimpact run -p 8000
 ```
 The web app should be running and available at [http://localhost:8000](http://localhost:8000).
 
-### New sessions
+### New sessions 2
 
-The various environment variables needed to run the web app are only set temporarily
-for the duration of a terminal session.
-
-When starting a new terminal, conda or virtual environments should be reactivated and
-the `env_vars` file should also be sourced again:
-```bash
-cd climate_scenario_web_tool
-. env_vars
-```
-If using conda:
+In addition to souring `env_vars`, conda or virtual environments should be reactivated 
+in new terminal sessions. If using conda:
 ```bash
 conda activate scotclimpact
 ```
@@ -236,14 +282,6 @@ cd -
 
 Running the web app with the latest changes is the same as [run the web app locally](#run-the-web-app-locally) above.
 
-#### Using the `run_dev.sh` script
-
-The steps in the [working on the code](#working-on-the-code) section are automated in the `run_dev.sh` script for
-environments managed with UV.
-Latest changes to the code can be run with:
-```bash
-./run_dev.sh
-```
 
 ## Running with Docker
 

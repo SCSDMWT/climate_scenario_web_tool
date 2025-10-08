@@ -71,7 +71,7 @@ The statistical calculation is done in [`scotclimpact/extreme_temp.py`](scotclim
 The calculation relies heavily on the Python [Xarray][xarray] package.
 However, it is not possible to transfer Xarray `DataSet` objects back to the browser.
 Utility functions in [`scotclimpact/data_helpers.py`](scotclimpact/data_helpers.py) are
-used to convert the xarray object to GeoJSON which can be interpreted in the browser.
+used to convert the Xarray object to GeoJSON which can be transferred to and interpreted in the browser.
 
 #### Update the Map
 

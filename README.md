@@ -43,6 +43,10 @@ The following steps are needed to get up and running using the script:
     * [The `PATH` variable](#the-path-variable)
   * [New Sessions](#new-sessions)
     
+> [!NOTE]
+> The following steps are optional and only recommended if the `run_dev.sh` script is
+> is not suitable for your workflow.
+
 The build environment can be setup manually without using the `run_dev.sh` script.
 This method is outlined in the following sections and a few alternatives to handle 
 Python dependencies are discussed too.
@@ -67,7 +71,7 @@ Python dependencies are discussed too.
 ### Software
 
 A few common Linux utilities must be installed from the distribution repositories.
-These include `git`, `wget` and `curl`.
+These include `git`, `tar`, `wget` and `curl`.
 
 ### Initial setup
 
@@ -245,7 +249,7 @@ The web app should be running and available at [http://localhost:8000](http://lo
 
 ### New sessions 2
 
-In addition to souring `env_vars`, conda or virtual environments should be reactivated 
+In addition to sourcing `env_vars`, conda or virtual environments should be reactivated 
 in new terminal sessions. If using conda:
 ```bash
 conda activate scotclimpact

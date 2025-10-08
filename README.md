@@ -3,6 +3,9 @@
 This is the repository for the web component of the Scottish Climate Scenario
 Decision-Making Web-Tool.
 
+A [pre-production](https://www.geos.ed.ac.uk/dev/ddekler/) version of the Web Tool is 
+served by the [School of GeoSciences](https://geosciences.ed.ac.uk/)
+
 ## Overview
 
 The code is under active development and significant changes are likely,
@@ -88,37 +91,37 @@ and
 
 Flask recommends a directory layout for web apps in the [tutorial](https://flask.palletsprojects.com/en/stable/tutorial/layout/) 
 and this project follows their convention.
-A brief descriptions of some of the project files are given in the following table:
+A brief descriptions of some of the project files are given in the following:
 
-| File                         | Description                                                                                                                    |
-|------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
-| `pyproject.toml`             | Python [package][flask-tut-install] configuration.<br> Managed with [`uv`][uv-projects].                                       |
-| `Dockerfile`                 | Recipe to create the app's Docker container.                                                                                   |
-| `scotclimpact/`              | The main Python package that contain the Flask app.                                                                            |
-| `├─ __init__.py`             | Initialization for the python package and Flask<br>[`app` object][flask-tut-app].                                              |
-| `├─  config.py`              | The app's configuration object.                                                                                                |
-| `├─  routes.py`              | Definition and logic for HTTP endpoints.                                                                                       |
-| `├─  extreme_temp.py`        | Statistical calculations for extreme heat hazards.                                                                             |
-| `├─  wsgi.py`                | Entry point for WSGI servers like [gunicorn][gunicorn].                                                                        |
-| `├─  cache.py`               | Wrapper for the Flask-cache plugin; used to cache<br>HTTP requests in [routes.py](scotclimpact/routes.py).                     |
-| `├─  data.py`                | Wrapper for the [Pooch][pooch] library; used to download<br>[project data][data-repo].                                         |
-| `├─  data_helpers.py`        | Utilities to validate and transform data structures.                                                                           |
-| `├─  boundary_layer.py`      | Utilities to serve regional boundary data.                                                                                     |
-| `├─  db.py`                  | Utilities to initialise and populate the [database][flask-tut-db]<br> (unused).                                                |
-| `├─  schema.sql`             | Database schema (unused)                                                                                                       |
-| `├─  pages/`                 | Content for pages containing mostly textual content                                                                            |
-| `├─  templates/`             | HTML Jinja2 [templates][flask-tut-templates].                                                                                  |
-| `└─  static/`                | Content that needs to be accessible from [the browser][flask-tut-static].<br>Mostly JavaScript code managed as an NPM project. |
-| `     ├─  package.json`      | NPM project configuration.                                                                                                     |
-| `     ├─  webpack.config.js` | Webpack transpiler configuration.                                                                                              |
-| `     ├─  src/`              | JavaScript source code.                                                                                                        |
-| `     │   ├─  main.js`       | The main control logic for the map and UI elements on the main<br> page.                                                       |
-| `     │   ├─  map.js`        | Class to wrap the [OpenLayers][open-layers] logic for the<br>interactive map.                                                  |
-| `     │   ├─  legend.js`     | Utilities to draw the legend.                                                                                                  |
-| `     │   ├─  color_map.js`  | Utilities to calculate color values for the data shown on the<br>map.                                                          |
-| `     │   └─  disclaimer.js` | Logic to check that the disclaimer has been accepted.                                                                          |
-| `     └─  tests/`            | JavaScript unit tests.                                                                                                         |
-| `tests/`                     | Python unit tests                                                                                                              |
+<big><pre>
+pyproject.toml               Python [package][flask-tut-install] configuration. Managed with [`uv`][uv-projects].
+Dockerfile                   Recipe to create the app's Docker container.
+scotclimpact/                The main Python package that contain the Flask app.
+├─ __init__.py              Initialization for the python package and Flask [`app` object][flask-tut-app].
+├─  config.py               The app's configuration object.
+├─  routes.py               Definition and logic for HTTP endpoints.
+├─  extreme_temp.py         Statistical calculations for extreme heat hazards.
+├─  wsgi.py                 Entry point for WSGI servers like [gunicorn][gunicorn].
+├─  cache.py                Wrapper for the Flask-cache plugin; used to cache HTTP requests in [routes.py](scotclimpact/routes.py).
+├─  data.py                 Wrapper for the [Pooch][pooch] library; used to download [project data][data-repo].
+├─  data_helpers.py         Utilities to validate and transform data structures.
+├─  boundary_layer.py       Utilities to serve regional boundary data.
+├─  db.py                   Utilities to initialise and populate the [database][flask-tut-db]  (unused).
+├─  schema.sql              Database schema (unused)
+├─  pages/                  Content for pages containing mostly textual content
+├─  templates/              HTML Jinja2 [templates][flask-tut-templates].
+└─  static/                 Content that needs to be accessible from [the browser][flask-tut-static]. Mostly JavaScript code managed as an NPM project.
+     ├─  package.json       NPM project configuration.
+     ├─  webpack.config.js  Webpack transpiler configuration.
+     ├─  src/               JavaScript source code.
+     │   ├─  main.js        The main control logic for the map and UI elements on the main page.
+     │   ├─  map.js         Class to wrap the [OpenLayers][open-layers] logic for the interactive map.
+     │   ├─  legend.js      Utilities to draw the legend.
+     │   ├─  color_map.js   Utilities to calculate color values for the data shown on the map.
+     │   └─  disclaimer.js  Logic to check that the disclaimer has been accepted.
+     └─  tests/             JavaScript unit tests.
+tests/                       Python unit tests
+</pre> </big>
 
 ### Data
 
@@ -148,31 +151,9 @@ The following steps are needed to get up and running using the script:
   * [New Sessions](#new-sessions)
   * [Run the latest code](#run-the-latest-code)
     
-The build environment can be setup manually without using the `run_dev.sh` script.
-This method is outlined in the following sections and a few alternatives to handle 
-Python dependencies are discussed too.
+The build environment can be setup manually without using the `run_dev.sh` script and
+is outlined [elsewhere in the documentation](docs/alternative_dev_setup.sh).
     
-> [!NOTE]
-> The following steps are optional and only recommended if the `run_dev.sh` script is
-> is not suitable for your workflow and/or system.
-
-  * [Additional Software](#additional-software)
-    * [Install NPM](#install-npm)
-    * [Install UV](#install-uv)
-    * [Install Conda](#install-conda)
-  * [Extra Initial Setup](#extra-initial-setup)
-    * [Setup a Python virtual environment](#setup-a-python-virtual-environment)
-      * [UV](#uv)
-      * [Python venv/virtualenv](#python-venvvirtualenv)
-      * [Conda](#conda)
-    * [Initialise the NPM project](#initialise-the-npm-project)
-    * [Run the web app locally](#run-the-web-app-locally)
-  * [New Sessions 2](#new-sessions-2)
-  * [Working on the code](#working-on-the-code)
-    * [Python](#python)
-    * [JavaScript](#javascript)
-    * [Running the latest code](#running-the-latest-code)
-
 ### Software
 
 A few common Linux utilities must be installed from the distribution repositories.
@@ -190,7 +171,7 @@ The following steps need to be performed once.
 
 Clone the Git repository:
 ```bash
-git clone https://github.com/SCSDMWT/climate_scenario_web_tool
+git clone git@github.com/SCSDMWT/climate_scenario_web_tool.git
 cd climate_scenario_web_tool
 ```
 
@@ -261,134 +242,6 @@ Latest changes to the code can be run with:
 ```
 The script has a few additional features to override the versions and download location of 
 the package managers. Run `./run_dev.sh -h` for details.
-
-> [!NOTE]
-> You should now be able to make changes to the code and run it with the `run_dev.sh` script.
-> The rest of the section covers alternative ways to manage Python and JavaScript dependencies 
-> and installing the required tools manually.
-
-
-### Additional Software
-#### Install NPM
-
-NPM can be installed without root access with the following steps:
-
- * Go to [nodejs.org/en/download/](https://nodejs.org/en/download/). 
- * Selected the latest version from the first drop down
- * Click the green 'Standalone Binary (.xz)' button
- * Extract the tarball
- * Add the `bin` directory to the `PATH` variable:
-   ```bash
-   export PATH=/full/path/to/node/bin:$PATH
-   ```
-
-
-#### Install UV
-
-UV can be installed without root privileges by following the instructions
-at [docs.astral.sh](https://docs.astral.sh/uv/getting-started/installation/).
-
-#### Install Conda
-
-Follow the installation instructions on the [conda web site](https://docs.conda.io/projects/conda/en/stable/user-guide/install/linux.html).
-
-
-#### Setup a Python virtual environment
-
-It is recommended to keep the Python dependencies for the project in a separate environment.
-This can be done with (at least) three software packages.
-Any one of the following three will do the job, however UV is much more convenient to use.
-If UV is not available, Python venv/virtualenv should be considered before Conda environments,
-unless the system installed version of Python is too old.
-
-##### UV
-
-UV creates temporary environments whenever a Python script or program is run using `uv run`.
-If `uv` is installed, no additional setup is needed at this stage.
-
-##### Python venv/virtualenv
-
-Python has a builtin mechanism for creating virtual environments, however it uses the
-Python installation of the operating system. If the version is recent enough, a
-virtual environment can be created with:
-```bash
-python -m venv .venv
-. .venv/bin/activate
-pip install .
-```
-
-##### Conda
-
-Conda is a popular package manager and can install recent versions of Python without root permissions.
-A conda environment can be created with:
-```bash
-conda create -n scotclimpact python=3.13.0
-conda activate scotclimpact
-pip install .
-```
-
-
-#### Initialise the NPM project
-
-JavaScript dependencies need to be downloaded and the code compiled to a browser
-supported format with:
-```bash
-cd scotclimpact/static
-npm install
-npm run build
-cd -
-```
-
-#### Run the web app locally
-
-When using UV, the following command will download all Python dependencies and run the web app:
-```bash
-uv run -- flask --app scotclimpact run -p 8000
-```
-
-With conda and a virtual environment, the web app can be started with:
-```bash
-flask --app scotclimpact run -p 8000
-```
-The web app should be running and available at [http://localhost:8000](http://localhost:8000).
-
-### New sessions 2
-
-In addition to sourcing `env_vars`, conda or virtual environments should be reactivated 
-in new terminal sessions. If using conda:
-```bash
-conda activate scotclimpact
-```
-For venv/virtualenv:
-```bash
-. .venv/bin/activate
-```
-
-### Working on the code
-
-Changes to the Python code might require additional steps to run, depending on how the Python environment
-is managed. Changes to the JavaScript code should be recompiled too.
-
-#### Python
-
-With UV no extra steps are needed when changing the Python code, but conda and virtual environments
-might need the following to install the updated code in the environment:
-```
-pip install .
-```
-
-#### JavaScript
-
-Changes to `scotclimpact/static/src/` should be compiled with
-```bash
-cd scotclimpact/static
-npm run build
-cd -
-```
-
-#### Running the latest code
-
-Running the web app with the latest changes is the same as [run the web app locally](#run-the-web-app-locally) above.
 
 
 ## Running with Docker

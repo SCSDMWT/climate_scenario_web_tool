@@ -37,15 +37,18 @@ The typical user interaction with the web app is summarised in the sequence diag
 
 <p align="center""> <img src="docs/main_sequence.svg" width="50%"> </p>
 
+Each step in the process is described in a bit more detail below.
+
 #### Render `map.html`
 
-The Flask app calls the `index` function ([`scotclimpact/routes.py`](scotclimpact/routes.py)) which in turn
-renders the [`scotclimpact/templates/map.html`](scotclimpact/templates/map.html) template.
+The Flask app calls the `index` function (defined in [`scotclimpact/routes.py`](scotclimpact/routes.py)) which 
+in turn renders the [`scotclimpact/templates/map.html`](scotclimpact/templates/map.html) template.
 The templates includes an additional request for [`scotclimpact/static/src/main.js`](scotclimpact/static/src/main.js).
 
 #### Select dataset on user input
 
-The logic in [`scotclimpact/static/src/main.js`](scotclimpact/static/src/main.js) does several things:
+The logic in [`scotclimpact/static/src/main.js`](scotclimpact/static/src/main.js) runs in the browser and 
+does several things:
 
   * Record the values of the drop down menus and slider positions. Default values are 
     used when the page is first loaded.
@@ -65,7 +68,7 @@ that corresponds to the request for the data set.
 
 The statistical calculation is done in [`scotclimpact/extreme_temp.py`](scotclimpact/extreme_temp.py) 
 (other hazards to follow).
-The calculation relies heavily on the Python [xarray][xarray] package.
+The calculation relies heavily on the Python [Xarray][xarray] package.
 However, it is not possible to transfer Xarray `DataSet` objects back to the browser.
 Utility functions in [`scotclimpact/data_helpers.py`](scotclimpact/data_helpers.py) are
 used to convert the xarray object to GeoJSON which can be interpreted in the browser.
@@ -89,7 +92,7 @@ A brief descriptions of some of the project files are given in the following tab
 
 | File                                    | Description                                                                                             |
 |-----------------------------------------|---------------------------------------------------------------------------------------------------------|
-| `pyproject.toml`                        | Python [package][flask-tut-install] configuration. Managed with [`uv`][uv-project].                     |
+| `pyproject.toml`                        | Python [package][flask-tut-install] configuration. Managed with [`uv`][uv-projects].                     |
 | `Dockerfile`                            | Recipe to create the app's Docker container.                                                            |
 | `scotclimpact/`                         | The main Python package that contain the Flask app.                                                     |
 | `scotclimpact/__init__.py`              | Initialization for the python package and Flask [`app` object][flask-tut-app].                          |
@@ -98,7 +101,7 @@ A brief descriptions of some of the project files are given in the following tab
 | `scotclimpact/extreme_temp.py`          | Statistical calculations for extreme heat hazards.                                                      |
 | `scotclimpact/wsgi.py`                  | Entry point for WSGI servers like [gunicorn][gunicorn].                                                 |
 | `scotclimpact/cache.py`                 | Wrapper for the Flask-cache plugin; used to cache HTTP requests in [routes.py](scotclimpact/routes.py). |
-| `scotclimpact/data.py`                  | Wrapper for the [Pooch][pooch] library; used to download [project data][data-reo].                      |
+| `scotclimpact/data.py`                  | Wrapper for the [Pooch][pooch] library; used to download [project data][data-repo].                      |
 | `scotclimpact/data_helpers.py`          | Utilities to validate and transform data structures.                                                    |
 | `scotclimpact/boundary_layer.py`        | Utilities to serve regional boundary data.                                                              |
 | `scotclimpact/db.py`                    | Utilities to initialise and populate the [database][flask-tut-db] (unused).                             |

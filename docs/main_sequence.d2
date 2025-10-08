@@ -1,0 +1,27 @@
+# D2 source for the main sequence diagram.
+# Compile by running:
+#   d2 -s -l elk -t 105 main_sequence.d2
+# See installation intructions for d2 at
+#   https://d2lang.com/tour/install/
+
+
+shape: sequence_diagram
+
+S: Server
+C: Browser
+
+C -> S: Request map page
+
+S."Render map.html"
+
+S -> C: Map page and `main.js`
+
+C."Select dataset\non user input"
+
+C -> S: Request data
+
+S."Calculate\nhazard dataset"
+
+S -> C: Send hazard dataset
+
+C."Update\nthe map"

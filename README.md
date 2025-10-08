@@ -127,9 +127,13 @@ app is run.
 The default download location is in `~/.cache/scotclimpact`.
 Details of how to allow access to download the data is discussed in later sections.
 
+The statistical calculation uses datasets in [NetCDF][netcdf] format. The [Xarray][xarray] library
+is used to read and manipulate the datasets.
+
+Region boundaries are kept in GeoJSON format. These are large text files that are essentially read
+send to the browser when requested.
+
 ## Development
-
-
 
 There are quite a few steps needed to setup a working development environment, however
 they are mostly automated in the [`run_dev.sh`](run_dev.sh) script.
@@ -425,3 +429,4 @@ See [LICENCE](LICENCE).
 [gunicorn]: https://gunicorn.org/
 [open-layers]: https://openlayers.org/
 [xarray]: https://docs.xarray.dev/en/stable/
+[netcdf]: https://www.unidata.ucar.edu/software/netcdf

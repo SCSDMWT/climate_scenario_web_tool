@@ -90,7 +90,7 @@ Flask recommends a directory layout for web apps in the [tutorial](https://flask
 and this project follows their convention.
 A brief descriptions of some of the project files are given in the following table:
 
-| <div style="width:290px">File</div> | Description                                                                                                                 |
+| <div style="width:490px">File</div> | Description                                                                                                                 |
 |-------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
 | `pyproject.toml`                    | Python [package][flask-tut-install] configuration. Managed with [`uv`][uv-projects].                                        |
 | `Dockerfile`                        | Recipe to create the app's Docker container.                                                                                |

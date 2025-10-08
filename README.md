@@ -94,9 +94,9 @@ and this project follows their convention.
 A brief descriptions of some of the project files are given in the following:
 
 <big><pre>
-├─ pyproject.toml               Python [package][flask-tut-install] configuration. Managed with [`uv`][uv-projects].
-├─ Dockerfile                   Recipe to create the app's Docker container.
-├─ scotclimpact/                The main Python package that contain the Flask app.
+├─ pyproject.toml              Python [package][flask-tut-install] configuration. Managed with [`uv`][uv-projects].
+├─ Dockerfile                  Recipe to create the app's Docker container.
+├─ scotclimpact/               The main Python package that contain the Flask app.
 │  ├─ \_\_init\_\_.py              Initialization for the python package and Flask [`app` object][flask-tut-app].
 │  ├─  config.py               The app's configuration object.
 │  ├─  routes.py               Definition and logic for HTTP endpoints.
@@ -120,7 +120,7 @@ A brief descriptions of some of the project files are given in the following:
 │       │   ├─  color_map.js   Utilities to calculate color values for the data shown on the map.
 │       │   └─  disclaimer.js  Logic to check that the disclaimer has been accepted.
 │       └─  tests/             JavaScript unit tests.
-└─ tests/                       Python unit tests
+└─ tests/                      Python unit tests
 </pre></big>
 
 ### Data

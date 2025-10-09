@@ -76,7 +76,13 @@ function parse_args() {
         exit 0
     fi
 
-    PATH="${UV_DIR}:${NODE_DIR}:${PATH}"
+    # Add UV_DIR and NODE_DIR to the PATH if they are not included
+    if [[ -z $(echo $PATH | grep ${UV_DIR}) ]]; then
+        PATH="${PWD}/${UV_DIR}:${PATH}"
+    fi
+    if [[ -z $(echo $PATH | grep ${NODE_DIR}) ]]; then
+        PATH="${PWD}/${NODE_DIR}:${PATH}"
+    fi
 }
 
 

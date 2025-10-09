@@ -89,14 +89,15 @@ and
 
 ### Project directory layout
 
-Flask recommends a directory layout for web apps in the [tutorial](https://flask.palletsprojects.com/en/stable/tutorial/layout/) 
+Flask recommends a directory layout for web apps in the [tutorial](https://flask.palletsprojects.com/en/stable/tutorial/layout/)
 and this project follows their convention.
 A brief descriptions of some of the project files are given in the following:
 
 <big><pre>
+*climate\_scenario\_web\_tool*/
 ├─ pyproject.toml              Python [package][flask-tut-install] configuration. Managed with [`uv`][uv-projects].
 ├─ Dockerfile                  Recipe to create the app's Docker container.
-├─ scotclimpact/               The main Python package that contain the Flask app.
+├─ *scotclimpact*/               The main Python package that contain the Flask app.
 │  ├─ \_\_init\_\_.py              Initialization for the python package and Flask [`app` object][flask-tut-app].
 │  ├─  config.py               The app's configuration object.
 │  ├─  routes.py               Definition and logic for HTTP endpoints.
@@ -108,19 +109,19 @@ A brief descriptions of some of the project files are given in the following:
 │  ├─  boundary_layer.py       Utilities to serve regional boundary data.
 │  ├─  db.py                   Utilities to initialise and populate the [database][flask-tut-db]  (unused).
 │  ├─  schema.sql              Database schema (unused)
-│  ├─  pages/                  Content for pages containing mostly textual content
-│  ├─  templates/              HTML Jinja2 [templates][flask-tut-templates].
-│  └─  static/                 Content that needs to be accessible from [the browser][flask-tut-static]. Mostly JavaScript code managed as an NPM project.
-│       ├─  package.json       NPM project configuration.
-│       ├─  webpack.config.js  Webpack transpiler configuration.
-│       ├─  src/               JavaScript source code.
-│       │   ├─  main.js        The main control logic for the map and UI elements on the main page.
-│       │   ├─  map.js         Class to wrap the [OpenLayers][open-layers] logic for the interactive map.
-│       │   ├─  legend.js      Utilities to draw the legend.
-│       │   ├─  color_map.js   Utilities to calculate color values for the data shown on the map.
-│       │   └─  disclaimer.js  Logic to check that the disclaimer has been accepted.
-│       └─  tests/             JavaScript unit tests.
-└─ tests/                      Python unit tests
+│  ├─  *pages*/                  Content for pages containing mostly textual content
+│  ├─  *templates*/              HTML Jinja2 [templates][flask-tut-templates].
+│  └─  *static*/                 Content that needs to be accessible from [the browser][flask-tut-static]. Mostly JavaScript code managed as an NPM project.
+│      ├─  package.json        NPM project configuration.
+│      ├─  webpack.config.js   Webpack transpiler configuration.
+│      ├─  *src*/                JavaScript source code.
+│      │   ├─  main.js         The main control logic for the map and UI elements on the main page.
+│      │   ├─  map.js          Class to wrap the [OpenLayers][open-layers] logic for the interactive map.
+│      │   ├─  legend.js       Utilities to draw the legend.
+│      │   ├─  color_map.js    Utilities to calculate color values for the data shown on the map.
+│      │   └─  disclaimer.js   Logic to check that the disclaimer has been accepted.
+│      └─  *tests*/              JavaScript unit tests.
+└─ *tests*/                      Python unit tests
 </pre></big>
 
 ### Data

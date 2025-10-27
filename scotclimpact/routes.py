@@ -7,6 +7,7 @@ import os
 from flask import current_app as app
 from flask import render_template, make_response, send_file
 
+from . import db
 from .extreme_temp import (
     init_composite_fit,
     intensity_from_return_time,
@@ -123,14 +124,17 @@ def bondaries_local_authorities(layer_name):
 )
 def data_extreme_temp_intensity(covariate, tauReturn, format='geojson'):
 
+    if format == 'geojson' and db.has_results(function='extreme_temp.intensity_from_return_time', covariate=covariate, return_time=tauReturn):
+        return make_json_response(
+            db.get_json_hazard_data(function='extreme_temp.intensity_from_return_time', covariate=covariate, return_time=tauReturn)
+        )
+
     composite_fit = init_composite_fit(
         app.config['DATA_FILE_DESC'],
         simParams='c,loc1,scale1',
         nVariates=10000,
         preProcess=True,
     )
-    #tauReturn = int(tauReturn)
-    #covariate = float(covariate)
 
     intensity = intensity_from_return_time(composite_fit, covariate, tauReturn)
 
@@ -165,6 +169,11 @@ def data_extreme_temp_intensity_ci_report(covariate, return_time, x_idx, y_idx):
     ('format', is_supported_format, str_lower),
 )
 def data_extreme_temp_return_time(covariate, intensity, format='geojson'):
+
+    if format == 'geojson' and db.has_results(function='extreme_temp.return_time_from_intensity', covariate=covariate, intensity=intensity):
+        return make_json_response(
+            db.get_json_hazard_data(function='extreme_temp.return_time_from_intensity', covariate=covariate, intensity=intensity)
+        )
 
     composite_fit = init_composite_fit(
         app.config['DATA_FILE_DESC'],
@@ -211,6 +220,11 @@ def data_extreme_temp_intensity_change(covariate0, return_time, covariate1, form
 
     if covariate1 <= covariate0:
         return "covariate1 > covariate0 is required", 400
+
+    if format == 'geojson' and db.has_results(function='extreme_temp.change_in_intensity', covariate=covariate0, covariate_comp=covariate1, return_time=return_time):
+        return make_json_response(
+            db.get_json_hazard_data(function='extreme_temp.change_in_intensity', covariate=covariate0, covariate_comp=covariate1, return_time=return_time)
+        )
 
     composite_fit = init_composite_fit(
         app.config['DATA_FILE_DESC'],
@@ -259,6 +273,11 @@ def data_extreme_temp_frequency_change(covariate0, intensity, covariate1, format
 
     if covariate1 <= covariate0:
         return "covariate1 > covariate0 is required", 400
+
+    if format == 'geojson' and db.has_results(function='extreme_temp.change_in_frequency', covariate=covariate0, covariate_comp=covariate1, intensity=intensity):
+        return make_json_response(
+            db.get_json_hazard_data(function='extreme_temp.change_in_frequency', covariate=covariate0, covariate_comp=covariate1, intensity=intensity)
+        )
 
     composite_fit = init_composite_fit(
         app.config['DATA_FILE_DESC'],

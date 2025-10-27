@@ -7,6 +7,7 @@ class Config:
 
     ## Caching
     DEBUG = True
+    PROFILE = os.environ.get('PROFILE', False)
     CACHE_TYPE = os.environ.get('CACHE_TYPE', 'SimpleCache')
     CACHE_DEFAULT_TIMEOUT = os.environ.get('CACHE_DEFAULT_TIMEOUT', 300)
 

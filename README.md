@@ -3,13 +3,15 @@
 This is the repository for the web component of the Scottish Climate Scenario
 Decision-Making Web-Tool.
 
+> [!IMPORTANT]
+> The web tool is under active development and significant changes are likely.
+
 A [pre-production](https://www.geos.ed.ac.uk/dev/ddekler/) version of the Web Tool is
 served by the [School of GeoSciences](https://geosciences.ed.ac.uk/)
 
 ## Overview
 
-The code is under active development and significant changes are likely,
-however the main components and their interactions are shown in the diagram below.
+The main components of the web tool and their interactions are shown in the diagram below.
 
 ![Architecture Diagram](docs/architecture.svg)
 

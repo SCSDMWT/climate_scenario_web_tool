@@ -1,7 +1,7 @@
 import os
 import pytest
 from scotclimpact import create_app
-from scotclimpact.data import make_pooch, from_private_github_repo
+from scotclimpact.data import make_pooch, from_github_repo
 
 @pytest.fixture(scope='session')
 def test_app():
@@ -27,5 +27,4 @@ POOCH = make_pooch()
 
 @pytest.fixture()
 def pooch_fetcher():
-    github_token = os.environ.get('DATA_REPO_GITHUB_TOKEN')
-    return lambda filename: POOCH.fetch(filename, downloader=from_private_github_repo(github_token))
+    return lambda filename: POOCH.fetch(filename, downloader=from_github_repo())

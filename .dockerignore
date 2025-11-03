@@ -3,7 +3,6 @@ docker/
 data/
 mapserver/
 tests/
-scotclimpact/static/node_modules/
 scotclimpact/static/src/
 scotclimpact/static/tests/
 scotclimpact/static/*.json

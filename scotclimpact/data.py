@@ -5,7 +5,6 @@ import requests
 DATA_REPO_VERSION = "v0.0.5"
 GITHUB_API_URL = "https://api.github.com/repos/SCSDMWT/climate_scenario_web_tool_data/contents/"
 
-
 def make_pooch(path=pooch.os_cache('scotclimpact')):
     '''Create the pooch object for the data repo'''
     return pooch.create(
@@ -32,13 +31,10 @@ def get_pooch(app):
     return g.pooch
 
 
-def from_private_github_repo(data_repo_github_token):
-    '''A custom Pooch downloader to fetch files from a private github repository'''
+def from_github_repo():
+    '''A custom Pooch downloader to fetch files using the github API'''
     def _downloader(url, output_file, mypooch):
-        api_request_headers = dict(
-            Authorization=f"token {data_repo_github_token}",
-        )
-        r = requests.get(url + f'?ref={DATA_REPO_VERSION}', headers=api_request_headers)
+        r = requests.get(url + f'?ref={DATA_REPO_VERSION}')
         if not r.status_code == 200:
             print(f"[{r.status_code}] {r.text}")
             return
@@ -54,7 +50,7 @@ def fetch_file(filename):
     pooch_ = get_pooch(current_app)
     return pooch_.fetch(
         filename, 
-        downloader=from_private_github_repo(current_app.config['DATA_REPO_GITHUB_TOKEN'])
+        downloader=from_github_repo()
     )
 
 

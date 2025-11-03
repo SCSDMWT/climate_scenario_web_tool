@@ -185,31 +185,6 @@ cd climate_scenario_web_tool
 The project's data is held in a separate [GitHub repository][data-repo] and
 automatically downloaded when needed.
 
-For the web app to access the data a [Fine Grained token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
-has to be generated with
-
- * the Resource owner set to SCSDMWT
- * Only Select repositories and pick SCSDMWT/climate_scenario_web_tool_data
- * Under add permissions pick Contents.
-
-The token should be held in an environment variable called `DATA_REPO_GITHUB_TOKEN`, however
-care should be taken not to accidentally store the token in the shell's history.
-
-Create a file called `env_vars` with the following content (replacing `...` with the value of the token):
-```bash
-#!/bin/bash
-
-export DATA_REPO_GITHUB_TOKEN=...
-```
-It is good practice to restrict the file's permissions by running
-```bash
-chmod 600 env_vars
-```
-The environment variable can now be set by running:
-```bash
-. env_vars
-```
-
 #### Using the `run_dev.sh` script
 
 The `run_dev.sh` script will download recent versions of the package managers
@@ -221,6 +196,7 @@ and download all additional software dependencies.
 The `PATH` variable can be set so that your terminal will use the same version of the package
 managers as the `run_dev.sh` script. This can be done with
 ```bash
+echo "#!/bin/bash" > env_vars
 ./run_dev.sh --print-export >> env_vars
 . env_vars
 ```
@@ -259,21 +235,11 @@ the package managers. Run `./run_dev.sh -h` for details.
 ## Running with Docker
 
 Running with [Docker](https://www.docker.com/) is the recommended way to serve the web app on a server.
-This method requires two slightly different authentication methods to
-download the data from the data repository (see the Data section above) and
-to download the container.
-
-Generate a Personal Access Token (classic) and make sure to tick 'read:packages'.
-Save the access token in the `GITHUB_PAT` environment variable.
-
-Login with docker (assuming the access token is the value of the environment variable `GITHUB_PAT`), pull the image and run:
+A basic version of the web tool can be run with Docker using the following:
 ```bash
-echo $GITHUB_PAT | docker login ghcr.io -u USERNAME --password-stdin
 docker pull ghcr.io/scsdmwt/climate_scenario_web_tool:latest
 sudo docker run \
-    -e DATA_REPO_GITHUB_TOKEN=$DATA_REPO_GITHUB_TOKEN \
     -e DATA_DIR=/app/data \
-    -v ~/.cache/scotclimpact:/app/data \
     -p 80:80 \
     -t ghcr.io/scsdmwt/climate_scenario_web_tool:latest
 ```

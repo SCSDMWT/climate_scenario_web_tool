@@ -19,9 +19,10 @@ The main components is a [Flask][flask] web app with the following supporting el
 
  * JavaScript to handle the interactive parts of the map in the users browser.
  * Third party (Open Street Maps or Ordinance Survey) to serve the tile layer.
+ * PostgreSQL database to store pre-computed hazard data. If the database is not present,
+   hazard data will be calculated per request.
 
-There is currently no separate caching or database service, but they might be used
-in the future.
+There is currently no separate caching, but it might be used in the future.
 
 
 The server component uses the [Flask][flask]
@@ -243,6 +244,8 @@ sudo docker run \
     -p 80:80 \
     -t ghcr.io/scsdmwt/climate_scenario_web_tool:latest
 ```
+
+An example of running the web tool with it's database in separate containers is given in [docker/docker-compose.yml](docker/docker-compose.yml).
 
 ## Licence
 

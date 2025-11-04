@@ -1,10 +1,14 @@
 name: climate_scenario_web_tool
 services:
   web:
-    image: SCSDMWT/climate_scenario_web_tool
+    image: "ghcr.io/scsdmwt/climate_scenario_web_tool:v0.0.10"
     hostname: web
+    depends_on: 
+      postgres:
+        condition: service_healthy
     environment:
       - DATABASE_URL=postgresql://scotclimpact:testingtesting@postgres/scotclimpact
+      - DATA_DIR=/app/data
       - FLASK_APP=scotclimpact
       - FLASK_ENV=development
     networks:
@@ -12,19 +16,21 @@ services:
     ports:
       - 80:80
 
-  postgis:
-    image: postgis/postgis
-    hostname: postgis
+  postgres:
+    image: "ghcr.io/scsdmwt/climate_scenario_web_tool_data:v0.0.8"
+    hostname: postgres
     environment:
-      - POSTGRES_DB=scotclimpact
-      - POSTGRES_USER=scotclimpact
       - POSTGRES_PASSWORD=testingtesting
-    volumes:
-      - ./postgis:/var/lib/postgresql/data
     networks:
       - default
-    ports:
-      - "5432:5432"
+    # Mapping this container port to localhost is useful in development.
+    #ports:
+    #  - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scotclimpact -d scotclimpact"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 networks:
   default:

@@ -1,3 +1,4 @@
+from psycopg2 import OperationalError
 from psycopg2.pool import SimpleConnectionPool
 from contextlib import contextmanager
 
@@ -8,11 +9,20 @@ class PostgresDB:
 
     def init_app(self, app):
         self.connection_url = app.config['DATABASE_URL']
-        self.connect()
+        self.connect(app=app)
 
-    def connect(self):
-        self.pool = SimpleConnectionPool(1, 20, self.connection_url)
+    def is_connected(self):
+        return not self.pool is None
+
+    def connect(self, app=None):
+        try:
+            self.pool = SimpleConnectionPool(1, 20, self.connection_url)
+        except OperationalError:
+            if app:
+                app.logger.warn(f"Database connection could not be stablished: {self.connection_url}")
+            self.pool = None
         return self.pool
+
 
     @contextmanager
     def get_cursor(self):

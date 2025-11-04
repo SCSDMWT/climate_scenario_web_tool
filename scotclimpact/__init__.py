@@ -20,8 +20,8 @@ def create_app(test_config=None):
         from . import data
 
         flask_static_digest.init_app(app)
+        data.init_data(app)
         postgres.pgdb.init_app(app)
         db.init_app(app)
-        data.init_data(app)
 
         return app

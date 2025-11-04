@@ -56,6 +56,8 @@ def _make_where_clause(params):
 
 
 def has_results(**kwargs):
+    if not pgdb.is_connected():
+        return False
     where_clause = _make_where_clause(kwargs)
     with pgdb.get_cursor() as cursor:
         cursor.execute(f"SELECT count(id) FROM hazard_data WHERE {where_clause};")
@@ -83,9 +85,19 @@ def db_insert(query):
     is_flag=True, 
     help="Commit the results directly to the database."
 )
-def pre_compute(commit):
+@click.option(
+    "--no-header", 
+    is_flag=True, 
+    help="Do not print the schema before emiting INSERT queries."
+)
+def pre_compute(commit=False, no_header=False):
     '''Precompute all hazard data and store the results in the database.'''
     
+    header = not no_header
+    if header:
+        with current_app.open_resource("schema.sql") as f:
+            print(f.read().decode('utf-8'))
+
     # A list containing dictionaries and metadata for each hazard function.
     hazards = [
         dict(

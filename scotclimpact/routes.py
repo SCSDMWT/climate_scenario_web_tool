@@ -5,7 +5,7 @@ import markdown
 import os
 
 from flask import current_app as app
-from flask import render_template, make_response, send_file
+from flask import render_template, request, make_response, send_file
 
 from . import db
 from .extreme_temp import (
@@ -22,6 +22,7 @@ from .extreme_temp import (
 from .data_helpers import xarray_to_geojson, is_number, validate_args, str_lower
 from .boundary_layer import is_valid_boundary_layer, get_boundary_layer
 from .cache import get_cache
+from .hazards import hazards
 
 def menu_items():
     '''Returns a list of named tuples describing the items in the navigation menu'''
@@ -113,6 +114,80 @@ def make_data_response(dataset, format, endpoint_name, params):
 @validate_args(('layer_name', is_valid_boundary_layer, str))
 def bondaries_local_authorities(layer_name):
     return get_boundary_layer(layer_name)
+
+
+def parse_and_validate_args(hazard):
+    '''Get hazard function arguments from the query string convert them to the correct type and
+    make sure the values are valid'''
+    args = [
+        request.args.get(arg_name, '')
+        for arg_name 
+        in hazard['arg_names']
+    ]
+    for i, arg in enumerate(args):
+        arg_name = hazard['arg_names'][i]
+        if not is_number(arg):
+            return []
+        args[i] = arg = hazard['arg_types'][arg_name](arg)
+        if not arg in hazard['args'][i]:
+            return []
+    return args
+
+@app.route('/data/map/<function_name>')
+@app.route('/data/map/<function_name>/<format>')
+@get_cache().cached(timeout=60, query_string=True)
+def data_new(function_name, format='geojson'):
+
+    if not function_name in hazards:
+        return "not found\n", 404
+
+    hazard = hazards[function_name]
+
+    args = parse_and_validate_args(hazard)
+    if not args:
+        return "Invalid arguments", 400
+
+    print(args)
+
+    hazard_function = hazard['function']
+    composite_fit = init_composite_fit(
+        app.config['DATA_FILE_DESC'],
+        simParams='c,loc1,scale1',
+        nVariates=1000,
+        preProcess=True,
+    )
+
+    result = hazard_function(composite_fit, *args)
+    
+    return make_data_response(result, format, function_name, args)
+
+
+@app.route('/data/ci_report/<function_name>/<x_idx>/<y_idx>')
+@get_cache().cached(timeout=60, query_string=True)
+def data_new(function_name, format='geojson'):
+
+    if not function_name in hazards:
+        return "not found\n", 404
+
+    hazard = hazards[function_name]
+    args = parse_and_validate_args(hazard)
+    if not args:
+        return "Invalid arguments", 400
+
+    print(args)
+
+    hazard_function = hazard['function']
+    composite_fit = init_composite_fit(
+        app.config['DATA_FILE_DESC'],
+        simParams='c,loc1,scale1',
+        nVariates=1000,
+        preProcess=True,
+    )
+
+    result = hazard_function(composite_fit, *args)
+    
+    return make_data_response(result, format, function_name, args)
+
 
 @app.route('/data/extreme_temp/intensity/<covariate>/<tauReturn>')
 @app.route('/data/extreme_temp/intensity/<covariate>/<tauReturn>/<format>')

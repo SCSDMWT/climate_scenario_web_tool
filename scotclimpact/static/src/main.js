@@ -207,28 +207,30 @@ function update_ui(input_values) {
 
 function make_data_url(input_values) {
     const scenario = input_values["#scenario"];
+    const calculation = input_values["#calculation"];
+
     var url_endpoint = new URL(
-        window.location.protocol + "//" + window.location.host + "/" +
-        window.location.pathname + "/data/" + scenario
+        window.location.protocol + "//" + window.location.host + 
+        window.location.pathname + "/data/map/" + scenario+ "_" + calculation
     ); 
 
     if (scenario == "extreme_temp") {
 
-        const calculation = input_values["#calculation"];
+        url_endpoint.searchParams.append('covariate', input_values["#covariateParam"]);
 
-        url_endpoint.pathname += '/' + calculation;
-        url_endpoint.pathname += '/' + input_values["#covariateParam"];
         if (calculation == "intensity") {
-            url_endpoint.pathname += '/' + input_values["#tauReturnParam"];
+            url_endpoint.searchParams.append('return_time', input_values["#tauReturnParam"]);
         }
         else if(calculation == "intensity_change") {
-            url_endpoint.pathname += '/' + input_values["#tauReturnParam"] + '/' + input_values["#covariate2Param"];
+            url_endpoint.searchParams.append('return_time', input_values["#tauReturnParam"]);
+            url_endpoint.searchParams.append('covariate_comp', input_values["#covariate2Param"]);
         }
         else if(calculation == "return_time") {
-            url_endpoint.pathname += '/' + input_values["#intensityParam"];
+            url_endpoint.searchParams.append('intensity', input_values["#intensityParam"]);
         }
         else if(calculation == "frequency_change") {
-            url_endpoint.pathname += '/' + input_values["#intensityParam"] + '/' + input_values["#covariate2Param"];
+            url_endpoint.searchParams.append('intensity', input_values["#intensityParam"]);
+            url_endpoint.searchParams.append('covariate_comp', input_values["#covariate2Param"]);
         }
     }
     return url_endpoint.href;

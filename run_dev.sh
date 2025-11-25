@@ -4,7 +4,7 @@
 # It will also download correct versions of NPM and UV if they are not
 # installed on the system.
 
-NODE_VERSION="${WT_NODE_VERSION:-v22.20.0}"
+NODE_VERSION="${WT_NODE_VERSION:-v24.11.1}"
 UV_VERSION="${WT_UV_VERSION:-0.8.24}"
 TOOLS_DIR="${WT_TOOLS_DIR:-.tools}"
 
@@ -165,9 +165,9 @@ function source_env_vars() {
         echo "Environment variables file 'env_vars' does not exist."
     fi
 
-    if [[ -z "$DATA_REPO_GITHUB_TOKEN" ]]; then
-        exit_failure "DATA_REPO_GITHUB_TOKEN is not set. See the README for details: https://github.com/SCSDMWT/climate_scenario_web_tool?tab=readme-ov-file#data  "
-    fi
+    #if [[ -z "$DATA_REPO_GITHUB_TOKEN" ]]; then
+    #    exit_failure "DATA_REPO_GITHUB_TOKEN is not set. See the README for details: https://github.com/SCSDMWT/climate_scenario_web_tool?tab=readme-ov-file#data  "
+    #fi
 }
 
 function compile_js() {

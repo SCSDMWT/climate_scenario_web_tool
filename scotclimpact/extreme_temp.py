@@ -585,7 +585,7 @@ def change_in_intensity(compositeFit, return_time, cov0, cov1):
 def change_in_frequency(compositeFit, intensity, cov0, cov1):
     return compositeFit.times_more_likely(intensity, cov0, cov1).times_more_likely
 
-def intensity_ci_report(compositeFit, return_time, cov, x_idx, y_idx):
+def intensity_ci_report(compositeFit, cov, return_time, x_idx, y_idx):
     compositeFit.set_temperature_anomaly(cov)
     return compositeFit.get_CI_report(
         'intensity_from_return_time',

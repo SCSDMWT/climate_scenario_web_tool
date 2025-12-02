@@ -1,4 +1,5 @@
 from collections import namedtuple
+from functools import partial
 import io
 import json
 import markdown
@@ -96,11 +97,11 @@ def is_supported_format(fmt):
     '''Predicate to check if fmt is a supported data format'''
     return fmt.lower() in SUPPORTED_FORMATS
 
-def make_data_response(dataset, format, endpoint_name, params):
+def make_data_response(dataset, format, endpoint_name, params, ci_report_url):
     # Make the response object
     if format == 'geojson':
-        params_part = '/'.join([str(param) for param in params])
-        ci_report_url = f'data/{endpoint_name}_ci_report/{params_part}/{{x_idx}}/{{y_idx}}'
+        #params_part = '/'.join([str(param) for param in params])
+        #ci_report_url = f'data/ci_report/{endpoint_name}/{params_part}/{{x_idx}}/{{y_idx}}'
         json_data = xarray_to_geojson(endpoint_name, dataset, ci_report_url=ci_report_url)
         return make_json_response(json_data)
     if format == 'netcdf':
@@ -159,12 +160,20 @@ def data_new(function_name, format='geojson'):
 
     result = hazard_function(composite_fit, *args)
     
-    return make_data_response(result, format, function_name, args)
+    #request.args
+    ci_report_url = partial(
+            hazard['ci_report_url']
+                .replace('{x}', '{x_idx}')
+                .replace('{y}', '{y_idx}')
+                .format,
+            **request.args
+    )
+    return make_data_response(result, format, function_name, args, ci_report_url)
 
 
 @app.route('/data/ci_report/<function_name>/<x_idx>/<y_idx>')
 @get_cache().cached(timeout=60, query_string=True)
-def data_new(function_name, format='geojson'):
+def ci_report(function_name, x_idx, y_idx):
 
     if not function_name in hazards:
         return "not found\n", 404
@@ -174,9 +183,17 @@ def data_new(function_name, format='geojson'):
     if not args:
         return "Invalid arguments", 400
 
+    if not is_number(x_idx) or int(x_idx) < 0 or int(x_idx) >= hazard['result_grid_size']['x']:
+        return "Invalid arguments", 400
+    if not is_number(y_idx) or int(y_idx) < 0 or int(y_idx) >= hazard['result_grid_size']['y']:
+        return "Invalid arguments", 400
+    x_idx = int(x_idx)
+    y_idx = int(y_idx)
+    args = args + [x_idx, y_idx]
+
     print(args)
 
-    hazard_function = hazard['function']
+    ci_report_function = hazard['ci_report_function']
     composite_fit = init_composite_fit(
         app.config['DATA_FILE_DESC'],
         simParams='c,loc1,scale1',
@@ -184,9 +201,9 @@ def data_new(function_name, format='geojson'):
         preProcess=True,
     )
 
-    result = hazard_function(composite_fit, *args)
+    result = ci_report_function(composite_fit, *args)
     
-    return make_data_response(result, format, function_name, args)
+    return result, 200 #make_data_response(result, format, function_name, args)
 
 
 @app.route('/data/extreme_temp/intensity/<covariate>/<tauReturn>')

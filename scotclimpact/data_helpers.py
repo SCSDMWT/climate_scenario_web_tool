@@ -152,22 +152,12 @@ def sql_to_geojson(function_name, query_result):
     )
 
 
-def xarray_to_geojson(dataset_name, xr_dataset, x_key='projection_x_coordinate', y_key='projection_y_coordinate', ci_report_url=''):
+def xarray_to_geojson(dataset_name, xr_dataset, x_key='projection_x_coordinate', y_key='projection_y_coordinate', ci_report_url=lambda x: x):
     '''Convert an xarray.DataArray object to GeoJSON compatible object.'''
-    #x_dim = dataset[x_key].to_numpy()
-    #y_dim = dataset[y_key].to_numpy()
-
     # Load the data
     np_dataset = xr_dataset.to_numpy()
     idx = np.where(np_dataset == np_dataset)
 
-    #dx = np.diff(x_dim).min()/2.0
-    #dy = np.diff(y_dim).min()/2.0
-
-    #top_right =    [ [x_dim[i]+dx, y_dim[j]+dy] for j, i in zip(*idx)]
-    #top_left  =    [ [x_dim[i]+dx, y_dim[j]-dy] for j, i in zip(*idx) ]
-    #bottom_right = [ [x_dim[i]-dx, y_dim[j]+dy] for j, i in zip(*idx) ]
-    #bottom_left  = [ [x_dim[i]-dx, y_dim[j]-dy] for j, i in zip(*idx) ]
     top_right, top_left, bottom_right, bottom_left = _make_bounds(xr_dataset, idx, x_key, y_key)
 
     # Create the geometry features

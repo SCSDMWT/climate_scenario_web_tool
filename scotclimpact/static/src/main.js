@@ -173,10 +173,10 @@ function update_ui(input_values) {
 
     // Update links for downloading datasets.
     $('#download_netcdf').prop({
-        'href': make_data_url(input_values) + '/netcdf',
+        'href': make_data_url(input_values, 'netcdf'),
     });
     $('#download_csv').prop({
-        'href': make_data_url(input_values) + '/csv',
+        'href': make_data_url(input_values, 'csv'),
     });
 
     // Update the legend label's units
@@ -205,13 +205,14 @@ function update_ui(input_values) {
     return colorbar[scenario][next_choice] // FIXME
 }
 
-function make_data_url(input_values) {
+function make_data_url(input_values, format) {
     const scenario = input_values["#scenario"];
     const calculation = input_values["#calculation"];
 
     var url_endpoint = new URL(
         window.location.protocol + "//" + window.location.host + 
         window.location.pathname + "/data/map/" + scenario+ "_" + calculation
+        + (format ? "/" + format : "")
     ); 
 
     if (scenario == "extreme_temp") {
@@ -285,7 +286,7 @@ async function on_user_input() {
         return;
     previous_input_values = input_values;
 
-    const url_endpoint = make_data_url(input_values);
+    const url_endpoint = make_data_url(input_values, '');
     await update_data_layer(url_endpoint, colorbar);
     draw_legend(colorbar.edges, colorbar.colors, colorbar.endpoint_type, colorbar.decimal_places);
 }

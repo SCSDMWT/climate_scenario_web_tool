@@ -139,6 +139,8 @@ def data_new(function_name, format='geojson'):
 
     if not function_name in hazards:
         return "not found\n", 404
+    if not format in {'geojson', 'csv', 'netcdf'}:
+        return "Invalid arguments", 400
 
     hazard = hazards[function_name]
 

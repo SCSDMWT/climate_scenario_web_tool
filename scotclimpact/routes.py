@@ -147,6 +147,10 @@ def data_new(function_name, format='geojson'):
     args = parse_and_validate_args(hazard)
     if not args:
         return "Invalid arguments", 400
+    if format=='geojson' and db.has_results(function=function_name, **request.args):
+        return make_json_response(
+            db.get_json_hazard_data(function=function_name, **request.args)
+        )
 
     hazard_function = hazard['function']
     composite_fit = init_composite_fit(

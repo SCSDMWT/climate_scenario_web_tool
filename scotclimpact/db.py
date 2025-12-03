@@ -9,6 +9,7 @@ import xarray as xr
 from . import extreme_temp
 from .postgres import pgdb
 from .data_helpers import (sql_to_geojson, unwrapped_xarray_to_sql, unwrap_xarray)
+from .hazards import hazards
 
 def get_db():
     """Returns the current connection object to the Postgre database."""
@@ -84,52 +85,6 @@ def pre_compute(commit=False, no_header=False):
         with current_app.open_resource("schema.sql") as f:
             print(f.read().decode('utf-8'))
 
-    # A list containing dictionaries and metadata for each hazard function.
-    hazards = [
-        dict(
-            function_name='extreme_temp.intensity_from_return_time',
-            function=extreme_temp.intensity_from_return_time,
-            ci_report_url = 'data/extreme_temp/intensity_ci_report/{covariate}/{return_time}/{x}/{y}',
-            arg_names=['covariate', 'return_time'],
-            args=[
-                [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
-                list(range(10, 110, 10)),
-            ]
-        ),
-        dict(
-            function_name='extreme_temp.change_in_intensity',
-            function=extreme_temp.change_in_intensity,
-            ci_report_url = 'data/extreme_temp/intensity_change_ci_report/{covariate}/{return_time}/{covariate_comp}/{x}/{y}',
-            arg_names=['return_time', 'covariate', 'covariate_comp'],
-            args=[
-                list(range(10, 110, 10)),
-                [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Covariate/Global temperature anomaly
-                [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
-            ]
-        ),
-        dict(
-            function_name='extreme_temp.return_time_from_intensity',
-            function=extreme_temp.return_time_from_intensity,
-            ci_report_url = 'data/extreme_temp/return_time_ci_report/{covariate}/{intensity}/{x}/{y}',
-            arg_names=['covariate', 'intensity'],
-            args=[
-                [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
-                list(range(30, 41)),
-            ]
-        ),
-        dict(
-            function_name='extreme_temp.change_in_frequency',
-            function=extreme_temp.change_in_frequency,
-            ci_report_url = 'data/extreme_temp/frequency_change_ci_report/{covariate}/{intensity}/{covariate_comp}/{x}/{y}',
-            arg_names=['intensity', 'covariate', 'covariate_comp'],
-            args=[
-                list(range(30, 41)),
-                [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Covariate/Global temperature anomaly
-                [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
-            ]
-        ),
-    ]
-
     insert_query_template = (
         "INSERT INTO hazard_data (function, central_estimate, geom, x_idx, y_idx, ci_report, {arg_names_clause}) VALUES {value_clauses};"
     )
@@ -138,9 +93,9 @@ def pre_compute(commit=False, no_header=False):
     if commit:
         db_insert("DELETE FROM hazard_data;")
 
-    for hazard in hazards:
+    for func_name, hazard in hazards.items():
         func = hazard['function']
-        func_name = hazard['function_name']
+        #func_name = hazard['function_name']
         arg_names = hazard['arg_names']
         ci_report_url = hazard['ci_report_url']
         # Call each function with all combinations of input parameters.

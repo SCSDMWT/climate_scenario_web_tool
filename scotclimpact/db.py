@@ -6,7 +6,7 @@ import numpy as np
 #import psycopg2.pool import SimpleConnectionPool
 import xarray as xr
 
-from . import extreme_temp
+from .developing_process import init_composite_fit
 from .postgres import pgdb
 from .data_helpers import (sql_to_geojson, unwrapped_xarray_to_sql, unwrap_xarray)
 from .hazards import hazards
@@ -104,8 +104,9 @@ def pre_compute(commit=False, no_header=False):
             if 'covariate_comp' in arg_names and arg[1] >= arg[2]:
                 continue
 
-            composite_fit = extreme_temp.init_composite_fit(
-                current_app.config['DATA_FILE_DESC'],
+            composite_fit = init_composite_fit(
+                hazard['model_file'],
+                hazard['grid_size'],
                 simParams='c,loc1,scale1',
                 nVariates=1000,
                 preProcess=True,

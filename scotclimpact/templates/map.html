@@ -17,6 +17,7 @@
           <label for="scenario" class="form-label" id="scenarioLabel">Hazard:</label>
           <select class="form-select" name="scenario" id="scenario">
             <option value="extreme_temp">Extreme Temperature</option>
+            <option value="extreme_1day_precip">Extreme 1-day Rainfall</option>
           </select>
         </div>
 
@@ -109,7 +110,7 @@
           </div>
         </div>
 
-        <datalist id="intensityValues">
+        <datalist id="intensityValues_C">
           <option value="30"></option>
           <option value="31"></option>
           <option value="32"></option>
@@ -123,11 +124,11 @@
           <option value="40"></option>
         </datalist>
 
-        <div id="intensityGroup" class="input-item">
-          <label for="intensityParam" class="form-label" id="intensityParamLabel">Intensity (in °C):</label>
+        <div id="intensityGroup_C" class="input-item">
+          <label for="intensityParam_C" class="form-label" id="intensityParamLabel_C">Intensity (in °C):</label>
           <div class="slider-options">
-            <input type="range" class="slider" min="30" max="40" step="1" defaultValue="25" id="intensityParam" list="intensityValues"/>
-            <div id="intensityTicks" class="ticks">
+            <input type="range" class="slider" min="30" max="40" step="1" defaultValue="25" id="intensityParam_C" list="intensityValues_C"/>
+            <div id="intensityTicks_C" class="ticks">
               <span class="ticks-txt">30</span>
               <span class="ticks-txt">31</span>
               <span class="ticks-txt">32</span>
@@ -139,6 +140,20 @@
               <span class="ticks-txt">38</span>
               <span class="ticks-txt">39</span>
               <span class="ticks-txt">40</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="intensityGroup_mm" class="input-item">
+          <label for="intensityParam_mm" class="form-label" id="intensityParamLabel_mm">Intensity (in mm):</label>
+          <div class="slider-options">
+            <input type="range" class="slider" min="50" max="150" step="25" defaultValue="100" id="intensityParam_mm"/>
+            <div id="intensityTicks_mm" class="ticks">
+              <span class="ticks-txt">50</span>
+              <span class="ticks-txt">75</span>
+              <span class="ticks-txt">100</span>
+              <span class="ticks-txt">125</span>
+              <span class="ticks-txt">150</span>
             </div>
           </div>
         </div>

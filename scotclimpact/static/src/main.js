@@ -49,7 +49,37 @@ const colorbar = {
             endpoint_type: legend_endpoints.lower_in_range,
             decimal_places: 0,
         },
-    }
+    },
+    extreme_1day_precip: {
+        intensity: {
+            edges: [50, 75, 100, 125, 150],
+            // Colorbrewer PuBu-6
+            colors: ['#f1eef6', '#d0d1e6', '#a6bddb', '#74a9cf', '#2b8cbe', '#045a8d'],
+            endpoint_type: legend_endpoints.out_of_range,
+            decimal_places: 0,
+        },
+        intensity_change: {
+            edges: [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
+            // Colorbrewer PuBu-8
+            colors: ["#fff7fb", "#ece7f2", "#d0d1e6", "#a6bddb", "#74a9cf", "#3690c0", "#0570b0", "#034e7b"],
+            endpoint_type: legend_endpoints.lower_in_range,
+            decimal_places: 1,
+        },
+        return_time: {
+            edges: [0, 10, 25, 50, 100, 200],
+            // Colorbrewer PuBu-6
+            colors: ["#f1eef6", "#d0d1e6", "#a6bddb", "#74a9cf", "#2b8cbe", "#045a8d"].slice().reverse(),
+            endpoint_type: legend_endpoints.lower_in_range,
+            decimal_places: 0,
+        },
+        frequency_change: {
+            edges: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+            // Colorbrewer PuBu-6
+            colors: ["#f1eef6", "#d0d1e6", "#a6bddb", "#74a9cf", "#2b8cbe", "#045a8d"],
+            endpoint_type: legend_endpoints.lower_in_range,
+            decimal_places: 0,
+        },
+    },
 };
 
 const selection_tree = {
@@ -59,38 +89,89 @@ const selection_tree = {
             "#covariateGroup": true,
             "#calculationGroup": true,
             "#tauReturnGroup": true,
-            "#intensityGroup": false,
+            "#intensityGroup_C": false,
+            "#intensityGroup_mm": false,
             "#covariate2Group": false,
         },
         intensity_change: {
             "#covariateGroup": true,
             "#calculationGroup": true,
             "#tauReturnGroup": true,
-            "#intensityGroup": false,
+            "#intensityGroup_C": false,
+            "#intensityGroup_mm": false,
             "#covariate2Group": true,
         },
         return_time: {
             "#covariateGroup": true,
             "#calculationGroup": true,
             "#tauReturnGroup": false,
-            "#intensityGroup": true,
+            "#intensityGroup_C": true,
+            "#intensityGroup_mm": false,
             "#covariate2Group": false,
         },
         frequency_change: {
             "#covariateGroup": true,
             "#calculationGroup": true,
             "#tauReturnGroup": false,
-            "#intensityGroup": true,
+            "#intensityGroup_C": true,
+            "#intensityGroup_mm": false,
             "#covariate2Group": true,
         },
-    }
+    },
+    extreme_1day_precip: {
+        next_choice: "#calculation",
+        intensity: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": true,
+            "#intensityGroup_C": false,
+            "#intensityGroup_mm": false,
+            "#covariate2Group": false,
+        },
+        intensity_change: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": true,
+            "#intensityGroup_C": false,
+            "#intensityGroup_mm": false,
+            "#covariate2Group": true,
+        },
+        return_time: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": false,
+            "#intensityGroup_C": false,
+            "#intensityGroup_mm": true,
+            "#covariate2Group": false,
+        },
+        frequency_change: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": false,
+            "#intensityGroup_C": false,
+            "#intensityGroup_mm": true,
+            "#covariate2Group": true,
+        },
+    },
 };
 
 const calculation_descriptions = {
-    "intensity": "<p>Intensity shows the hottest temperature that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
-    "intensity_change": "<p>Change in Intensity shows the change in the hottest temperature that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly of +X_COV °C.</p>",
-    "return_time": "<p>Return Time shows the number of years in which a maximum temperature of Z_INTENSITY °C is expected to be exceeded at least once at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
-    "frequency_change": "<p>Change in Frequency shows how many times more frequent a maximum temperature of Z_INTENSITY °C is expected to be seen at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly +X_COV °C.</p>",
+    "intensity": "<p>Intensity shows the HAZARD that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
+    "intensity_change": "<p>Change in Intensity shows the change in the HAZARD that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly of +X_COV °C.</p>",
+    "return_time": "<p>Return Time shows the number of years in which a HAZARD of Z_INTENSITY INTENSITY_UNIT is expected to be exceeded at least once at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
+    "frequency_change": "<p>Change in Frequency shows how many times more frequent a HAZARD of Z_INTENSITY INTENSITY_UNIT is expected to be seen at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly +X_COV °C.</p>",
+    //"extreme_temp": {
+    //    "intensity": "<p>Intensity shows the hottest temperature that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
+    //    "intensity_change": "<p>Change in Intensity shows the change in the hottest temperature that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly of +X_COV °C.</p>",
+    //    "return_time": "<p>Return Time shows the number of years in which a maximum temperature of Z_INTENSITY °C is expected to be exceeded at least once at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
+    //    "frequency_change": "<p>Change in Frequency shows how many times more frequent a maximum temperature of Z_INTENSITY °C is expected to be seen at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly +X_COV °C.</p>",
+    //},
+    //"extreme_1day_precip": {
+    //    "intensity": "<p>Intensity shows the 1-day rainfall that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
+    //    "intensity_change": "<p>Change in Intensity shows the change in the 1-day rainfall that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly of +X_COV °C.</p>",
+    //    "return_time": "<p>Return Time shows the number of years in which a 1-day rainfall of Z_INTENSITY mm is expected to be exceeded at least once at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
+    //    "frequency_change": "<p>Change in Frequency shows how many times more frequent a maximum temperature of Z_INTENSITY mm is expected to be seen at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly +X_COV °C.</p>",
+    //},
 };
 
 const ui_map = new UIMap('map', tilelayerurl);
@@ -160,7 +241,8 @@ function update_ui(input_values) {
         ["#covariateParam", "#covariateTicks", 1],
         ["#covariate2Param", "#covariate2Ticks", 1],
         ["#tauReturnParam", "#tauReturnTicks", 0],
-        ["#intensityParam", "#intensityTicks", 0],
+        ["#intensityParam_C", "#intensityTicks_C", 0],
+        ["#intensityParam_mm", "#intensityTicks_mm", 0],
     ];
     for (const [slider_id, tick_collection, decimal_places] of slider_ticks_pairs) {
         const slider_txt = input_values[slider_id].toFixed(decimal_places);
@@ -182,8 +264,11 @@ function update_ui(input_values) {
     // Update the legend label's units
     var legend_label = $("#legend-label")[0];
     console.log(legend_label);
-    if (calculation == "intensity") {
+    if (calculation == "intensity" && (scenario == "extreme_temp")) {
         legend_label.innerHTML = "Legend (in °C):";
+    }
+    else if (calculation == "intensity" && (scenario == "extreme_1day_precip")) {
+        legend_label.innerHTML = "Legend (in mm):";
     }
     else if (calculation == "return_time") {
         legend_label.innerHTML = "Legend (in years):";
@@ -194,12 +279,25 @@ function update_ui(input_values) {
 
     // Insert slider values in the calculation description box
     var calculation_description = $('#calculation_description')[0];
+    var intensity_value, intensity_unit, hazard_name;
+    if (scenario == "extreme_temp") {
+        intensity_value = input_values["#intensityParam_C"];
+        intensity_unit = "°C";
+        hazard_name = "hottest temperature";
+    }
+    if (scenario == "extreme_1day_precip"){
+        intensity_value = input_values["#intensityParam_mm"];
+        intensity_unit = "mm";
+        hazard_name = "1-day rainfall";
+    }
     calculation_description.innerHTML = 
         calculation_descriptions[calculation]
             .replaceAll("X_COV", input_values["#covariateParam"])
             .replaceAll("Y_COV", input_values["#covariate2Param"])
             .replaceAll("Z_RETURN_TIME", input_values["#tauReturnParam"])
-            .replaceAll("Z_INTENSITY ", input_values["#intensityParam"]);
+            .replaceAll("HAZARD", hazard_name)
+            .replaceAll("INTENSITY_UNIT", intensity_unit)
+            .replaceAll("Z_INTENSITY", intensity_value);
 
 
     return colorbar[scenario][next_choice] // FIXME
@@ -215,22 +313,32 @@ function make_data_url(input_values, format) {
         + (format ? "/" + format : "")
     ); 
 
+
+    url_endpoint.searchParams.append('covariate', input_values["#covariateParam"]);
+
+    if (calculation == "intensity") {
+        url_endpoint.searchParams.append('return_time', input_values["#tauReturnParam"]);
+    }
+    if(calculation == "intensity_change") {
+        url_endpoint.searchParams.append('return_time', input_values["#tauReturnParam"]);
+        url_endpoint.searchParams.append('covariate_comp', input_values["#covariate2Param"]);
+    }
+
     if (scenario == "extreme_temp") {
-
-        url_endpoint.searchParams.append('covariate', input_values["#covariateParam"]);
-
-        if (calculation == "intensity") {
-            url_endpoint.searchParams.append('return_time', input_values["#tauReturnParam"]);
+        if(calculation == "return_time") {
+            url_endpoint.searchParams.append('intensity', input_values["#intensityParam_C"]);
         }
-        else if(calculation == "intensity_change") {
-            url_endpoint.searchParams.append('return_time', input_values["#tauReturnParam"]);
+        if(calculation == "frequency_change") {
+            url_endpoint.searchParams.append('intensity', input_values["#intensityParam_C"]);
             url_endpoint.searchParams.append('covariate_comp', input_values["#covariate2Param"]);
         }
-        else if(calculation == "return_time") {
-            url_endpoint.searchParams.append('intensity', input_values["#intensityParam"]);
+    }
+    if (scenario == "extreme_1day_precip") {
+        if(calculation == "return_time") {
+            url_endpoint.searchParams.append('intensity', input_values["#intensityParam_mm"]);
         }
-        else if(calculation == "frequency_change") {
-            url_endpoint.searchParams.append('intensity', input_values["#intensityParam"]);
+        if(calculation == "frequency_change") {
+            url_endpoint.searchParams.append('intensity', input_values["#intensityParam_mm"]);
             url_endpoint.searchParams.append('covariate_comp', input_values["#covariate2Param"]);
         }
     }
@@ -245,7 +353,8 @@ function get_input_values() {
         "#covariateParam",
         "#covariate2Param",
         "#tauReturnParam",
-        "#intensityParam",
+        "#intensityParam_C",
+        "#intensityParam_mm",
     ];
     const dropdown_ids = [
         "#scenario",
@@ -299,8 +408,11 @@ $("#covariate2ParamLabel")[0].value = "Covariate 2: <span style=\"font-weight:bo
 $("#covariate2Param")[0].oninput = on_user_input;
 $("#tauReturnParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">100</span>"; 
 $("#tauReturnParam")[0].oninput = on_user_input;
-$("#intensityParamLabel")[0].value = "Intensity: <span style=\"font-weight:bold\">100</span>"; 
-$("#intensityParam")[0].oninput = on_user_input;
+$("#intensityParamLabel_C")[0].value = "Intensity: <span style=\"font-weight:bold\">100</span>"; 
+$("#intensityParam_C")[0].oninput = on_user_input;
+
+//$("#intensityParamLabel_mm")[0].value = "Intensity: <span style=\"font-weight:bold\">100</span>"; 
+$("#intensityParam_mm")[0].oninput = on_user_input;
 
 $("#scenario")[0].oninput = on_user_input; 
 $("#calculation")[0].oninput = on_user_input; 

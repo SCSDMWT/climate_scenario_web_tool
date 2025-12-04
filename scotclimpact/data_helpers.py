@@ -54,10 +54,10 @@ def _make_bounds(dataset, idx, x_key, y_key):
     dx = np.diff(x_dim).min()/2.0
     dy = np.diff(y_dim).min()/2.0
 
-    top_right =    [ [float(x_dim[i]+dx), float(y_dim[j]+dy)] for j, i in zip(*idx)]
-    top_left  =    [ [float(x_dim[i]+dx), float(y_dim[j]-dy)] for j, i in zip(*idx) ]
-    bottom_right = [ [float(x_dim[i]-dx), float(y_dim[j]+dy)] for j, i in zip(*idx) ]
-    bottom_left  = [ [float(x_dim[i]-dx), float(y_dim[j]-dy)] for j, i in zip(*idx) ]
+    top_right =    [ [float(x_dim[i]+dx), float(y_dim[j]+dy)] for i, j in zip(*idx)]
+    top_left  =    [ [float(x_dim[i]+dx), float(y_dim[j]-dy)] for i, j in zip(*idx) ]
+    bottom_right = [ [float(x_dim[i]-dx), float(y_dim[j]+dy)] for i, j in zip(*idx) ]
+    bottom_left  = [ [float(x_dim[i]-dx), float(y_dim[j]-dy)] for i, j in zip(*idx) ]
 
     return top_right, top_left, bottom_right, bottom_left
 
@@ -166,7 +166,7 @@ def xarray_to_geojson(dataset_name, xr_dataset, x_key='projection_x_coordinate',
             type='Feature',
             properties=dict(
                 data=value if not value == float("inf") else 10000,
-                ci_report_url=ci_report_url(x_idx=int(coord_idx[1]), y_idx=int(coord_idx[0])),
+                ci_report_url=ci_report_url(x_idx=int(coord_idx[0]), y_idx=int(coord_idx[1])),
             ),
             geometry=dict(
                 type='Polygon',

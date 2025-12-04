@@ -2,6 +2,7 @@ import functools
 
 import numpy  as np
 import xarray as xr
+import pandas as pd
 from scipy.stats     import genextreme as genex
 from scipy.stats     import multivariate_normal
 from scipy.stats     import kstest
@@ -9,7 +10,6 @@ from scipy.stats     import norm
 from scipy.stats     import lognorm
 from datetime        import datetime
 
-from .cache import get_cache
 from .data import fetch_file
 
 class Fitted_Obs_Sim():
@@ -21,22 +21,27 @@ class Fitted_Obs_Sim():
                  preProcess     = True,
                  nVariates      = 1000,
                  storeInput     = False,
-                 intensityUnits = 'degrees_Celsius',
+                 intensityUnits = u"\u00b0C",#'degrees_Celsius',
                  TScotVariates  = True):
         '''
         initialise with fitted parameter files from simulations and observations.
         When we have confirmed exactly how we want to do the de-biasing of simulations,
         these steps can be skipped by only providing the fully processed composite file.
         '''
+        # align and transpose coordinates
+        sameTranspose = lambda x: x.transpose('projection_x_coordinate','projection_y_coordinate',...)
+        dsObs, dsSim, grid = xr.align(sameTranspose(dsObs), 
+                                      sameTranspose(dsSim), 
+                                      sameTranspose(grid), 
+                                      join = 'inner', exclude = ['year', 'ensemble_member'])
+
+        self.dsObs = dsObs.load(); self.dsSim = dsSim.load()
+        
         self.TScotVariates  = TScotVariates
         self.intensityUnits = intensityUnits
         if storeInput: # if there is a need to keep full input files
             self.dsObsInput = self.dsObs.copy(deep = True)
             self.dsSimInput = self.dsSim.copy(deep = True)
-        
-        self.dsObs, self.dsSim, grid = xr.align(dsObs, dsSim, grid, 
-                                      join = 'inner', exclude = ['year', 'ensemble_member'])
-        
         
         self.gridDims = list(grid.dims)
         self.ds     = self.dsObs.copy(deep = True).load()
@@ -49,11 +54,17 @@ class Fitted_Obs_Sim():
             da = da.where(~np.isin(da.params, simParams),
                             self.dsSim[v])
             self.ds[v] = da.compute()
-        
-        da = self.ds.bootstrap_covariance
-        for param in simParams:
-            da = da.where(da.params_i != param,self.dsSim.bootstrap_covariance)
-            da = da.where(da.params_j != param,self.dsSim.bootstrap_covariance)
+
+        # block zero cross-covariance
+        indexObsP = xr.where(np.isin(self.ds.params, simParams), 0, 1)
+        indexSimP = xr.where(np.isin(self.ds.params, simParams), 1, 0)
+        self.ds['iCovObsP']  = (['params_i','params_j'],
+                                np.matmul(np.array([indexObsP]).T, [indexObsP]))
+        self.ds['iCovSimP']  = (['params_i','params_j'],
+                                np.matmul(np.array([indexSimP]).T, [indexSimP]))
+        da = self.dsObs.bootstrap_covariance * self.ds.iCovObsP\
+           + self.dsSim.bootstrap_covariance * self.ds.iCovSimP
+
         self.ds['bootstrap_covariance'] = da.compute()
 
         self.ds.coords['paramsGEV'] = ['c','loc','scale']
@@ -77,6 +88,12 @@ class Fitted_Obs_Sim():
                     linear_loc_scale    = lambda x,p: np.array([p[0], 
                                                                 p[1] + p[2]*x, 
                                                                 p[3] + p[4]*x]),
+                    linear_loc_log_scale= lambda x,p: np.array([p[0], 
+                                                                p[1] + p[2]*x, 
+                                                                np.exp(p[3] + p[4]*x)]),
+                    log_loc_scale       = lambda x,p: np.array([p[0], 
+                                                                np.exp(p[1] + p[2]*x), 
+                                                                np.exp(p[3] + p[4]*x)]),
                     quadratic_loc       = lambda x,p: np.array([p[0], 
                                                                 p[1] + p[2]*x + p[3]*x*x, 
                                                                 p[4]]),
@@ -99,8 +116,8 @@ class Fitted_Obs_Sim():
         produce random variates of the bootstrap parameters
         '''
         def f(mean, cov, nVariates): 
-            if not np.isfinite(mean).all():
-                return np.array([mean]*nVariates)
+            if (not np.isfinite(mean).all()) or (not np.isfinite(cov).all()):
+                return np.array([[np.nan]*mean.size]*nVariates)
             else:
                 return multivariate_normal(mean, cov).rvs(nVariates)
         self.bsVariates = xr.apply_ufunc(
@@ -336,21 +353,25 @@ class Fitted_Obs_Sim():
             quantiles = [0.05,0.1,0.25,0.75,0.9,0.95]
         #-----------------------------------------------------------
         if calculation == 'intensity_from_return_time':
+            mv = np.inf
             dataset = self.intensity_from_return_time(return_time, 
                                                       mode = 'quantiles', quantiles = quantiles)
             var     = 'intensity'
         #-----------------------------------------------------------            
         elif calculation == 'return_time_from_intensity':
+            mv = 200
             dataset = self.return_time_from_intensity(intensity, 
                                                       mode = 'quantiles', quantiles = quantiles)
             var     = 'return_time'
         #-----------------------------------------------------------           
         elif calculation == 'change_in_intensity':
+            mv = np.inf
             dataset = self.change_in_intensity_T(return_time, T0 = T0, T1 = T1, 
                                                       mode = 'quantiles', quantiles = quantiles)
             var     = 'intensity_change'
         #-----------------------------------------------------------            
         elif calculation == 'times_more_likely':
+            mv = 50
             dataset = self.times_more_likely_T(intensity, T0 = T0, T1 = T1,
                                                       mode = 'quantiles', quantiles = quantiles)
             var     = 'times_more_likely'
@@ -358,31 +379,37 @@ class Fitted_Obs_Sim():
         if (type(xIndex) != type(None)) and (type(yIndex) != type(None)):
             dataset = dataset.isel(projection_x_coordinate = xIndex,
                                    projection_y_coordinate = yIndex)
+            def two_sigfigs(num):
+                return '%d'%float(f"{num:.{2}g}")
+            def formatVal(q, mv, var): 
+                if (q > mv) or (np.isnan(q)): 
+                    q = 'more than ' + str(mv)
+                elif (var == 'intensity')\
+                  or (var == 'intensity_change')\
+                  or (q < 10):                         
+                    q = '%0.1f'%q
+                else: 
+                    q = two_sigfigs(q)
+                return q
+
+            qs = [dataset[var]]
+            for qi in quantiles:
+                qs.append(dataset[var+'_quantiles'].sel(quantile = qi).values)
+            qs = [formatVal(q, mv, var) for q in qs]
+            
             if report == 'central_CI':
-                return '%0.1f, [%0.1f, %0.1f] %s'%(dataset[var], 
-                                                dataset[var+'_quantiles']\
-                                                    .isel(quantile = 0).values,
-                                                dataset[var+'_quantiles']\
-                                                    .isel(quantile =-1).values,
-                                                dataset.attrs['units'])
+                return '%s (%s — %s) %s'%(qs[0], qs[1], qs[2],
+                                          dataset.attrs['units'].replace('_',' '))
             if report == 'calibrated_confidence':# calibrated language for 90%, 80%, 50% confidence intervals from IPCC AR4 guidance
                 return\
-                       'Central estimate:     %0.1f %s\n'%(dataset[var],dataset.attrs['units'])\
-                      +'Very High confidence: %0.1f to %0.1f %s\n'%(dataset[var+'_quantiles']\
-                                                    .sel(quantile = 0.05).values,
-                                                           dataset[var+'_quantiles']\
-                                                    .sel(quantile = 0.95).values,
-                                                           dataset.attrs['units'])\
-                      +'High confidence:      %0.1f to %0.1f %s\n'%(dataset[var+'_quantiles']\
-                                                    .sel(quantile = 0.1).values,
-                                                           dataset[var+'_quantiles']\
-                                                    .sel(quantile = 0.9).values,
-                                                           dataset.attrs['units'])\
-                      +'Medium confidence:    %0.1f to %0.1f %s\n'%(dataset[var+'_quantiles']\
-                                                    .sel(quantile = 0.25).values,
-                                                           dataset[var+'_quantiles']\
-                                                    .sel(quantile = 0.75).values,
-                                                           dataset.attrs['units'])
+                       'Central estimate:     %s %s\n'%(qs[0],dataset.attrs['units'].replace('_',' '))\
+                      +'Very High confidence: %s to %s %s\n'%(qs[1],qs[6],
+                                                dataset.attrs['units'].replace('_',' '))\
+                      +'High confidence:      %s to %s %s\n'%(qs[2],qs[5],
+                                                dataset.attrs['units'].replace('_',' '))\
+                      +'Medium confidence:    %s to %s %s\n'%(qs[3],qs[4],
+               
+                                                              dataset.attrs['units'].replace('_',' '))
         return dataset
 
     def get_KS_test_p(self, data, distribution, nParams):
@@ -507,11 +534,39 @@ class Fitted_Obs_Sim():
                        user     = 'default',#let users credit themselves for their request
                       ):
         da.attrs[      'creator'] = creator
-        da.attrs[       'source'] = 'Scottish Climate Scenario Decision-Making Web-Tool'
+        da.attrs[       'source'] = 'Scottish Climate Scenario Decision-Making Web-Tool. This data product is built on other data from: UK Climate Projections (UKCP18), UK observations (HadUK-Grid), Global temperature anomalies (HadCRUT5), Regional boundaries from spatialdata.gov.scot.'
         da.attrs[         'user'] = user
         da.attrs['creation_date'] = datetime.today().strftime('%Y-%m-%d')
+        da.attrs[  'institution'] = 'Researcher at The University of Edinburgh, using JASMIN'
+        da.attrs[      'comment'] = 'This data product was produced via a Scottish Government funded ClimateXChange project in 2025/26. ClimateXChange is one of five centres of expertise funded by Scottish Government. The centres work at the interface between policy and research, and provide responsive work in areas of high policy importance: climate change (ClimateXChange), animal disease outbreaks (EPIC), plant health (Scotland’s Plant Health Centre), water (CREW) and knowledge exchange and impact (SEFARI Gateway). The centres of expertise work jointly to make sure policymakers have easy access to research, help prioritise scientific resources in line with society’s priorities and create new partnerships with research institutes and universities.'
         for k in other.keys(): da.attrs[k] = other[k]
         return da
+
+    def download_data(self, da,
+                      fileType = 'netCDF',
+                      other    = dict(),
+                      creator  = 'Climate Hazards Tool',
+                      user     = 'Tool User',
+                      ):
+        self.apply_metadata(da, other, creator, user)
+        if fileType == 'netCDF':
+            da.to_netcdf('hazard_download.nc')
+        if fileType == 'csv': 
+            df = da.to_dataframe()
+            df.attrs = da.attrs
+            with open('hazard_download.csv', 'w', encoding='utf-8') as f:
+                # Write metadata
+                if df.attrs:
+                    for key, value in df.attrs.items():
+                        f.write(f'# {key}: {value}\n')
+        # Write CSV
+                df.to_csv(f, index=True)
+    
+
+        #df.attrs = da.attrs
+        #compression_opts = dict(method='zip',archive_name='out.csv')  
+        #df.to_csv('hazard_download.zip', index=False,
+        #compression=compression_opts) 
 
     def list_dataset_info(self, ds, mode = 'full'):
         '''
@@ -555,20 +610,19 @@ class Fitted_Obs_Sim():
                         info.append(f"    {attr}: {val}")
                 info.append('')
         return info
-
-
+        
 @functools.lru_cache(maxsize=16)
-def init_composite_fit(file, simParams='c,loc1,scale1', nVariates=10000, preProcess=True):
+def init_composite_fit(model_file, grid_size, simParams='c,loc1,scale0,scale1', nVariates=10000, preProcess=True):
     simParams = simParams.split(',')
-    dsObs = xr.open_dataset(fetch_file('extreme_temp/HadUK_%s.nc'%file))
-    dsSim = xr.open_dataset(fetch_file('extreme_temp/%s.nc'%file))
-    grid = xr.open_dataset(fetch_file('extreme_temp/gridWide_g12.nc'))\
+    dsObs = xr.open_dataset(fetch_file('model_fits/obs/'+model_file%'HadUK'))
+    dsSim = xr.open_dataset(fetch_file('model_fits/sim/'+model_file%'UKCP18'))
+    grid = xr.open_dataset(fetch_file('grids/gridWide_g%i.nc'%grid_size))\
              .sel(projection_y_coordinate = slice(4e5,13e5),
                   projection_x_coordinate = slice(0,5e5))
-    
+    dsSim, dsObs, grid = xr.align(dsSim, dsObs, grid, join = 'outer', exclude = ['year', 'ensemble_member'], fill_value  = np.nan)
+
     result = Fitted_Obs_Sim(dsObs, dsSim, grid, simParams = simParams, nVariates = nVariates, preProcess = preProcess)
     return result
-
 
 
 def intensity_from_return_time(compositeFit, covariate, tauReturn):
@@ -627,3 +681,4 @@ def change_in_frequency_ci_report(compositeFit, intensity, cov0, cov1, x_idx, y_
         xIndex=x_idx,
         yIndex=y_idx,
     )
+

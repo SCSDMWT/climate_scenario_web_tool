@@ -9,7 +9,7 @@ from flask import current_app as app
 from flask import render_template, request, make_response, send_file
 
 from . import db
-from .extreme_temp import (
+from .developing_process import (
     init_composite_fit,
     intensity_from_return_time,
     return_time_from_intensity,
@@ -154,7 +154,8 @@ def data_new(function_name, format='geojson'):
 
     hazard_function = hazard['function']
     composite_fit = init_composite_fit(
-        app.config['DATA_FILE_DESC'],
+        hazard['model_file'],
+        hazard['grid_size'],
         simParams='c,loc1,scale1',
         nVariates=1000,
         preProcess=True,
@@ -194,7 +195,8 @@ def ci_report(function_name, x_idx, y_idx):
 
     ci_report_function = hazard['ci_report_function']
     composite_fit = init_composite_fit(
-        app.config['DATA_FILE_DESC'],
+        hazard['model_file'],
+        hazard['grid_size'],
         simParams='c,loc1,scale1',
         nVariates=1000,
         preProcess=True,

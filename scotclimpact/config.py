@@ -31,4 +31,3 @@ class Config:
         'DATA_DIR',
         pooch.os_cache('scotclimpact'),
     )
-    DATA_FILE_DESC = 'GEV_covaraite_fit_tasmax_linear_loc_scale_nFits_1000_parametric_False'

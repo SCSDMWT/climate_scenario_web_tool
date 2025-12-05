@@ -50,6 +50,43 @@ const colorbar = {
             decimal_places: 0,
         },
     },
+    sustained_3day_Tmin: {
+        intensity: {
+            edges: [14, 15, 16, 17, 18, 19, 20, 21],
+            // Colorbrewer YlOrBr-9
+            colors: ["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#993404", "#662506"],
+            // Colorbrewer YlOrBr-8
+            //colors: ["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"].slice().reverse(),
+            // Colorbrewer YlOrBr-7
+            //colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
+            endpoint_type: legend_endpoints.out_of_range,
+            decimal_places: 0,
+        },
+        intensity_change: {
+            edges: [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
+            colors: ["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
+            endpoint_type: legend_endpoints.lower_in_range,
+            decimal_places: 1,
+        },
+        return_time: {
+            edges: [0, 10, 25, 50, 100, 200],
+            // Colorbrewer YlOrBr-7
+            //colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
+            // Colorbrewer YlOrBr-6
+            colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404" ].slice().reverse(),
+            endpoint_type: legend_endpoints.lower_in_range,
+            decimal_places: 0,
+        },
+        frequency_change: {
+            edges: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+            // Colorbrewer YlOrBr-7
+            //colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
+            // Colorbrewer YlOrBr-6
+            colors: ["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404" ],
+            endpoint_type: legend_endpoints.lower_in_range,
+            decimal_places: 0,
+        },
+    },
     extreme_1day_precip: {
         intensity: {
             edges: [50, 75, 100, 125, 150],
@@ -114,6 +151,41 @@ const colorbar = {
 
 const selection_tree = {
     extreme_temp: {
+        next_choice: "#calculation",
+        intensity: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": true,
+            "#intensityGroup_C": false,
+            "#intensityGroup_mm": false,
+            "#covariate2Group": false,
+        },
+        intensity_change: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": true,
+            "#intensityGroup_C": false,
+            "#intensityGroup_mm": false,
+            "#covariate2Group": true,
+        },
+        return_time: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": false,
+            "#intensityGroup_C": true,
+            "#intensityGroup_mm": false,
+            "#covariate2Group": false,
+        },
+        frequency_change: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": false,
+            "#intensityGroup_C": true,
+            "#intensityGroup_mm": false,
+            "#covariate2Group": true,
+        },
+    },
+    sustained_3day_Tmin: {
         next_choice: "#calculation",
         intensity: {
             "#covariateGroup": true,
@@ -228,11 +300,13 @@ const calculation_dropdown_labels = {
 }
 const intensity_label_ids = {
     "extreme_temp": "#intensityParamLabel_C",
+    "sustained_3day_Tmin": "#intensityParamLabel_C",
     "extreme_1day_precip": "#intensityParamLabel_mm",
     "extreme_3day_precip": "#intensityParamLabel_mm",
 }
 const intensity_labels = {
     "extreme_temp": "Hottest temperature (in °C)",
+    "sustained_3day_Tmin": "Highest sustained heat (in °C)",
     "extreme_1day_precip": "Highest 1-day rainfall (in mm)",
     "extreme_1day_precip": "Highest 3-day rainfall (in mm)",
 }
@@ -332,7 +406,7 @@ function update_ui(input_values) {
 
     // Update the legend label's units
     var legend_label = $("#legend-label")[0];
-    if (calculation == "intensity" && (scenario == "extreme_temp")) {
+    if (calculation == "intensity" && (scenario == "extreme_temp" || scenario == "sustained_3day_Tmin")) {
         legend_label.innerHTML = "Legend (in °C):";
     }
     else if (calculation == "intensity" && (scenario == "extreme_1day_precip")) {
@@ -353,6 +427,11 @@ function update_ui(input_values) {
         intensity_value = input_values["#intensityParam_C"];
         intensity_unit = "°C";
         hazard_name = "hottest temperature";
+    }
+    if (scenario == "sustained_3day_Tmin") {
+        intensity_value = input_values["#intensityParam_C"];
+        intensity_unit = "°C";
+        hazard_name = "highest 3-day sustained heat";
     }
     if (scenario == "extreme_1day_precip"){
         intensity_value = input_values["#intensityParam_mm"];
@@ -415,7 +494,7 @@ function make_data_url(input_values, format) {
         url_endpoint.searchParams.append('covariate_comp', input_values["#covariate2Param"]);
     }
 
-    if (scenario == "extreme_temp") {
+    if (scenario == "extreme_temp" || scenario == "sustained_3day_Tmin") {
         if(calculation == "return_time") {
             url_endpoint.searchParams.append('intensity', input_values["#intensityParam_C"]);
         }

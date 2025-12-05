@@ -66,6 +66,65 @@ hazards = {
         model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
         grid_size=12,
     ),
+    ## Sustained cold temperatures
+    'sustained_3day_Tmin_intensity': dict(
+        function=developing_process.intensity_from_return_time,
+        ci_report_function=developing_process.intensity_ci_report,
+        ci_report_url = 'data/ci_report/3day_Tmin_intensity/{x}/{y}?covariate={covariate}&return_time={return_time}',
+        arg_names=['covariate', 'return_time'],
+        arg_types=dict(covariate=float, return_time=int),
+        args=[
+            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
+            list(range(10, 110, 10)),
+        ],
+        result_grid_size=dict(x=54, y=54),
+        model_file='GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
+        grid_size=12,
+    ),
+    'sustained_3day_Tmin_intensity_change': dict(
+        function=developing_process.change_in_intensity,
+        ci_report_function=developing_process.change_in_intensity_ci_report,
+        ci_report_url = 'data/ci_report/3day_Tmin_intensity_change/{x}/{y}?covariate={covariate}&return_time={return_time}&covariate_comp={covariate_comp}',
+        arg_names=['return_time', 'covariate', 'covariate_comp'],
+        arg_types=dict(return_time=int, covariate=float, covariate_comp=float),
+        args=[
+            list(range(10, 110, 10)),
+            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Covariate/Global temperature anomaly
+            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
+        ],
+        result_grid_size=dict(x=54, y=54),
+        model_file='GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
+        grid_size=12,
+    ),
+    'sustained_3day_Tmin_return_time': dict(
+        function=developing_process.return_time_from_intensity,
+        ci_report_function=developing_process.return_time_ci_report,
+        ci_report_url = 'data/ci_report/3day_Tmin_return_time/{x}/{y}?covariate={covariate}&intensity={intensity}',
+        arg_names=['covariate', 'intensity'],
+        arg_types=dict(covariate=float, intensity=int),
+        args=[
+            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
+            list(range(14, 21)),
+        ],
+        result_grid_size=dict(x=54, y=54),
+        model_file='GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
+        grid_size=12,
+    ),
+    'sustained_3day_Tmin_frequency_change': dict(
+        function=developing_process.change_in_frequency,
+        ci_report_function=developing_process.change_in_frequency_ci_report,
+        ci_report_url = 'data/ci_report/3day_Tmin_frequency_change/{x}/{y}?covariate={covariate}&intensity={intensity}&covariate_comp={covariate_comp}',
+        arg_names=['intensity', 'covariate', 'covariate_comp'],
+        arg_types=dict(intensity=int, covariate=float, covariate_comp=float),
+        args=[
+            list(range(14, 21)),
+            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Covariate/Global temperature anomaly
+            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
+        ],
+        result_grid_size=dict(x=54, y=54),
+        model_file='GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
+        grid_size=12,
+    ),
     ## Extreme 1 day precipitation
     'extreme_1day_precip_intensity': dict(
         function=developing_process.intensity_from_return_time,

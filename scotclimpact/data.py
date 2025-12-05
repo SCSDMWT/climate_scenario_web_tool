@@ -24,9 +24,11 @@ def make_pooch(path=pooch.os_cache('scotclimpact')):
             'grids/gridWide_g12.nc': 'md5:0131b839eeab315756c293e623497995',
             'model_fits/obs/GEV_covaraite_fit_HadUK_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc': 'md5:033f678605cb3789447563a3a236745b',
             'model_fits/obs/smoothed_GEV_covaraite_fit_HadUK_1day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc': 'md5:84b9a3a5ed811e40c4f311c1cdf0a771',
+            'model_fits/obs/smoothed_GEV_covaraite_fit_HadUK_3day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc': 'md5:a5b92853a78a81f34cd7545e47e717f3',
             'model_fits/sim/GEV_covaraite_fit_UKCP18_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc': 'md5:a5a1713ded39b694367cebebc9748c2d',
             'model_fits/sim/smoothed_GEV_covaraite_fit_UKCP18_1day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc': 'md5:3219480e3e33312756a377943d45c4fd',
-            },
+            'model_fits/sim/smoothed_GEV_covaraite_fit_UKCP18_3day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc': 'md5:fe369cd03c4f945ad21df25f658c0404',
+        },
     )
 
 def get_pooch(app):

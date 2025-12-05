@@ -80,6 +80,36 @@ const colorbar = {
             decimal_places: 0,
         },
     },
+    extreme_3day_precip: {
+        intensity: {
+            edges: [50, 75, 100, 125, 150],
+            // Colorbrewer PuBu-6
+            colors: ['#f1eef6', '#d0d1e6', '#a6bddb', '#74a9cf', '#2b8cbe', '#045a8d'],
+            endpoint_type: legend_endpoints.out_of_range,
+            decimal_places: 0,
+        },
+        intensity_change: {
+            edges: [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
+            // Colorbrewer PuBu-8
+            colors: ["#fff7fb", "#ece7f2", "#d0d1e6", "#a6bddb", "#74a9cf", "#3690c0", "#0570b0", "#034e7b"],
+            endpoint_type: legend_endpoints.lower_in_range,
+            decimal_places: 1,
+        },
+        return_time: {
+            edges: [0, 10, 25, 50, 100, 200],
+            // Colorbrewer PuBu-6
+            colors: ["#f1eef6", "#d0d1e6", "#a6bddb", "#74a9cf", "#2b8cbe", "#045a8d"].slice().reverse(),
+            endpoint_type: legend_endpoints.lower_in_range,
+            decimal_places: 0,
+        },
+        frequency_change: {
+            edges: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+            // Colorbrewer PuBu-6
+            colors: ["#f1eef6", "#d0d1e6", "#a6bddb", "#74a9cf", "#2b8cbe", "#045a8d"],
+            endpoint_type: legend_endpoints.lower_in_range,
+            decimal_places: 0,
+        },
+    },
 };
 
 const selection_tree = {
@@ -153,6 +183,41 @@ const selection_tree = {
             "#covariate2Group": true,
         },
     },
+    extreme_3day_precip: {
+        next_choice: "#calculation",
+        intensity: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": true,
+            "#intensityGroup_C": false,
+            "#intensityGroup_mm": false,
+            "#covariate2Group": false,
+        },
+        intensity_change: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": true,
+            "#intensityGroup_C": false,
+            "#intensityGroup_mm": false,
+            "#covariate2Group": true,
+        },
+        return_time: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": false,
+            "#intensityGroup_C": false,
+            "#intensityGroup_mm": true,
+            "#covariate2Group": false,
+        },
+        frequency_change: {
+            "#covariateGroup": true,
+            "#calculationGroup": true,
+            "#tauReturnGroup": false,
+            "#intensityGroup_C": false,
+            "#intensityGroup_mm": true,
+            "#covariate2Group": true,
+        },
+    },
 };
 
 const calculation_dropdown_labels = {
@@ -164,10 +229,12 @@ const calculation_dropdown_labels = {
 const intensity_label_ids = {
     "extreme_temp": "#intensityParamLabel_C",
     "extreme_1day_precip": "#intensityParamLabel_mm",
+    "extreme_3day_precip": "#intensityParamLabel_mm",
 }
 const intensity_labels = {
     "extreme_temp": "Hottest temperature (in °C)",
     "extreme_1day_precip": "Highest 1-day rainfall (in mm)",
+    "extreme_1day_precip": "Highest 3-day rainfall (in mm)",
 }
 const calculation_descriptions = {
     "intensity": "<p>Intensity shows the HAZARD that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
@@ -292,6 +359,11 @@ function update_ui(input_values) {
         intensity_unit = "mm";
         hazard_name = "1-day rainfall";
     }
+    if (scenario == "extreme_3day_precip"){
+        intensity_value = input_values["#intensityParam_mm"];
+        intensity_unit = "mm";
+        hazard_name = "3-day rainfall";
+    }
     // Calculation dropdown values
     const calculation_dropdown_items = [
         "#calculation_intensity",
@@ -352,7 +424,7 @@ function make_data_url(input_values, format) {
             url_endpoint.searchParams.append('covariate_comp', input_values["#covariate2Param"]);
         }
     }
-    if (scenario == "extreme_1day_precip") {
+    if (scenario == "extreme_1day_precip" || scenario == "extreme_3day_precip") {
         if(calculation == "return_time") {
             url_endpoint.searchParams.append('intensity', input_values["#intensityParam_mm"]);
         }

@@ -155,23 +155,25 @@ const selection_tree = {
     },
 };
 
+const calculation_dropdown_labels = {
+    "#calculation_intensity": "HAZARD expected to be exceeded in # years",
+    "#calculation_intensity_change": "Change in HAZARD expected in # years",
+    "#calculation_return_time": "Expected return time of HAZARD",
+    "#calculation_return_time_change": "Change in frequency of HAZARD",
+}
+const intensity_label_ids = {
+    "extreme_temp": "#intensityParamLabel_C",
+    "extreme_1day_precip": "#intensityParamLabel_mm",
+}
+const intensity_labels = {
+    "extreme_temp": "Hottest temperature (in °C)",
+    "extreme_1day_precip": "Highest 1-day rainfall (in mm)",
+}
 const calculation_descriptions = {
     "intensity": "<p>Intensity shows the HAZARD that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
     "intensity_change": "<p>Change in Intensity shows the change in the HAZARD that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly of +X_COV °C.</p>",
     "return_time": "<p>Return Time shows the number of years in which a HAZARD of Z_INTENSITY INTENSITY_UNIT is expected to be exceeded at least once at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
     "frequency_change": "<p>Change in Frequency shows how many times more frequent a HAZARD of Z_INTENSITY INTENSITY_UNIT is expected to be seen at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly +X_COV °C.</p>",
-    //"extreme_temp": {
-    //    "intensity": "<p>Intensity shows the hottest temperature that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
-    //    "intensity_change": "<p>Change in Intensity shows the change in the hottest temperature that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly of +X_COV °C.</p>",
-    //    "return_time": "<p>Return Time shows the number of years in which a maximum temperature of Z_INTENSITY °C is expected to be exceeded at least once at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
-    //    "frequency_change": "<p>Change in Frequency shows how many times more frequent a maximum temperature of Z_INTENSITY °C is expected to be seen at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly +X_COV °C.</p>",
-    //},
-    //"extreme_1day_precip": {
-    //    "intensity": "<p>Intensity shows the 1-day rainfall that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
-    //    "intensity_change": "<p>Change in Intensity shows the change in the 1-day rainfall that is expected to be seen in Z_RETURN_TIME years at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly of +X_COV °C.</p>",
-    //    "return_time": "<p>Return Time shows the number of years in which a 1-day rainfall of Z_INTENSITY mm is expected to be exceeded at least once at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
-    //    "frequency_change": "<p>Change in Frequency shows how many times more frequent a maximum temperature of Z_INTENSITY mm is expected to be seen at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly +X_COV °C.</p>",
-    //},
 };
 
 const ui_map = new UIMap('map', tilelayerurl);
@@ -263,7 +265,6 @@ function update_ui(input_values) {
 
     // Update the legend label's units
     var legend_label = $("#legend-label")[0];
-    console.log(legend_label);
     if (calculation == "intensity" && (scenario == "extreme_temp")) {
         legend_label.innerHTML = "Legend (in °C):";
     }
@@ -277,7 +278,8 @@ function update_ui(input_values) {
         legend_label.innerHTML = "Legend:";
     }
 
-    // Insert slider values in the calculation description box
+
+
     var calculation_description = $('#calculation_description')[0];
     var intensity_value, intensity_unit, hazard_name;
     if (scenario == "extreme_temp") {
@@ -290,6 +292,23 @@ function update_ui(input_values) {
         intensity_unit = "mm";
         hazard_name = "1-day rainfall";
     }
+    // Calculation dropdown values
+    const calculation_dropdown_items = [
+        "#calculation_intensity",
+        "#calculation_intensity_change",
+        "#calculation_return_time",
+        "#calculation_return_time_change",
+    ];
+    for (const item_id of calculation_dropdown_items) {
+        var item = $(item_id)[0];
+        const label = calculation_dropdown_labels[item_id].replaceAll("HAZARD", hazard_name);
+        item.innerHTML = label.charAt(0).toUpperCase() + label.slice(1);
+    }
+    // Intensity labels
+    const intensity_label_id = intensity_label_ids[scenario];
+    const intensity_label = $(intensity_label_id)[0];
+    intensity_label.innerHTML = intensity_labels[scenario];
+    // Insert slider values in the calculation description box
     calculation_description.innerHTML = 
         calculation_descriptions[calculation]
             .replaceAll("X_COV", input_values["#covariateParam"])

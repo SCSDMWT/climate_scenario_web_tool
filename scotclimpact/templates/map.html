@@ -33,7 +33,7 @@
           <option value="4.0"></option>
         </datalist>
         <div class="p-2 input-section" id="covariateGroup">
-          <label for="covariateParam" class="form-label" id="covariateParamLabel">Global temperature anomaly (in °C):</label>
+          <label for="covariateParam" class="form-label" id="covariateParamLabel">Set global warming level (in °C):</label>
           <div class="slider-options">
             <input type="range" class="slider" min="0" max="4" step="0.5" defaultValue="2.0" id="covariateParam" list="covariateValues"/>
             <div id="covariateTicks" class="ticks">
@@ -72,10 +72,10 @@
       <div class="p-3 input-section" id="calculationGroup">
         <label for="calculation" class="form-label" id="calculationLabel">Calculation:</label>
         <select class="form-select" name="calculation" id="calculation">
-          <option value="intensity">Intensity</option>
-          <option value="intensity_change">Change in Intensity</option>
-          <option value="return_time">Return Time</option>
-          <option value="frequency_change">Change in Frequency</option>
+          <option id="calculation_intensity" value="intensity">Intensity</option>
+          <option id="calculation_intensity_change" value="intensity_change">Change in Intensity</option>
+          <option id="calculation_return_time" value="return_time">Return Time</option>
+          <option id="calculation_return_time_change" value="frequency_change">Change in Frequency</option>
         </select>
 
         <datalist id="tauReturnValues">
@@ -92,7 +92,7 @@
         </datalist>
 
         <div id="tauReturnGroup" class="input-item">
-          <label for="tauReturnParam" class="form-label" id="tauReturnParamLabel">Return time (in years):</label>
+          <label for="tauReturnParam" class="form-label" id="tauReturnParamLabel">Set the return time (in years) to visualise the 1-in-# year extreme:</label>
           <div class="slider-options">
             <input type="range" class="slider" min="10" max="100" step="10" defaultValue="50" id="tauReturnParam" list="tauReturnValues"/>
             <div id="tauReturnTicks" class="ticks">
@@ -159,7 +159,7 @@
         </div>
 
         <div id="covariate2Group" class="input-item">
-          <label for="covariate2Param" class="form-label" id="covariate2ParamLabel">Comparitative global temperature anomaly (in °C):</label>
+          <label for="covariate2Param" class="form-label" id="covariate2ParamLabel">Set cooler reference global warming level for comparison (in °C):</label>
           <div class="slider-options">
             <input type="range" class="slider" min="0" max="4" step="0.5" defaultValue="2.0" id="covariate2Param" list="covariateValues"/>
             <div id="covariate2Ticks" class="ticks">

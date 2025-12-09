@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import {apply_color_map, legend_endpoints} from "../src/color_map.js";
 import {draw_legend} from "../src/legend.js";
 import {UIMap} from "../src/map.js";
+import {make_slider} from "../src/slider.js";
 
 function check_disclaimer_cookie() {
     /// Redirects to the disclaimer page if the ToS have not been accepted.
@@ -12,6 +13,7 @@ function check_disclaimer_cookie() {
     }
 }
 
+var hazard_metadata = {};
 const colorbar = {
     extreme_temp: {
         intensity: {
@@ -149,6 +151,7 @@ const colorbar = {
     },
 };
 
+/*
 const selection_tree = {
     extreme_temp: {
         next_choice: "#calculation",
@@ -316,6 +319,7 @@ const calculation_descriptions = {
     "return_time": "<p>Return Time shows the number of years in which a HAZARD of Z_INTENSITY INTENSITY_UNIT is expected to be exceeded at least once at a global temperature anomaly of +X_COV °C compared to the pre-industrial average.</p>",
     "frequency_change": "<p>Change in Frequency shows how many times more frequent a HAZARD of Z_INTENSITY INTENSITY_UNIT is expected to be seen at a global temperature anomaly of +Y_COV °C compared to a global temperature anomaly +X_COV °C.</p>",
 };
+*/
 
 const ui_map = new UIMap('map', tilelayerurl);
 
@@ -359,41 +363,22 @@ async function update_boundary_layer(layer_name) {
 function update_ui(input_values) {
     
     const scenario = input_values["#scenario"];
+    //const calculation = input_values["#calculation"];
+
+    /*
     const next_choice = $(selection_tree[scenario].next_choice)[0].value;
+    */
 
-    // Update slider visibility
-    for (let ui_item_id in selection_tree[scenario][next_choice]) {
-        const ui_item = $(ui_item_id)[0];
-        const ui_item_is_visible = selection_tree[scenario][next_choice][ui_item_id];
-        ui_item.style.display = ui_item_is_visible ? "block" : "none";
-    }
 
-    // Enforce Covariate 1/2 value constraints
+    // Enforce Covariate 1 and 2 value constraints
     const calculation = input_values["#calculation"];
-    const covariate_max = parseFloat($('#covariateParam')[0].max);
-    const covariate_step = parseFloat($('#covariateParam')[0].step);
-    if ((calculation.search('_change') > 0) && (input_values['#covariateParam'] >= covariate_max - covariate_step)) {
-        $('#covariateParam')[0].value = covariate_max - covariate_step;
+    const covariate_min = parseFloat($('#param_covariate')[0].min);
+    const covariate_step = parseFloat($('#param_covariate')[0].step);
+    if ((calculation.search('_change') > 0) && (input_values['#param_covariate'] == covariate_min)) {
+        $('#param_covariate')[0].value = covariate_min + covariate_step;
     }
-    if (input_values['#covariate2Param'] <= input_values["#covariateParam"] + covariate_step) {
-        $('#covariate2Param')[0].value = input_values["#covariateParam"] + covariate_step;
-    }
-
-    // Show selected tick with a special class.
-    const slider_ticks_pairs = [
-        ["#covariateParam", "#covariateTicks", 1],
-        ["#covariate2Param", "#covariate2Ticks", 1],
-        ["#tauReturnParam", "#tauReturnTicks", 0],
-        ["#intensityParam_C", "#intensityTicks_C", 0],
-        ["#intensityParam_mm", "#intensityTicks_mm", 0],
-    ];
-    for (const [slider_id, tick_collection, decimal_places] of slider_ticks_pairs) {
-        const slider_txt = input_values[slider_id].toFixed(decimal_places);
-        for (var tick of $(tick_collection)[0].children) {
-            tick.classList = (tick.innerHTML === slider_txt)
-                ? "ticks-txt ticks-on"
-                : "ticks-txt";
-        }
+    if (input_values['#param_covariate_comp'] >= input_values["#param_covariate"] - covariate_step) {
+        $('#param_covariate_comp')[0].value = input_values["#param_covariate"] - covariate_step;
     }
 
     // Update links for downloading datasets.
@@ -404,6 +389,7 @@ function update_ui(input_values) {
         'href': make_data_url(input_values, 'csv'),
     });
 
+    /* FIXME
     // Update the legend label's units
     var legend_label = $("#legend-label")[0];
     if (calculation == "intensity" && (scenario == "extreme_temp" || scenario == "sustained_3day_Tmin")) {
@@ -418,9 +404,11 @@ function update_ui(input_values) {
     else {
         legend_label.innerHTML = "Legend:";
     }
+    */
 
 
 
+    /*
     var calculation_description = $('#calculation_description')[0];
     var intensity_value, intensity_unit, hazard_name;
     if (scenario == "extreme_temp") {
@@ -443,18 +431,7 @@ function update_ui(input_values) {
         intensity_unit = "mm";
         hazard_name = "3-day rainfall";
     }
-    // Calculation dropdown values
-    const calculation_dropdown_items = [
-        "#calculation_intensity",
-        "#calculation_intensity_change",
-        "#calculation_return_time",
-        "#calculation_return_time_change",
-    ];
-    for (const item_id of calculation_dropdown_items) {
-        var item = $(item_id)[0];
-        const label = calculation_dropdown_labels[item_id].replaceAll("HAZARD", hazard_name);
-        item.innerHTML = label.charAt(0).toUpperCase() + label.slice(1);
-    }
+
     // Intensity labels
     const intensity_label_id = intensity_label_ids[scenario];
     const intensity_label = $(intensity_label_id)[0];
@@ -470,7 +447,17 @@ function update_ui(input_values) {
             .replaceAll("Z_INTENSITY", intensity_value);
 
 
-    return colorbar[scenario][next_choice] // FIXME
+    */
+    let hazard_meta = get_hazard_function_meta(scenario, calculation);
+    var calculation_description_text = hazard_meta["calculation_description_template"];
+    for (const arg_name of hazard_meta["arg_names"]) {
+        const arg_value = $("#param_" + arg_name)[0].value;
+        calculation_description_text = calculation_description_text.replaceAll("{" + arg_name + "}", arg_value);
+    }
+    var calculation_description = $('#calculation_description')[0];
+    calculation_description.innerHTML = calculation_description_text;
+
+    return colorbar[scenario][calculation] // FIXME
 }
 
 function make_data_url(input_values, format) {
@@ -479,11 +466,17 @@ function make_data_url(input_values, format) {
 
     var url_endpoint = new URL(
         window.location.protocol + "//" + window.location.host + 
-        window.location.pathname + "/data/map/" + scenario+ "_" + calculation
+        window.location.pathname + "/data/map/" + scenario + "_" + calculation
         + (format ? "/" + format : "")
     ); 
 
+    let hazard_meta = get_hazard_function_meta(scenario, calculation);
+    for (const arg_name of hazard_meta["arg_names"]) {
+        const arg_value = input_values["#param_" + arg_name];
+        url_endpoint.searchParams.append(arg_name, arg_value);
+    }
 
+    /*
     url_endpoint.searchParams.append('covariate', input_values["#covariateParam"]);
 
     if (calculation == "intensity") {
@@ -512,6 +505,7 @@ function make_data_url(input_values, format) {
             url_endpoint.searchParams.append('covariate_comp', input_values["#covariate2Param"]);
         }
     }
+    */
     return url_endpoint.href;
 
 }
@@ -519,37 +513,49 @@ function make_data_url(input_values, format) {
 /// Get the values of the input elements in the UI
 function get_input_values() {
     var result = new Object();
-    const slider_ids = [
-        "#covariateParam",
-        "#covariate2Param",
-        "#tauReturnParam",
-        "#intensityParam_C",
-        "#intensityParam_mm",
-    ];
+
     const dropdown_ids = [
         "#scenario",
         "#calculation",
     ];
-
-    for (const id of slider_ids) {
-        result[id] = parseFloat($(id).val());
-    }
     for (const id of dropdown_ids) {
         result[id] = $(id)[0].value;
     }
 
-    const calculation = $("#calculation")[0].value;
-    const covariate_max = parseFloat($('#covariateParam')[0].max);
-    const covariate_step = parseFloat($('#covariateParam')[0].step);
+    /*
+    const slider_ids = [
+        "#param_covariate",
+        "#param_covariate_comp",
+        //"#tauReturnParam",
+        //"#intensityParam_C",
+        //"#intensityParam_mm",
+    ];
+    for (const id of slider_ids) {
+        result[id] = parseFloat($(id).val());
+    }
+    */
 
-    // Ensure covariate < 4.0 if comparing different scenarios
-    if (calculation.search('_change') > 0 && result['#covariateParam'] >= covariate_max - covariate_step) {
-        result["#covariateParam"] = covariate_max - covariate_step;
+    // Get hazard specific inputs
+    const scenario = result["#scenario"];
+    const calculation = result["#calculation"];
+    let hazard_meta = get_hazard_function_meta(scenario, calculation);
+    for (const arg_name of hazard_meta["arg_names"]) {
+        const input_id = "#param_" + arg_name;
+        const input_value = $(input_id)[0].value;
+        result[input_id] = input_value;
     }
 
-    // Ensure covariate1 < covariate2
-    if (result['#covariate2Param'] <= result["#covariateParam"] + covariate_step) {
-        result['#covariate2Param'] = result["#covariateParam"] + covariate_step;
+    const covariate_min = parseFloat($('#param_covariate')[0].min);
+    const covariate_step = parseFloat($('#param_covariate')[0].step);
+
+    // Ensure covariate < 4.0 if comparing different scenarios
+    if (calculation.search('_change') > 0 && result['#param_covariate'] == covariate_min) {
+        result["#param_covariate"] = covariate_min + covariate_step;
+    }
+
+    // Ensure covariate1 > covariate2
+    if (result['#param_covariate_comp'] >= result["#param_covariate"] - covariate_step) {
+        result['#param_covariate_comp'] = result["#param_covariate"] - covariate_step;
     }
     return result;
 }
@@ -567,15 +573,125 @@ async function on_user_input() {
 
     const url_endpoint = make_data_url(input_values, '');
     await update_data_layer(url_endpoint, colorbar);
-    draw_legend(colorbar.edges, colorbar.colors, colorbar.endpoint_type, colorbar.decimal_places);
+    draw_legend(colorbar.edges, colorbar.colors, colorbar.endpoint_type, colorbar.decimal_places); //TODO colobar in metadata from server
 }
 
-check_disclaimer_cookie();
+// --- Initialize the user interface
 
+/// Populate hazard_metadata with data from the server.
+async function get_hazard_metadata() {
+    const url = new URL(
+        window.location.protocol + "//" + window.location.host + "/" +
+        window.location.pathname + "/data/metadata"
+    ); 
+    let response = await fetch(url);
+    hazard_metadata = await response.json();
+}
+
+function get_hazard_function_meta(scenario, calculation) {
+    let hazard = hazard_metadata["ui_selection"][scenario]["calculations"][calculation];
+    return hazard_metadata["hazards"][hazard];
+}
+
+function on_calculation_change() {
+    let scenario = $("#scenario")[0].value;
+    let calculation = $("#calculation")[0].value;
+    let hazard_meta = get_hazard_function_meta(scenario, calculation);
+
+    // Update comparitave covariate visibility
+    let covariate_comp = $("#covariate2Group")[0];
+    covariate_comp.style.display = hazard_meta["arg_names"].some(e => e === "covariate_comp") ? "block" : "none";
+
+    // Create sliders for other arguments.
+    $("#sliderGroup")[0].textContent = "";
+
+    let arg_meta = hazard_meta["arg_names"].map(function(a, i) { return [a, hazard_meta["args"][i], hazard_meta["arg_labels"][i]]; });
+    for (const [arg_name, arg_range, arg_label] of arg_meta) {
+        if (arg_label == '')
+            continue;
+        make_slider({
+            range_id: "param_" + arg_name,
+            values: arg_range,
+            label: arg_label,
+            root_div_id: "sliderGroup",
+            on_user_input: on_user_input,
+        });
+    }
+
+    // Update the legend
+    // Update calculation description
+
+    on_user_input();
+}
+
+function update_calculation_options() {
+    let scenario_selector = $("#scenario")[0];
+    let calculation_selector = $("#calculation")[0];
+    let scenario = scenario_selector.value;
+    for (var calculation_option of calculation_selector.options) {
+        const calculation_id = calculation_option.value;
+        let hazard = hazard_metadata["ui_selection"][scenario]["calculations"][calculation_id];
+        let label_text = hazard_metadata["hazards"][hazard]["calculation_dropdown_label"];
+        calculation_option.innerText = label_text;
+    }
+    on_calculation_change();
+}
+
+function on_scenario_change() {
+    // Update calculation dropdown options
+    update_calculation_options();
+    // Update datalayer
+    on_user_input();
+}
+
+/// Update 
+async function init_ui() {
+    check_disclaimer_cookie();
+
+    await get_hazard_metadata();
+
+    let scenario_selector = $("#scenario")[0];
+    scenario_selector.oninput = on_scenario_change;
+
+    $("#param_covariate")[0].oninput = on_user_input;
+    $("#param_covariate_comp")[0].oninput = on_user_input;
+
+    for (const scenario in hazard_metadata["ui_selection"]) {
+        const option = document.createElement("option");
+        const hazard_label_text = hazard_metadata["ui_selection"][scenario]["ui_label"];
+        const hazard_label = document.createTextNode(hazard_label_text);
+        option.setAttribute("value", scenario);
+        option.appendChild(hazard_label);
+        scenario_selector.appendChild(option);
+    }
+    // Update calculation dropdown options -- set the supported hazards
+    update_calculation_options();
+
+    // Set what happens when the calculation is changed.
+    let calculation_selector = $("#calculation")[0];
+    calculation_selector.oninput = on_calculation_change;
+
+    var opacityInput = $("#opacityInput")[0];
+    opacityInput.value = 1.0;
+    opacityInput.oninput = function() {
+        const opacity = parseFloat(opacityInput.value);
+        ui_map.set_data_layer_opacity(opacity);
+    }
+
+    var boundaryInput = $("#boundaryLayer")[0];
+    boundaryInput.oninput = async function() {
+        const boundary_layer = boundaryInput.value;
+        await update_boundary_layer(boundary_layer);
+    }
+
+    boundaryInput.value = "none"
+    await update_boundary_layer("none");
+}
+
+
+/*
 $("#covariateParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">1.5</span>"; 
-$("#covariateParam")[0].oninput = on_user_input;
 $("#covariate2ParamLabel")[0].value = "Covariate 2: <span style=\"font-weight:bold\">1.5</span>"; 
-$("#covariate2Param")[0].oninput = on_user_input;
 $("#tauReturnParamLabel")[0].value = "Covariate: <span style=\"font-weight:bold\">100</span>"; 
 $("#tauReturnParam")[0].oninput = on_user_input;
 $("#intensityParamLabel_C")[0].value = "Intensity: <span style=\"font-weight:bold\">100</span>"; 
@@ -583,24 +699,14 @@ $("#intensityParam_C")[0].oninput = on_user_input;
 
 //$("#intensityParamLabel_mm")[0].value = "Intensity: <span style=\"font-weight:bold\">100</span>"; 
 $("#intensityParam_mm")[0].oninput = on_user_input;
+*/
 
-$("#scenario")[0].oninput = on_user_input; 
-$("#calculation")[0].oninput = on_user_input; 
+//$("#scenario")[0].oninput = on_user_input; 
+//$("#calculation")[0].oninput = on_user_input; 
 
-var opacityInput = $("#opacityInput")[0];
-opacityInput.value = 1.0;
-opacityInput.oninput = function() {
-    const opacity = parseFloat(opacityInput.value);
-    ui_map.set_data_layer_opacity(opacity);
-}
 
-var boundaryInput = $("#boundaryLayer")[0];
-boundaryInput.oninput = async function() {
-    const boundary_layer = boundaryInput.value;
-    await update_boundary_layer(boundary_layer);
-}
 
-on_user_input();
+await init_ui();
+//on_user_input();
 
-boundaryInput.value = "none"
-await update_boundary_layer("none");
+

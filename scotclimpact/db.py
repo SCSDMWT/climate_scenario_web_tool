@@ -49,7 +49,7 @@ def has_results(**kwargs):
     with pgdb.get_cursor() as cursor:
         cursor.execute(f"SELECT count(id) FROM hazard_data WHERE {where_clause};")
         result = cursor.fetchall()
-        return len(result) > 0
+        return result[0][0] > 0
 
 
 def get_json_hazard_data(**kwargs):

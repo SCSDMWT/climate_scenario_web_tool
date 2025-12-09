@@ -23,7 +23,7 @@ from .developing_process import (
 from .data_helpers import xarray_to_geojson, is_number, validate_args, str_lower
 from .boundary_layer import is_valid_boundary_layer, get_boundary_layer
 from .cache import get_cache
-from .hazards import hazards
+from .hazards import (ui_selection, hazards)
 
 def menu_items():
     '''Returns a list of named tuples describing the items in the navigation menu'''
@@ -132,6 +132,31 @@ def parse_and_validate_args(hazard):
             return []
     return args
 
+
+@app.route('/data/metadata')
+def get_metadata():
+    """Return metadata that the client needs to draw UI elements"""
+    client_keys = [
+        "arg_names",
+        "arg_labels",
+        "calculation_dropdown_label",
+        "calculation_description_template",
+        "args",
+    ]
+    def trim_for_client(hazard):
+        return {
+            key: hazard.get(key, '')
+            for key in client_keys
+        }
+    hazards_ = {
+        hazard_name: trim_for_client(hazard)
+        for hazard_name, hazard
+        in hazards.items()
+    }
+    result = dict(ui_selection=ui_selection, hazards=hazards_)
+    return make_json_response(result)
+
+
 @app.route('/data/map/<function_name>')
 @app.route('/data/map/<function_name>/<format>')
 @get_cache().cached(timeout=60, query_string=True)
@@ -148,15 +173,17 @@ def data_new(function_name, format='geojson'):
     if not args:
         return "Invalid arguments", 400
     if format=='geojson' and db.has_results(function=function_name, **request.args):
+        print(f'from db: {function_name}')
         return make_json_response(
             db.get_json_hazard_data(function=function_name, **request.args)
         )
 
+    print(f'calculating: {function_name}')
     hazard_function = hazard['function']
     composite_fit = init_composite_fit(
         hazard['model_file'],
         hazard['grid_size'],
-        simParams='c,loc1,scale1',
+        simParams='c,loc1,scale0,scale1',
         nVariates=1000,
         preProcess=True,
     )
@@ -197,7 +224,7 @@ def ci_report(function_name, x_idx, y_idx):
     composite_fit = init_composite_fit(
         hazard['model_file'],
         hazard['grid_size'],
-        simParams='c,loc1,scale1',
+        simParams='c,loc1,scale0,scale1',
         nVariates=1000,
         preProcess=True,
     )

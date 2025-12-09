@@ -1,5 +1,18 @@
 from . import developing_process
 
+
+ui_selection = {
+    "extreme_temp": dict(
+        ui_label="Extreme Temperature",
+        calculations=dict(
+            intensity="extreme_temp_intensity",
+            intensity_change="extreme_temp_intensity_change",
+            return_time="extreme_temp_return_time",
+            frequency_change="extreme_temp_frequency_change",
+        ),
+    ),
+}
+
 '''
 A dictionary containing functions that calculate hazard data.
 The values are names used by routes.py and db.py to find a relavant
@@ -12,6 +25,9 @@ hazards = {
         function=developing_process.intensity_from_return_time,
         ci_report_function=developing_process.intensity_ci_report,
         ci_report_url = 'data/ci_report/extreme_temp_intensity/{x}/{y}?covariate={covariate}&return_time={return_time}',
+        calculation_dropdown_label="Hottest temperature expected to be exceeded in # years.",
+        calculation_description_template="<p>Intensity shows the hottest temperature that is expected to be seen in {return_time} years at a global warming level of +{covariate} °C compared to the pre-industrial average.</p>",
+        arg_labels=['', 'Set the return time (in years) to visualise the 1-in-# year extreme:'],
         arg_names=['covariate', 'return_time'],
         arg_types=dict(covariate=float, return_time=int),
         args=[
@@ -26,6 +42,9 @@ hazards = {
         function=developing_process.change_in_intensity,
         ci_report_function=developing_process.change_in_intensity_ci_report,
         ci_report_url = 'data/ci_report/extreme_temp_intensity_change/{x}/{y}?covariate={covariate}&return_time={return_time}&covariate_comp={covariate_comp}',
+        calculation_dropdown_label="Change in hottest temperature expected in # years.",
+        calculation_description_template="<p>Change in Intensity shows the change in the hottest temperature that is expected to be seen in {return_time} years at a global warming level of +{covariate} °C compared to a global warming level of +{covariate_comp} °C.</p>",
+        arg_labels=['Set the return time (in years) to visualise the 1-in-# year extreme:', '', ''],
         arg_names=['return_time', 'covariate', 'covariate_comp'],
         arg_types=dict(return_time=int, covariate=float, covariate_comp=float),
         args=[
@@ -41,6 +60,8 @@ hazards = {
         function=developing_process.return_time_from_intensity,
         ci_report_function=developing_process.return_time_ci_report,
         ci_report_url = 'data/ci_report/extreme_temp_return_time/{x}/{y}?covariate={covariate}&intensity={intensity}',
+        calculation_dropdown_label="Expected return time of hottest temperature.",
+        arg_labels=['', 'Hottest temperature (in °C):'],
         arg_names=['covariate', 'intensity'],
         arg_types=dict(covariate=float, intensity=int),
         args=[
@@ -55,6 +76,8 @@ hazards = {
         function=developing_process.change_in_frequency,
         ci_report_function=developing_process.change_in_frequency_ci_report,
         ci_report_url = 'data/ci_report/extreme_temp_frequency_change/{x}/{y}?covariate={covariate}&intensity={intensity}&covariate_comp={covariate_comp}',
+        calculation_dropdown_label="Change in frequency of hottest temperature.",
+        arg_labels=['Hottest temperature (in °C):', '', ''],
         arg_names=['intensity', 'covariate', 'covariate_comp'],
         arg_types=dict(intensity=int, covariate=float, covariate_comp=float),
         args=[

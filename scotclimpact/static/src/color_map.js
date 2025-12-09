@@ -32,11 +32,11 @@ export function make_legend_labels_out_of_range(edges, decimal_places) {
 export function make_legend_labels(edges, range = legend_endpoints.out_of_range, decimal_places = 0) {
     const result = make_legend_labels_out_of_range(edges, decimal_places);
     
-    if (range == legend_endpoints.in_range)
+    if (range == legend_endpoints.in_range || range == "in_range")
         return result.slice(1, -1);
-    if (range == legend_endpoints.lower_in_range)
+    if (range == legend_endpoints.lower_in_range || range == "lower_in_range")
         return result.slice(1);
-    if (range == legend_endpoints.upper_in_range)
+    if (range == legend_endpoints.upper_in_range || range == "upper_in_range")
         return result.slice(0, -1);
 
     return result;

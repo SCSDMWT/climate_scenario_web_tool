@@ -456,8 +456,6 @@ function update_ui(input_values) {
     }
     var calculation_description = $('#calculation_description')[0];
     calculation_description.innerHTML = calculation_description_text;
-
-    return colorbar[scenario][calculation] // FIXME
 }
 
 function make_data_url(input_values, format) {
@@ -564,7 +562,7 @@ var previous_input_values = {};
 async function on_user_input() {
     /// Handler for UI events
     const input_values = get_input_values();
-    const colorbar = update_ui(input_values);
+    update_ui(input_values);
 
     // Early exit if nothing changed.
     if (JSON.stringify(previous_input_values) === JSON.stringify(input_values))
@@ -572,8 +570,21 @@ async function on_user_input() {
     previous_input_values = input_values;
 
     const url_endpoint = make_data_url(input_values, '');
+    const colorbar = get_hazard_function_meta(input_values["#scenario"], input_values["#calculation"]).legend;
     await update_data_layer(url_endpoint, colorbar);
-    draw_legend(colorbar.edges, colorbar.colors, colorbar.endpoint_type, colorbar.decimal_places); //TODO colobar in metadata from server
+}
+
+
+function update_legend() {
+    let scenario = $("#scenario")[0].value;
+    let calculation = $("#calculation")[0].value;
+    let hazard_meta = get_hazard_function_meta(scenario, calculation);
+
+    const legend = hazard_meta.legend;
+    draw_legend(legend.edges, legend.colors, legend.endpoint_type, legend.decimal_places);
+
+    const legend_label = $("#legend-label")[0];
+    legend_label.innerText = legend.label;
 }
 
 // --- Initialize the user interface
@@ -622,6 +633,7 @@ function on_calculation_change() {
     // Update calculation description
 
     on_user_input();
+    update_legend();
 }
 
 function update_calculation_options() {
@@ -642,6 +654,7 @@ function on_scenario_change() {
     update_calculation_options();
     // Update datalayer
     on_user_input();
+    update_legend();
 }
 
 /// Update 

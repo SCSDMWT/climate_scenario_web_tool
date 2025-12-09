@@ -37,6 +37,14 @@ hazards = {
         result_grid_size=dict(x=54, y=54),
         model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
         grid_size=12,
+        legend=dict(
+            edges=[25, 27, 29, 31, 33, 35, 37, 39],
+            # Colorbrewer YlOrBr-9
+            colors=["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#993404", "#662506"],
+            endpoint_type="out_of_range",
+            decimal_places=0,
+            label="Legend (in °C):",
+        ),
     ),
     'extreme_temp_intensity_change': dict(
         function=developing_process.change_in_intensity,
@@ -55,6 +63,13 @@ hazards = {
         result_grid_size=dict(x=54, y=54),
         model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
         grid_size=12,
+        legend=dict(
+            edges=[0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
+            colors=["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
+            endpoint_type="lower_in_range",
+            decimal_places=1,
+            label="Legend:",
+        ),
     ),
     'extreme_temp_return_time': dict(
         function=developing_process.return_time_from_intensity,
@@ -71,6 +86,14 @@ hazards = {
         result_grid_size=dict(x=54, y=54),
         model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
         grid_size=12,
+        legend=dict(
+            edges=[0, 10, 25, 50, 100, 200],
+            # Colorbrewer YlOrBr-6
+            colors=list(reversed(["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404" ])),
+            endpoint_type="lower_in_range",
+            decimal_places=0,
+            label="Legend (in years):",
+        ),
     ),
     'extreme_temp_frequency_change': dict(
         function=developing_process.change_in_frequency,
@@ -88,6 +111,14 @@ hazards = {
         result_grid_size=dict(x=54, y=54),
         model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
         grid_size=12,
+        legend=dict(
+            edges=[1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+            # Colorbrewer YlOrBr-6
+            colors=["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404" ],
+            endpoint_type="lower_in_range",
+            decimal_places=0,
+            label="Legend:",
+        ),
     ),
     ## Sustained cold temperatures
     'sustained_3day_Tmin_intensity': dict(

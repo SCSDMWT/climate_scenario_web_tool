@@ -142,6 +142,7 @@ def get_metadata():
         "calculation_dropdown_label",
         "calculation_description_template",
         "args",
+        "legend",
     ]
     def trim_for_client(hazard):
         return {

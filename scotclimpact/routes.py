@@ -11,14 +11,6 @@ from flask import render_template, request, make_response, send_file
 from . import db
 from .developing_process import (
     init_composite_fit,
-    intensity_from_return_time,
-    return_time_from_intensity,
-    change_in_intensity,
-    change_in_frequency,
-    intensity_ci_report,
-    return_time_ci_report,
-    change_in_intensity_ci_report,
-    change_in_frequency_ci_report,
 )
 from .data_helpers import xarray_to_geojson, is_number, validate_args, str_lower
 from .boundary_layer import is_valid_boundary_layer, get_boundary_layer
@@ -228,6 +220,7 @@ def ci_report(function_name, x_idx, y_idx):
         simParams='c,loc1,scale0,scale1',
         nVariates=1000,
         preProcess=True,
+        intensityUnits=hazard['intensityUnits'],
     )
 
     result = ci_report_function(composite_fit, *args)

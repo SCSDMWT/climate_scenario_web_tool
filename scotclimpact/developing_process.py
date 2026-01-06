@@ -612,7 +612,7 @@ class Fitted_Obs_Sim():
         return info
         
 @functools.lru_cache(maxsize=16)
-def init_composite_fit(model_file, grid_size, simParams='c,loc1,scale0,scale1', nVariates=10000, preProcess=True):
+def init_composite_fit(model_file, grid_size, simParams='c,loc1,scale0,scale1', nVariates=10000, preProcess=True, **kwargs):
     simParams = simParams.split(',')
     dsObs = xr.open_dataset(fetch_file('model_fits/obs/'+model_file%'HadUK'))
     dsSim = xr.open_dataset(fetch_file('model_fits/sim/'+model_file%'UKCP18'))
@@ -621,8 +621,7 @@ def init_composite_fit(model_file, grid_size, simParams='c,loc1,scale0,scale1', 
                   projection_x_coordinate = slice(0,5e5))
     dsSim, dsObs, grid = xr.align(dsSim, dsObs, grid, join = 'outer', exclude = ['year', 'ensemble_member'], fill_value  = np.nan)
 
-    result = Fitted_Obs_Sim(dsObs, dsSim, grid, simParams = simParams, nVariates = nVariates, preProcess = preProcess)
-    return result
+    return Fitted_Obs_Sim(dsObs, dsSim, grid, simParams = simParams, nVariates = nVariates, preProcess = preProcess, **kwargs)
 
 
 def intensity_from_return_time(compositeFit, covariate, tauReturn):

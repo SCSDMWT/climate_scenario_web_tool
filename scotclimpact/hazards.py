@@ -64,6 +64,7 @@ hazards = {
         result_grid_size=dict(x=54, y=54),
         model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
         grid_size=12,
+        intensityUnits=u"\u00b0C",
         legend=dict(
             edges=[25, 27, 29, 31, 33, 35, 37, 39],
             # Colorbrewer YlOrBr-9
@@ -153,7 +154,7 @@ hazards = {
     'sustained_3day_Tmin_intensity': dict(
         function=developing_process.intensity_from_return_time,
         ci_report_function=developing_process.intensity_ci_report,
-        ci_report_url = 'data/ci_report/3day_Tmin_intensity/{x}/{y}?covariate={covariate}&return_time={return_time}',
+        ci_report_url = 'data/ci_report/sustained_3day_Tmin_intensity/{x}/{y}?covariate={covariate}&return_time={return_time}',
         calculation_dropdown_label="Highest 3-day sustained heat expected to be exceeded in # years.",
         calculation_description_template="<p>Intensity shows the highest 3-day sustained haet that is expected to be seen in {return_time} years at a global warming level of +{covariate} °C compared to the pre-industrial average.</p>",
         arg_labels=['', 'Set the return time (in years) to visualise the 1-in-# year extreme:'],
@@ -164,8 +165,9 @@ hazards = {
             list(range(10, 110, 10)),
         ],
         result_grid_size=dict(x=54, y=54),
-        model_file='GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
+        model_file='exclude_GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
         grid_size=12,
+        intensityUnits=u"\u00b0C",
         legend=dict(
             edges=[14, 15, 16, 17, 18, 19, 20, 21],
             # Colorbrewer YlOrBr-9
@@ -178,7 +180,7 @@ hazards = {
     'sustained_3day_Tmin_intensity_change': dict(
         function=developing_process.change_in_intensity,
         ci_report_function=developing_process.change_in_intensity_ci_report,
-        ci_report_url = 'data/ci_report/3day_Tmin_intensity_change/{x}/{y}?covariate={covariate}&return_time={return_time}&covariate_comp={covariate_comp}',
+        ci_report_url = 'data/ci_report/sustained_3day_Tmin_intensity_change/{x}/{y}?covariate={covariate}&return_time={return_time}&covariate_comp={covariate_comp}',
         calculation_dropdown_label="Change in highest 3-day sustained heat expected in # years",
         calculation_description_template="<p>Change in Intensity shows the change in the highest 3-day sustained heat that is expected to be seen in {return_time} years at a global warming level of +{covariate} °C compared to a global warming level of +{covariate_comp} °C.</p>",
         arg_labels=['Set the return time (in years) to visualise the 1-in-# year extreme:', '', ''],
@@ -190,7 +192,7 @@ hazards = {
             [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=54, y=54),
-        model_file='GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
+        model_file='exclude_GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
         grid_size=12,
         legend=dict(
             edges=[0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
@@ -203,7 +205,7 @@ hazards = {
     'sustained_3day_Tmin_return_time': dict(
         function=developing_process.return_time_from_intensity,
         ci_report_function=developing_process.return_time_ci_report,
-        ci_report_url = 'data/ci_report/3day_Tmin_return_time/{x}/{y}?covariate={covariate}&intensity={intensity}',
+        ci_report_url = 'data/ci_report/sustained_3day_Tmin_return_time/{x}/{y}?covariate={covariate}&intensity={intensity}',
         calculation_dropdown_label="Expected return time of highest 3-day sustained heat.",
         calculation_description_template="<p>Shows the number of years in which the highest 3-day sustained heat of {intensity} °C is expected to be exceeded at least once at a global temperature anomaly of +{covariate} °C compared to the pre-industrial average.</p>",
         arg_labels=['', 'Highest 3-day sustained heat (in °C):'],
@@ -214,7 +216,7 @@ hazards = {
             list(range(14, 21)),
         ],
         result_grid_size=dict(x=54, y=54),
-        model_file='GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
+        model_file='exclude_GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
         grid_size=12,
         legend=dict(
             edges=[0, 10, 25, 50, 100, 200],
@@ -228,7 +230,7 @@ hazards = {
     'sustained_3day_Tmin_frequency_change': dict(
         function=developing_process.change_in_frequency,
         ci_report_function=developing_process.change_in_frequency_ci_report,
-        ci_report_url = 'data/ci_report/3day_Tmin_frequency_change/{x}/{y}?covariate={covariate}&intensity={intensity}&covariate_comp={covariate_comp}',
+        ci_report_url = 'data/ci_report/sustained_3day_Tmin_frequency_change/{x}/{y}?covariate={covariate}&intensity={intensity}&covariate_comp={covariate_comp}',
         calculation_dropdown_label="Change in frequency of highest 3-day sustained heat.",
         calculation_description_template="<p>Change in Frequency shows how many times more frequent the highest 3-day sustained heat of {intensity} °C is expected to be seen at a global temperature anomaly of +{covariate_comp) °C compared to a global temperature anomaly +{covariate} °C.</p>",
         arg_labels=['Highest 3-day sustained heat (in °C):', '', ''],
@@ -240,7 +242,7 @@ hazards = {
             [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=54, y=54),
-        model_file='GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
+        model_file='exclude_GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
         grid_size=12,
         legend=dict(
             edges=[1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
@@ -268,6 +270,7 @@ hazards = {
         result_grid_size=dict(x=120, y=170),
         model_file='smoothed_GEV_covaraite_fit_%s_1day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
         grid_size=5,
+        intensityUnits="mm",
         legend=dict(
             edges=[50, 75, 100, 125, 150],
             # Colorbrewer PuBu-6
@@ -372,6 +375,7 @@ hazards = {
         result_grid_size=dict(x=120, y=170),
         model_file='smoothed_GEV_covaraite_fit_%s_3day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
         grid_size=5,
+        intensityUnits="mm",
         legend=dict(
             edges=[50, 75, 100, 125, 150],
             # Colorbrewer PuBu-6

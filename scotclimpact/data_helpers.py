@@ -155,6 +155,7 @@ def sql_to_geojson(function_name, query_result):
 def xarray_to_geojson(dataset_name, xr_dataset, x_key='projection_x_coordinate', y_key='projection_y_coordinate', ci_report_url=lambda **kwargs: repr(kwargs)):
     '''Convert an xarray.DataArray object to GeoJSON compatible object.'''
     # Load the data
+    breakpoint()
     np_dataset = xr_dataset.to_numpy()
     idx = np.where(np_dataset == np_dataset)
 
@@ -166,7 +167,7 @@ def xarray_to_geojson(dataset_name, xr_dataset, x_key='projection_x_coordinate',
             type='Feature',
             properties=dict(
                 data=value if not value == float("inf") else 10000,
-                ci_report_url=ci_report_url(x_idx=int(coord_idx[0]), y_idx=int(coord_idx[1])),
+                ci_report_url=ci_report_url(x=int(coord_idx[0]), y=int(coord_idx[1])),
             ),
             geometry=dict(
                 type='Polygon',

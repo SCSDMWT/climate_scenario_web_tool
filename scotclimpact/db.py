@@ -117,7 +117,7 @@ def pre_compute(commit=False, no_header=False):
             central_estimate = func(composite_fit, *arg)
             params = dict(zip(arg_names, arg))
             unwrapped_central_estimate = [
-                {**ce, 'ci_report_url': ci_report_url.format(x=ce['coord_idx'][1], y=ce['coord_idx'][0], **params)}
+                {**ce, 'ci_report_url': ci_report_url.format(x=ce['coord_idx'][0], y=ce['coord_idx'][1], **params)}
                 for ce in unwrap_xarray(central_estimate)
             ]
 

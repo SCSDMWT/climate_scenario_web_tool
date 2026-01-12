@@ -48,9 +48,9 @@ def test_validate_args():
 
 @pytest.fixture()
 def test_nc_data(pooch_fetcher):
-    filename = pooch_fetcher('extreme_temp/GEV_covaraite_fit_tasmax_linear_loc_scale_nFits_1000_parametric_False.nc')
+    filename = pooch_fetcher('model_fits/obs/GEV_covaraite_fit_HadUK_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc')
     data = xr.load_dataset(filename)
-    return data['tasmax'][:, :, 0, 0]
+    return data['tasmax'][:, 0, :].T # just need to select a slice of 'tasmax' that contain some non-nan values and is a variable of x and y coordinates
 
 
 def test_xarray_to_geojson(test_nc_data):

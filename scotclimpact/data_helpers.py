@@ -54,7 +54,7 @@ def _make_bounds(dataset, idx, x_key, y_key):
     dx = np.diff(x_dim).min()/2.0
     dy = np.diff(y_dim).min()/2.0
 
-    top_right =    [ [float(x_dim[i]+dx), float(y_dim[j]+dy)] for i, j in zip(*idx)]
+    top_right =    [ [float(x_dim[i]+dx), float(y_dim[j]+dy)] for i, j in zip(*idx) ]
     top_left  =    [ [float(x_dim[i]+dx), float(y_dim[j]-dy)] for i, j in zip(*idx) ]
     bottom_right = [ [float(x_dim[i]-dx), float(y_dim[j]+dy)] for i, j in zip(*idx) ]
     bottom_left  = [ [float(x_dim[i]-dx), float(y_dim[j]-dy)] for i, j in zip(*idx) ]
@@ -152,7 +152,7 @@ def sql_to_geojson(function_name, query_result):
     )
 
 
-def xarray_to_geojson(dataset_name, xr_dataset, x_key='projection_x_coordinate', y_key='projection_y_coordinate', ci_report_url=lambda x: x):
+def xarray_to_geojson(dataset_name, xr_dataset, x_key='projection_x_coordinate', y_key='projection_y_coordinate', ci_report_url=lambda **kwargs: repr(kwargs)):
     '''Convert an xarray.DataArray object to GeoJSON compatible object.'''
     # Load the data
     np_dataset = xr_dataset.to_numpy()

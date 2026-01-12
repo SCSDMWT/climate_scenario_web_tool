@@ -212,6 +212,8 @@ def ci_report(function_name, x_idx, y_idx):
     args = args + [x_idx, y_idx]
 
     ci_report_function = hazard['ci_report_function']
+    print(ci_report_function)
+    print(args)
     composite_fit = init_composite_fit(
         hazard['model_file'],
         hazard['grid_size'],

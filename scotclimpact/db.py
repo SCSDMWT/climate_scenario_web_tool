@@ -101,7 +101,7 @@ def pre_compute(commit=False, no_header=False):
         # Call each function with all combinations of input parameters.
         for arg in itertools.product(*hazard['args']):
 
-            if 'covariate_comp' in arg_names and arg[1] <= arg[2]:
+            if 'covariate_comp' in arg_names and arg[1] >= arg[2]:
                 continue
 
             composite_fit = init_composite_fit(

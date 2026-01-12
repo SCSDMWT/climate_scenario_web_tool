@@ -81,12 +81,12 @@ hazards = {
         calculation_dropdown_label="Change in hottest temperature expected in # years.",
         calculation_description_template="<p>Change in Intensity shows the change in the hottest temperature that is expected to be seen in {return_time} years at a global warming level of +{covariate} °C compared to a global warming level of +{covariate_comp} °C.</p>",
         arg_labels=['Set the return time (in years) to visualise the 1-in-# year extreme:', '', ''],
-        arg_names=['return_time', 'covariate', 'covariate_comp'],
+        arg_names=['return_time', 'covariate_comp', 'covariate'],
         arg_types=dict(return_time=int, covariate=float, covariate_comp=float),
         args=[
             list(range(10, 110, 10)),
-            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Covariate/Global temperature anomaly
-            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
+            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Comparitave Covariate/Global temperature anomaly
+            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=54, y=54),
         model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
@@ -131,12 +131,12 @@ hazards = {
         calculation_dropdown_label="Change in frequency of hottest temperature.",
         calculation_description_template="<p>Change in Frequency shows how many times more frequent the hottest temperature of {intensity} °C is expected to be seen at a global temperature anomaly of +{covariate_comp) °C compared to a global temperature anomaly +{covariate} °C.</p>",
         arg_labels=['Hottest temperature (in °C):', '', ''],
-        arg_names=['intensity', 'covariate', 'covariate_comp'],
+        arg_names=['intensity', 'covariate_comp', 'covariate'],
         arg_types=dict(intensity=int, covariate=float, covariate_comp=float),
         args=[
             list(range(30, 41)),
-            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Covariate/Global temperature anomaly
-            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
+            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Comparitave Covariate/Global temperature anomaly
+            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=54, y=54),
         model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
@@ -184,12 +184,12 @@ hazards = {
         calculation_dropdown_label="Change in highest 3-day sustained heat expected in # years",
         calculation_description_template="<p>Change in Intensity shows the change in the highest 3-day sustained heat that is expected to be seen in {return_time} years at a global warming level of +{covariate} °C compared to a global warming level of +{covariate_comp} °C.</p>",
         arg_labels=['Set the return time (in years) to visualise the 1-in-# year extreme:', '', ''],
-        arg_names=['return_time', 'covariate', 'covariate_comp'],
+        arg_names=['return_time', 'covariate_comp', 'covariate'],
         arg_types=dict(return_time=int, covariate=float, covariate_comp=float),
         args=[
             list(range(10, 110, 10)),
-            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Covariate/Global temperature anomaly
-            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
+            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Comparitave Covariate/Global temperature anomaly
+            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=54, y=54),
         model_file='exclude_GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
@@ -234,12 +234,12 @@ hazards = {
         calculation_dropdown_label="Change in frequency of highest 3-day sustained heat.",
         calculation_description_template="<p>Change in Frequency shows how many times more frequent the highest 3-day sustained heat of {intensity} °C is expected to be seen at a global temperature anomaly of +{covariate_comp) °C compared to a global temperature anomaly +{covariate} °C.</p>",
         arg_labels=['Highest 3-day sustained heat (in °C):', '', ''],
-        arg_names=['intensity', 'covariate', 'covariate_comp'],
+        arg_names=['intensity', 'covariate_comp', 'covariate'],
         arg_types=dict(intensity=int, covariate=float, covariate_comp=float),
         args=[
             list(range(14, 21)),
-            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Covariate/Global temperature anomaly
-            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
+            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Comparitave Covariate/Global temperature anomaly
+            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=54, y=54),
         model_file='exclude_GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
@@ -287,12 +287,12 @@ hazards = {
         calculation_dropdown_label="Change in highest 1-day rainfall expected in # years.",
         calculation_description_template="<p>Change in Intensity shows the change in the highest 1-day rainfall that is expected to be seen in {return_time} years at a global warming level of +{covariate} °C compared to a global warming level of +{covariate_comp} °C.</p>",
         arg_labels=['Set the return time (in years) to visualise the 1-in-# year extreme:', '', ''],
-        arg_names=['return_time', 'covariate', 'covariate_comp'],
+        arg_names=['return_time', 'covariate_comp', 'covariate'],
         arg_types=dict(return_time=int, covariate=float, covariate_comp=float),
         args=[
             list(range(10, 110, 10)),
-            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Covariate/Global temperature anomaly
-            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
+            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Comparitave Covariate/Global temperature anomaly
+            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=120, y=170),
         model_file='smoothed_GEV_covaraite_fit_%s_1day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
@@ -338,13 +338,13 @@ hazards = {
         calculation_dropdown_label="Change in frequency of highest 1-day rainfall.",
         calculation_description_template="<p>Change in Frequency shows how many times more frequent the highest 1-day rainfall of {intensity} mm is expected to be seen at a global temperature anomaly of +{covariate_comp) °C compared to a global temperature anomaly +{covariate} °C.</p>",
         arg_labels=['Highest 1-day rainfall (in mm):', '', ''],
-        arg_names=['intensity', 'covariate', 'covariate_comp'],
+        arg_names=['intensity', 'covariate_comp', 'covariate'],
         arg_types=dict(intensity=int, covariate=float, covariate_comp=float),
         args=[
             #list(range(30, 41)),
             list(range(50, 175, 25)),
-            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Covariate/Global temperature anomaly
-            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
+            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Comparitave Covariate/Global temperature anomaly
+            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=120, y=170),
         model_file='smoothed_GEV_covaraite_fit_%s_1day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
@@ -392,12 +392,12 @@ hazards = {
         calculation_dropdown_label="Change in highest 3-day rainfall expected in # years.",
         calculation_description_template="<p>Change in Intensity shows the change in the highest 3-day rainfall that is expected to be seen in {return_time} years at a global warming level of +{covariate} °C compared to a global warming level of +{covariate_comp} °C.</p>",
         arg_labels=['Set the return time (in years) to visualise the 1-in-# year extreme:', '', ''],
-        arg_names=['return_time', 'covariate', 'covariate_comp'],
+        arg_names=['return_time', 'covariate_comp', 'covariate'],
         arg_types=dict(return_time=int, covariate=float, covariate_comp=float),
         args=[
             list(range(10, 110, 10)),
-            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Covariate/Global temperature anomaly
-            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
+            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Comparitave Covariate/Global temperature anomaly
+            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=120, y=170),
         model_file='smoothed_GEV_covaraite_fit_%s_3day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
@@ -443,12 +443,12 @@ hazards = {
         calculation_dropdown_label="Change in frequency of highest 3-day rainfall.",
         calculation_description_template="<p>Change in Frequency shows how many times more frequent the highest 3-day rainfall of {intensity} mm is expected to be seen at a global temperature anomaly of +{covariate_comp) °C compared to a global temperature anomaly +{covariate} °C.</p>",
         arg_labels=['Highest 3-day rainfall (in mm):', '', ''],
-        arg_names=['intensity', 'covariate', 'covariate_comp'],
+        arg_names=['intensity', 'covariate_comp', 'covariate'],
         arg_types=dict(intensity=int, covariate=float, covariate_comp=float),
         args=[
             list(range(50, 175, 25)),
-            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Covariate/Global temperature anomaly
-            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Comparitave Covariate/Global temperature anomaly
+            [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Comparitave Covariate/Global temperature anomaly
+            [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=120, y=170),
         model_file='smoothed_GEV_covaraite_fit_%s_3day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',

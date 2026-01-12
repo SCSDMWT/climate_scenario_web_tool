@@ -153,7 +153,7 @@ def get_metadata():
 @app.route('/data/map/<function_name>')
 @app.route('/data/map/<function_name>/<format>')
 @get_cache().cached(timeout=60, query_string=True)
-def data_new(function_name, format='geojson'):
+def data(function_name, format='geojson'):
 
     if not function_name in hazards:
         return "not found\n", 404
@@ -166,12 +166,10 @@ def data_new(function_name, format='geojson'):
     if not args:
         return "Invalid arguments", 400
     if format=='geojson' and db.has_results(function=function_name, **request.args):
-        print(f'from db: {function_name}')
         return make_json_response(
             db.get_json_hazard_data(function=function_name, **request.args)
         )
 
-    print(f'calculating: {function_name}')
     hazard_function = hazard['function']
     composite_fit = init_composite_fit(
         hazard['model_file'],
@@ -220,7 +218,7 @@ def ci_report(function_name, x_idx, y_idx):
         simParams='c,loc1,scale0,scale1',
         nVariates=1000,
         preProcess=True,
-        intensityUnits=hazard['intensityUnits'],
+        intensityUnits=hazard.get('intensityUnits', ''),
     )
 
     result = ci_report_function(composite_fit, *args)

@@ -1,7 +1,7 @@
 import os
 import pytest
 from scotclimpact import create_app
-from scotclimpact.data import make_pooch, from_github_repo
+from scotclimpact.data import make_pooch
 
 @pytest.fixture(scope='session')
 def test_app():
@@ -27,4 +27,4 @@ POOCH = make_pooch()
 
 @pytest.fixture()
 def pooch_fetcher():
-    return lambda filename: POOCH.fetch(filename, downloader=from_github_repo())
+    return lambda filename: POOCH.fetch(filename)

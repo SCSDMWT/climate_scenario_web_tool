@@ -56,24 +56,23 @@ The templates includes an additional request for [`scotclimpact/static/src/main.
 The logic in [`scotclimpact/static/src/main.js`](scotclimpact/static/src/main.js) runs in the browser and
 does several things:
 
-  * Record the values of the drop down menus and slider positions. Default values are
-    used when the page is first loaded.
-  * Hide sliders that are not relevant to the current selection in drop down menus.
+  * Request a list of hazards from the server and populate the sliders, drop down menus,
+    descriptions and legend.
+  * Record the values of the UI elements.  
   * Make an additional request to the server to calculate the dataset associated with
     the values of UI elements.
 
 The request is sent to a URL endpoint that is constructed based on the following template:
 ```
-/<hazard>/<what_do_you_want_to_know>/<slider1>/<slider2>/...
+/map/data/<hazard>_<calculation>?param1=value1&...
 ```
 
 #### Calculate hazard dataset
 
-The web app calls a function in [`scotclimpact/routes.py`](scotclimpact/routes.py)
-that corresponds to the request for the data set.
+The web app calls the `data` function in [`scotclimpact/routes.py`](scotclimpact/routes.py)
+with the hazard selected by the user.
 
-The statistical calculation is done in [`scotclimpact/extreme_temp.py`](scotclimpact/extreme_temp.py)
-(other hazards to follow).
+The statistical calculation is done in [`scotclimpact/developing_process.py`](scotclimpact/developing_process.py).
 The calculation relies heavily on the Python [Xarray][xarray] package.
 However, it is not possible to transfer Xarray `DataSet` objects back to the browser.
 Utility functions in [`scotclimpact/data_helpers.py`](scotclimpact/data_helpers.py) are
@@ -105,13 +104,14 @@ A brief descriptions of some of the project files are given in the following:
 │  ├─ \_\_init\_\_.py              Initialization for the python package and Flask [`app` object][flask-tut-app].
 │  ├─  config.py               The app's configuration object.
 │  ├─  routes.py               Definition and logic for HTTP endpoints.
-│  ├─  extreme_temp.py         Statistical calculations for extreme heat hazards.
+│  ├─  developing_process.py   Statistical calculations for extreme heat hazards.
+│  ├─  hazards.py              A data structure containing metadata for all available hazards.
 │  ├─  wsgi.py                 Entry point for WSGI servers like [gunicorn][gunicorn].
 │  ├─  cache.py                Wrapper for the Flask-cache plugin; used to cache HTTP requests in [routes.py](scotclimpact/routes.py).
 │  ├─  data.py                 Wrapper for the [Pooch][pooch] library; used to download [project data][data-repo].
 │  ├─  data_helpers.py         Utilities to validate and transform data structures.
 │  ├─  boundary_layer.py       Utilities to serve regional boundary data.
-│  ├─  db.py                   Utilities to initialise and populate the [database][flask-tut-db]  (unused).
+│  ├─  db.py                   Utilities to initialise and populate the [database][flask-tut-db].
 │  ├─  schema.sql              Database schema (unused)
 │  ├─  **pages**/                  Content for pages containing mostly textual content
 │  ├─  **templates**/              HTML Jinja2 [templates][flask-tut-templates].
@@ -123,6 +123,7 @@ A brief descriptions of some of the project files are given in the following:
 │      │   ├─  map.js          Class to wrap the [OpenLayers][open-layers] logic for the interactive map.
 │      │   ├─  legend.js       Utilities to draw the legend.
 │      │   ├─  color_map.js    Utilities to calculate color values for the data shown on the map.
+│      │   ├─  slider.js       Utilities to create the slider UI elements.
 │      │   └─  disclaimer.js   Logic to check that the disclaimer has been accepted.
 │      └─  **tests**/              JavaScript unit tests.
 └─ **tests**/                      Python unit tests

@@ -63,10 +63,11 @@ def _make_bounds(dataset, idx, x_key, y_key):
 
 def _fix_infs(np_array, multiplier=1000):
     '''Update all 'inf' values of an np array to be multiplier * max(np_array)'''
-    infs = np_array == float('inf')
+    infs = np.isinf(np_array)
     inf_idx = np.where(infs)
-    proper_numbers_idx = np.where( (np_array == np_array) & ~infs )
-    np_array[inf_idx] = multiplier * np.max(np_array)
+    finites = np.isfinite(np_array)
+    idx_finite = np.where(finites)
+    np_array[inf_idx] = multiplier * np.max(np_array[idx_finite])
 
 def unwrap_xarray(xr_dataset, x_key='projection_x_coordinate', y_key='projection_y_coordinate'):
     '''Convert a grid of 2D cells to a list of containing only the points in the grid with values.'''

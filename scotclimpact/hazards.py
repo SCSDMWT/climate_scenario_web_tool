@@ -3,7 +3,7 @@ from . import developing_process
 
 ui_selection = {
     "extreme_temp": dict(
-        ui_label="Extreme Temperature",
+        ui_label="Extreme Heat",
         calculations=dict(
             intensity="extreme_temp_intensity",
             intensity_change="extreme_temp_intensity_change",
@@ -422,7 +422,7 @@ hazards = {
         arg_types=dict(covariate=float, intensity=int),
         args=[
             [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
-            list(range(50, 175, 25)),
+            list(range(100, 275, 25)),
         ],
         result_grid_size=dict(x=120, y=170),
         model_file='smoothed_GEV_covaraite_fit_%s_3day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
@@ -446,7 +446,7 @@ hazards = {
         arg_names=['intensity', 'covariate_comp', 'covariate'],
         arg_types=dict(intensity=int, covariate=float, covariate_comp=float),
         args=[
-            list(range(50, 175, 25)),
+            list(range(100, 275, 25)),
             [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5], # Comparitave Covariate/Global temperature anomaly
             [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],

@@ -29,6 +29,7 @@ async function update_data_layer(url, colorbar) {
     ui_map.hide_overlay();
     const data = await fetch_data(url);
     ui_map.update_data_layer(data, colorbar);
+    $("#opacityInput")[0].oninput();
 }
 
 async function update_boundary_layer(layer_name) {
@@ -265,7 +266,7 @@ async function init_ui() {
     calculation_selector.oninput = on_calculation_change;
 
     var opacityInput = $("#opacityInput")[0];
-    opacityInput.value = 1.0;
+    opacityInput.value = 0.8; // Set default opacity
     opacityInput.oninput = function() {
         const opacity = parseFloat(opacityInput.value);
         ui_map.set_data_layer_opacity(opacity);

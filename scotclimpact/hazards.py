@@ -96,7 +96,7 @@ hazards = {
             colors=["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
             endpoint_type="lower_in_range",
             decimal_places=1,
-            label="Legend:",
+            label="Legend (in °C):",
         ),
     ),
     'extreme_temp_return_time': dict(
@@ -147,7 +147,7 @@ hazards = {
             colors=["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404" ],
             endpoint_type="lower_in_range",
             decimal_places=0,
-            label="Legend:",
+            label="Legend (times more frequent):",
         ),
     ),
     ## Sustained cold temperatures
@@ -199,7 +199,7 @@ hazards = {
             colors=["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
             endpoint_type="lower_in_range",
             decimal_places=1,
-            label="Legend:",
+            label="Legend (in °C):",
         ),
     ),
     'sustained_3day_Tmin_return_time': dict(
@@ -250,7 +250,7 @@ hazards = {
             colors=["#ffffd4", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404" ],
             endpoint_type="lower_in_range",
             decimal_places=0,
-            label="Legend:",
+            label="Legend (times more frequent):",
         ),
     ),
     ## Extreme 1 day precipitation
@@ -303,7 +303,7 @@ hazards = {
             colors=["#fff7fb", "#ece7f2", "#d0d1e6", "#a6bddb", "#74a9cf", "#3690c0", "#0570b0", "#034e7b"],
             endpoint_type="lower_in_range",
             decimal_places=1,
-            label="Legend:",
+            label="Legend (in mm):",
         ),
     ),
     'extreme_1day_precip_return_time': dict(
@@ -355,7 +355,7 @@ hazards = {
             colors=["#f1eef6", "#d0d1e6", "#a6bddb", "#74a9cf", "#2b8cbe", "#045a8d"],
             endpoint_type="lower_in_range",
             decimal_places=0,
-            label="Legend:",
+            label="Legend (times more frequent):",
         ),
     ),
     ## Extreme 3 day precipitation
@@ -408,7 +408,7 @@ hazards = {
             colors=["#fff7fb", "#ece7f2", "#d0d1e6", "#a6bddb", "#74a9cf", "#3690c0", "#0570b0", "#034e7b"],
             endpoint_type="lower_in_range",
             decimal_places=1,
-            label="Legend:",
+            label="Legend (in mm):",
         ),
     ),
     'extreme_3day_precip_return_time': dict(
@@ -454,12 +454,12 @@ hazards = {
         model_file='smoothed_GEV_covaraite_fit_%s_3day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
         grid_size=5,
         legend=dict(
-            edges=[1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+            edges=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
             # Colorbrewer PuBu-6
             colors=["#f1eef6", "#d0d1e6", "#a6bddb", "#74a9cf", "#2b8cbe", "#045a8d"],
             endpoint_type="lower_in_range",
             decimal_places=0,
-            label="Legend:",
+            label="Legend (times more frequent):",
         ),
     ),
 }

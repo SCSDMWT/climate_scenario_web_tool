@@ -100,6 +100,73 @@ export class UIMap {
         if (this.#layers[this.#selection_layer_idx])
             this.#layers[this.#selection_layer_idx].changed();
     }
+
+    /// Helper to select a feature, then request and show a CI report for that feature.
+    async highlight_feature(features, event_coordinate) {
+
+        if (!features.length) {
+            this.clear_selection()
+            return;
+        }
+
+        const feature = features[0];
+        if (!feature)
+            return;
+
+        this.#selection = {};
+        this.#selection[feature.ol_uid] = feature;
+
+        this.#layers[this.#selection_layer_idx].changed();
+
+        // Early exit if the overlay DOM element was not found
+        if (!this.#overlay_content || !this.#overlay)
+            return;
+
+        // Fetch ci report
+        const ci_report_url =  new URL(
+            window.location.protocol + "//" + window.location.host + "/" +
+            window.location.pathname + "/" + feature.values_.ci_report_url
+        ); 
+        let response = await fetch(ci_report_url);
+        if (!response.ok)
+            return;
+        let ci_report = await response.text();
+        ci_report = ci_report.replaceAll('\n', '</p><p>');
+        ci_report = ci_report.replaceAll('degrees_Celsius', '°C');
+
+        // set overlay content
+        this.#overlay_content.innerHTML = "<p>" + ci_report + "</p>"
+        // show the overlay.
+        this.#overlay.setPosition(event_coordinate);
+    };
+
+
+    /// Highlight a feature at a coordinate
+    select_feature_at(coordinate) {
+        if (this.#overlay)
+            this.#overlay.setPosition(undefined);
+
+        const data_layer = this.#layers[this.#data_layer_idx];
+        if (!data_layer) {
+            return;
+        }
+
+        let features = data_layer.getSource().getFeaturesAtCoordinate(coordinate);
+        if (features.length == 0) {
+            let alert_root = $("#alert-root");
+            if (alert_root.length == 0)
+                return;
+            alert_root[0].innerHTML = '<div class="alert alert-warning alert-dismissible fade show" role="alert">' +
+                'That postcode is not covered by the chosen hazard.' +
+                '<button id="alert-closer" type="button" class="close" data-bs-dismiss="alert" aria-label="Close">' +
+                '<span aria-hidden="true">&times;</span>' +
+                '</button>' +
+                '</div>';
+            return;
+        }
+        this.highlight_feature(features, coordinate);
+    }
+
     /// Register event listeners for clicking on the data layer
     init_selection_events() {
         this.#map.on(['click'], (event) => {
@@ -113,41 +180,7 @@ export class UIMap {
             }
 
             data_layer.getFeatures(event.pixel).then(async (features) => {
-                if (!features.length) {
-                    this.clear_selection()
-                    return;
-                }
-
-                const feature = features[0];
-                if (!feature)
-                    return;
-
-                this.#selection = {};
-                this.#selection[feature.ol_uid] = feature;
-                    
-                this.#layers[this.#selection_layer_idx].changed();
-
-                // Early exit if the overlay DOM element was not found
-                if (!this.#overlay_content || !this.#overlay)
-                    return;
-
-                // Fetch ci report
-                const ci_report_url =  new URL(
-                    window.location.protocol + "//" + window.location.host + "/" +
-                    window.location.pathname + "/" + feature.values_.ci_report_url
-                ); 
-                let response = await fetch(ci_report_url);
-                if (!response.ok)
-                    return;
-                let ci_report = await response.text();
-                ci_report = ci_report.replaceAll('\n', '</p><p>');
-                ci_report = ci_report.replaceAll('degrees_Celsius', '°C');
-
-                // set overlay content
-                this.#overlay_content.innerHTML = "<p>" + ci_report + "</p>"
-                // show the overlay.
-                const event_coordinate = event.coordinate;
-                this.#overlay.setPosition(event_coordinate);
+                await this.highlight_feature(features, event.coordinate);
             });
         });
     }
@@ -209,7 +242,6 @@ export class UIMap {
             var style = styles[feature.getGeometry().getType()];
             if (feature.getGeometry().getType() == 'Polygon') {
                 const color_value = apply_color_map(feature.values_.data, colorbar.edges, colorbar.colors, colorbar.endpoint_type);
-                //console.log(feature.values_.data, color_value);
                 style.getFill().setColor(color_value);
             }
             return style;
@@ -234,7 +266,6 @@ export class UIMap {
     }
 
     show_spinner() {
-        console.log('show spinner')
         this.#map.getTargetElement().classList.add('spinner');
     }
 

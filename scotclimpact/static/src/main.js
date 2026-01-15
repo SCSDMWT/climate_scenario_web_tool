@@ -5,6 +5,7 @@ import {apply_color_map, legend_endpoints} from "../src/color_map.js";
 import {draw_legend} from "../src/legend.js";
 import {UIMap} from "../src/map.js";
 import {make_slider} from "../src/slider.js";
+import {attach_postcode_search} from "../src/postcode_search.js"
 
 function check_disclaimer_cookie() {
     /// Redirects to the disclaimer page if the ToS have not been accepted.
@@ -278,6 +279,15 @@ async function init_ui() {
 
     boundaryInput.value = "none"
     await update_boundary_layer("none");
+
+    // Setup the Postcode search feature
+    let postcode_search_button = $("#button-search-postcode")[0];
+    let postcode_search_input = $("#search-postcode")[0];
+    attach_postcode_search(
+        postcode_search_button, 
+        postcode_search_input,
+        (coordinate) => { ui_map.select_feature_at(coordinate); },
+    );
 }
 
 await init_ui();

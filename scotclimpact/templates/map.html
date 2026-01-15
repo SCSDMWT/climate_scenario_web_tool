@@ -143,6 +143,14 @@
             <!--<option value="police">Scottish Police Divisions</option>-->
           </select>
         </div>
+        <div class="input-item">
+            <!--<label>Search for a postcode</label>-->
+          <div class="input-group">
+            <button class="btn btn-outline-secondary" type="submit" id="button-search-postcode"><i class="fa fa-search"></i></button>
+            <input type="text" class="form-control" placeholder="postcode" aria-label="search for postcode" aria-describedby="button-search-postcode" id="search-postcode" name="search-postcode"/>
+          </div>
+          <div id="alert-root"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -254,4 +262,5 @@
   const tilelayerurl = "{{ tilelayerurl }}";
 </script>
 <script type="module" src="{{ static_url_for('static', filename='dist/main.js') }}"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 {% endblock %}

@@ -172,8 +172,7 @@ def data(function_name, format='geojson'):
 
     hazard_function = hazard['function']
     composite_fit = init_composite_fit(
-        hazard['model_file'],
-        hazard['grid_size'],
+        hazard['dataset'],
         simParams='c,loc1,scale0,scale1',
         nVariates=1000,
         preProcess=True,
@@ -210,8 +209,7 @@ def ci_report(function_name, x_idx, y_idx):
 
     ci_report_function = hazard['ci_report_function']
     composite_fit = init_composite_fit(
-        hazard['model_file'],
-        hazard['grid_size'],
+        hazard['dataset'],
         simParams='c,loc1,scale0,scale1',
         nVariates=1000,
         preProcess=True,

@@ -40,6 +40,8 @@ ui_selection = {
     ),
 }
 
+
+
 '''
 A dictionary containing functions that calculate hazard data.
 The values are names used by routes.py and db.py to find a relavant
@@ -49,6 +51,7 @@ function. Values are dictionaries and must contain the following:
 hazards = {
     ## Extreme temperatures
     'extreme_temp_intensity': dict(
+        dataset='extreme_temp',
         function=developing_process.intensity_from_return_time,
         ci_report_function=developing_process.intensity_ci_report,
         ci_report_url = 'data/ci_report/extreme_temp_intensity/{x}/{y}?covariate={covariate}&return_time={return_time}',
@@ -62,8 +65,6 @@ hazards = {
             list(range(10, 110, 10)),
         ],
         result_grid_size=dict(x=54, y=54),
-        model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
-        grid_size=12,
         intensityUnits=u"\u00b0C",
         legend=dict(
             edges=[25, 27, 29, 31, 33, 35, 37, 39],
@@ -75,6 +76,7 @@ hazards = {
         ),
     ),
     'extreme_temp_intensity_change': dict(
+        dataset='extreme_temp',
         function=developing_process.change_in_intensity,
         ci_report_function=developing_process.change_in_intensity_ci_report,
         ci_report_url = 'data/ci_report/extreme_temp_intensity_change/{x}/{y}?covariate={covariate}&return_time={return_time}&covariate_comp={covariate_comp}',
@@ -89,8 +91,6 @@ hazards = {
             [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=54, y=54),
-        model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
-        grid_size=12,
         legend=dict(
             edges=[0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
             colors=["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
@@ -100,6 +100,7 @@ hazards = {
         ),
     ),
     'extreme_temp_return_time': dict(
+        dataset='extreme_temp',
         function=developing_process.return_time_from_intensity,
         ci_report_function=developing_process.return_time_ci_report,
         ci_report_url = 'data/ci_report/extreme_temp_return_time/{x}/{y}?covariate={covariate}&intensity={intensity}',
@@ -113,8 +114,6 @@ hazards = {
             list(range(30, 41)),
         ],
         result_grid_size=dict(x=54, y=54),
-        model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
-        grid_size=12,
         legend=dict(
             edges=[0, 10, 25, 50, 100, 200],
             # Colorbrewer YlOrBr-6
@@ -125,6 +124,7 @@ hazards = {
         ),
     ),
     'extreme_temp_frequency_change': dict(
+        dataset='extreme_temp',
         function=developing_process.change_in_frequency,
         ci_report_function=developing_process.change_in_frequency_ci_report,
         ci_report_url = 'data/ci_report/extreme_temp_frequency_change/{x}/{y}?covariate={covariate}&intensity={intensity}&covariate_comp={covariate_comp}',
@@ -139,8 +139,6 @@ hazards = {
             [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=54, y=54),
-        model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
-        grid_size=12,
         legend=dict(
             edges=[1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
             # Colorbrewer YlOrBr-6
@@ -152,6 +150,7 @@ hazards = {
     ),
     ## Sustained cold temperatures
     'sustained_3day_Tmin_intensity': dict(
+        dataset='sustained_3day_Tmin_intensity',
         function=developing_process.intensity_from_return_time,
         ci_report_function=developing_process.intensity_ci_report,
         ci_report_url = 'data/ci_report/sustained_3day_Tmin_intensity/{x}/{y}?covariate={covariate}&return_time={return_time}',
@@ -165,8 +164,6 @@ hazards = {
             list(range(10, 110, 10)),
         ],
         result_grid_size=dict(x=54, y=54),
-        model_file='exclude_GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
-        grid_size=12,
         intensityUnits=u"\u00b0C",
         legend=dict(
             edges=[14, 15, 16, 17, 18, 19, 20, 21],
@@ -178,6 +175,7 @@ hazards = {
         ),
     ),
     'sustained_3day_Tmin_intensity_change': dict(
+        dataset='sustained_3day_Tmin_intensity',
         function=developing_process.change_in_intensity,
         ci_report_function=developing_process.change_in_intensity_ci_report,
         ci_report_url = 'data/ci_report/sustained_3day_Tmin_intensity_change/{x}/{y}?covariate={covariate}&return_time={return_time}&covariate_comp={covariate_comp}',
@@ -192,8 +190,6 @@ hazards = {
             [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=54, y=54),
-        model_file='exclude_GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
-        grid_size=12,
         legend=dict(
             edges=[0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
             colors=["#ffffe5", "#fff7bc", "#fee391", "#fec44f", "#fe9929", "#ec7014", "#cc4c02", "#8c2d04"],
@@ -203,6 +199,7 @@ hazards = {
         ),
     ),
     'sustained_3day_Tmin_return_time': dict(
+        dataset='sustained_3day_Tmin_intensity',
         function=developing_process.return_time_from_intensity,
         ci_report_function=developing_process.return_time_ci_report,
         ci_report_url = 'data/ci_report/sustained_3day_Tmin_return_time/{x}/{y}?covariate={covariate}&intensity={intensity}',
@@ -216,8 +213,6 @@ hazards = {
             list(range(14, 21)),
         ],
         result_grid_size=dict(x=54, y=54),
-        model_file='exclude_GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
-        grid_size=12,
         legend=dict(
             edges=[0, 10, 25, 50, 100, 200],
             # Colorbrewer YlOrBr-7
@@ -228,6 +223,7 @@ hazards = {
         ),
     ),
     'sustained_3day_Tmin_frequency_change': dict(
+        dataset='sustained_3day_Tmin_intensity',
         function=developing_process.change_in_frequency,
         ci_report_function=developing_process.change_in_frequency_ci_report,
         ci_report_url = 'data/ci_report/sustained_3day_Tmin_frequency_change/{x}/{y}?covariate={covariate}&intensity={intensity}&covariate_comp={covariate_comp}',
@@ -242,8 +238,6 @@ hazards = {
             [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=54, y=54),
-        model_file='exclude_GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
-        grid_size=12,
         legend=dict(
             edges=[1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
             # Colorbrewer YlOrBr-7
@@ -255,6 +249,7 @@ hazards = {
     ),
     ## Extreme 1 day precipitation
     'extreme_1day_precip_intensity': dict(
+        dataset='extreme_1day_precip',
         function=developing_process.intensity_from_return_time,
         ci_report_function=developing_process.intensity_ci_report,
         ci_report_url = 'data/ci_report/extreme_1day_precip_intensity/{x}/{y}?covariate={covariate}&return_time={return_time}',
@@ -268,8 +263,6 @@ hazards = {
             list(range(10, 110, 10)),
         ],
         result_grid_size=dict(x=120, y=170),
-        model_file='smoothed_GEV_covaraite_fit_%s_1day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
-        grid_size=5,
         intensityUnits="mm",
         legend=dict(
             edges=[50, 75, 100, 125, 150],
@@ -281,6 +274,7 @@ hazards = {
         ),
     ),
     'extreme_1day_precip_intensity_change': dict(
+        dataset='extreme_1day_precip',
         function=developing_process.change_in_intensity,
         ci_report_function=developing_process.change_in_intensity_ci_report,
         ci_report_url = 'data/ci_report/extreme_1day_precip_intensity_change/{x}/{y}?covariate={covariate}&return_time={return_time}&covariate_comp={covariate_comp}',
@@ -295,8 +289,6 @@ hazards = {
             [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=120, y=170),
-        model_file='smoothed_GEV_covaraite_fit_%s_1day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
-        grid_size=5,
         legend=dict(
             edges=[0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
             # Colorbrewer PuBu-8
@@ -307,6 +299,7 @@ hazards = {
         ),
     ),
     'extreme_1day_precip_return_time': dict(
+        dataset='extreme_1day_precip',
         function=developing_process.return_time_from_intensity,
         ci_report_function=developing_process.return_time_ci_report,
         ci_report_url = 'data/ci_report/extreme_1day_precip_return_time/{x}/{y}?covariate={covariate}&intensity={intensity}',
@@ -320,8 +313,6 @@ hazards = {
             list(range(50, 175, 25)),
         ],
         result_grid_size=dict(x=120, y=170),
-        model_file='smoothed_GEV_covaraite_fit_%s_1day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
-        grid_size=5,
         legend=dict(
             edges=[0, 10, 25, 50, 100, 200],
             # Colorbrewer PuBu-6
@@ -332,6 +323,7 @@ hazards = {
         ),
     ),
     'extreme_1day_precip_frequency_change': dict(
+        dataset='extreme_1day_precip',
         function=developing_process.change_in_frequency,
         ci_report_function=developing_process.change_in_frequency_ci_report,
         ci_report_url = 'data/ci_report/extreme_1day_precip_frequency_change/{x}/{y}?covariate={covariate}&intensity={intensity}&covariate_comp={covariate_comp}',
@@ -347,8 +339,6 @@ hazards = {
             [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=120, y=170),
-        model_file='smoothed_GEV_covaraite_fit_%s_1day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
-        grid_size=5,
         legend=dict(
             edges=[1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
             # Colorbrewer PuBu-6
@@ -360,6 +350,7 @@ hazards = {
     ),
     ## Extreme 3 day precipitation
     'extreme_3day_precip_intensity': dict(
+        dataset='extreme_3day_precip',
         function=developing_process.intensity_from_return_time,
         ci_report_function=developing_process.intensity_ci_report,
         ci_report_url = 'data/ci_report/extreme_3day_precip_intensity/{x}/{y}?covariate={covariate}&return_time={return_time}',
@@ -373,8 +364,6 @@ hazards = {
             list(range(10, 110, 10)),
         ],
         result_grid_size=dict(x=120, y=170),
-        model_file='smoothed_GEV_covaraite_fit_%s_3day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
-        grid_size=5,
         intensityUnits="mm",
         legend=dict(
             edges=[50, 75, 100, 125, 150],
@@ -386,6 +375,7 @@ hazards = {
         ),
     ),
     'extreme_3day_precip_intensity_change': dict(
+        dataset='extreme_3day_precip',
         function=developing_process.change_in_intensity,
         ci_report_function=developing_process.change_in_intensity_ci_report,
         ci_report_url = 'data/ci_report/extreme_3day_precip_intensity_change/{x}/{y}?covariate={covariate}&return_time={return_time}&covariate_comp={covariate_comp}',
@@ -400,8 +390,6 @@ hazards = {
             [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=120, y=170),
-        model_file='smoothed_GEV_covaraite_fit_%s_3day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
-        grid_size=5,
         legend=dict(
             edges=[0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
             # Colorbrewer PuBu-8
@@ -412,6 +400,7 @@ hazards = {
         ),
     ),
     'extreme_3day_precip_return_time': dict(
+        dataset='extreme_3day_precip',
         function=developing_process.return_time_from_intensity,
         ci_report_function=developing_process.return_time_ci_report,
         ci_report_url = 'data/ci_report/extreme_3day_precip_return_time/{x}/{y}?covariate={covariate}&intensity={intensity}',
@@ -425,8 +414,6 @@ hazards = {
             list(range(100, 275, 25)),
         ],
         result_grid_size=dict(x=120, y=170),
-        model_file='smoothed_GEV_covaraite_fit_%s_3day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
-        grid_size=5,
         legend=dict(
             edges=[0, 10, 25, 50, 100, 200],
             # Colorbrewer PuBu-6
@@ -437,6 +424,7 @@ hazards = {
         ),
     ),
     'extreme_3day_precip_frequency_change': dict(
+        dataset='extreme_3day_precip',
         function=developing_process.change_in_frequency,
         ci_report_function=developing_process.change_in_frequency_ci_report,
         ci_report_url = 'data/ci_report/extreme_3day_precip_frequency_change/{x}/{y}?covariate={covariate}&intensity={intensity}&covariate_comp={covariate_comp}',
@@ -451,8 +439,6 @@ hazards = {
             [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], # Covariate/Global temperature anomaly
         ],
         result_grid_size=dict(x=120, y=170),
-        model_file='smoothed_GEV_covaraite_fit_%s_3day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
-        grid_size=5,
         legend=dict(
             edges=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
             # Colorbrewer PuBu-6

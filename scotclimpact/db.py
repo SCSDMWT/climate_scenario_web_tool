@@ -105,8 +105,7 @@ def pre_compute(commit=False, no_header=False):
                 continue
 
             composite_fit = init_composite_fit(
-                hazard['model_file'],
-                hazard['grid_size'],
+                hazard['dataset'],
                 simParams='c,loc1,scale1',
                 nVariates=1000,
                 preProcess=True,

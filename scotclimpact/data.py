@@ -5,6 +5,44 @@ import requests
 DATA_REPO_VERSION = "v0.1.0"
 GITHUB_API_URL = "https://media.githubusercontent.com/media/SCSDMWT/climate_scenario_web_tool_data/{version}"
 
+'''
+Meta-data that describes which hazards use which datafiles etc.
+'''
+datasets = dict(
+    extreme_temp=dict(
+        model_file='GEV_covaraite_fit_%s_tasmax_linear_loc_log_scale_nFits_1000_parametric_False.nc',
+        grid_size=12,
+        grid_selection=dict(
+            projection_x_coordinate = slice(0,0.5e6),
+            projection_y_coordinate = slice(0.46e6,1.21e6),
+        ),
+    ),
+    sustained_3day_Tmin_intensity=dict(
+        model_file='exclude_GEV_covaraite_fit_%s_max_3day_tasmin_linear_loc_log_scale_nFits_1000_parametric_False.nc',
+        grid_size=12,
+        grid_selection=dict(
+            projection_x_coordinate = slice(0,0.5e6),
+            projection_y_coordinate = slice(0.46e6,1.21e6),
+        ),
+    ),
+    extreme_1day_precip=dict(
+        model_file='smoothed_GEV_covaraite_fit_%s_1day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
+        grid_size=5,
+        grid_selection=dict(
+            projection_x_coordinate=slice(0,0.5e6),
+            projection_y_coordinate=slice(0.46e6,1.1e6),
+        ),
+    ),
+    extreme_3day_precip=dict(
+        model_file='smoothed_GEV_covaraite_fit_%s_3day_precip_max_log_loc_scale_nFits_1000_parametric_False.nc',
+        grid_size=5,
+        grid_selection=dict(
+            projection_x_coordinate=slice(0,0.5e6),
+            projection_y_coordinate=slice(0.46e6,1.1e6),
+        ),
+    ),
+)
+
 def make_pooch(path=pooch.os_cache('scotclimpact')):
     '''Create the pooch object for the data repo'''
     return pooch.create(

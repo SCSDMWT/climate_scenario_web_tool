@@ -10,7 +10,7 @@ from scipy.stats     import norm
 from scipy.stats     import lognorm
 from datetime        import datetime
 
-from .data import fetch_file
+from .data import fetch_file, datasets
 
 class Fitted_Obs_Sim():
     def __init__(self,
@@ -612,13 +612,14 @@ class Fitted_Obs_Sim():
         return info
         
 @functools.lru_cache(maxsize=16)
-def init_composite_fit(model_file, grid_size, simParams='c,loc1,scale0,scale1', nVariates=10000, preProcess=True, **kwargs):
+def init_composite_fit(dataset_name, simParams='c,loc1,scale0,scale1', nVariates=10000, preProcess=True, **kwargs):
+    dataset = datasets[dataset_name]
+    model_file, grid_size, grid_selection = dataset['model_file'], dataset['grid_size'], dataset['grid_selection']
     simParams = simParams.split(',')
     dsObs = xr.open_dataset(fetch_file('model_fits/obs/'+model_file%'HadUK'))
     dsSim = xr.open_dataset(fetch_file('model_fits/sim/'+model_file%'UKCP18'))
     grid = xr.open_dataset(fetch_file('grids/gridWide_g%i.nc'%grid_size))\
-             .sel(projection_y_coordinate = slice(4e5,13e5),
-                  projection_x_coordinate = slice(0,5e5))
+             .sel(grid_selection)
     dsSim, dsObs, grid = xr.align(dsSim, dsObs, grid, join = 'outer', exclude = ['year', 'ensemble_member'], fill_value  = np.nan)
 
     return Fitted_Obs_Sim(dsObs, dsSim, grid, simParams = simParams, nVariates = nVariates, preProcess = preProcess, **kwargs)

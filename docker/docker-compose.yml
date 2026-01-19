@@ -1,13 +1,16 @@
 name: climate_scenario_web_tool
 services:
   web:
-    image: "ghcr.io/scsdmwt/climate_scenario_web_tool:v0.0.10"
+    image: "ghcr.io/scsdmwt/climate_scenario_web_tool:v0.1.1"
     hostname: web
     depends_on: 
       postgres:
         condition: service_healthy
+    env_file:
+      - path: .env
+        required: True
     environment:
-      - DATABASE_URL=postgresql://scotclimpact:testingtesting@postgres/scotclimpact
+      - DATABASE_URL=postgresql://scotclimpact:${POSTGRES_PASSWORD}@postgres/scotclimpact
       - DATA_DIR=/app/data
       - FLASK_APP=scotclimpact
       - FLASK_ENV=development
@@ -15,12 +18,15 @@ services:
       - default
     ports:
       - 80:80
+    volumes:
+      - ./scotclimpact/v0.1.0:/app/data/v0.1.0
 
   postgres:
-    image: "ghcr.io/scsdmwt/climate_scenario_web_tool_data:v0.0.8"
+    image: "ghcr.io/scsdmwt/climate_scenario_web_tool_data:v0.1.2"
     hostname: postgres
-    environment:
-      - POSTGRES_PASSWORD=testingtesting
+    env_file:
+      - path: .env
+        required: True
     networks:
       - default
     # Mapping this container port to localhost is useful in development.

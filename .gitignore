@@ -3,6 +3,8 @@
 .dev-env
 env_vars
 .tools/
+.env
+docker/scotclimpact/
 
 ## Data
 data/

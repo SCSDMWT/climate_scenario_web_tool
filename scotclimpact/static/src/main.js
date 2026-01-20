@@ -25,9 +25,14 @@ async function fetch_data(url) {
     return data;
 }
 
-async function update_data_layer(url, colorbar) {
+async function update_data_layer(input_values, colorbar) {
+    const url_endpoint = make_data_url(input_values, '');
+    gtag('event', 'update_data_layer', {
+        'input_values': input_values,
+        'url_endpoint': url_endpoint.href,
+    });
     ui_map.hide_overlay();
-    const data = await fetch_data(url);
+    const data = await fetch_data(url_endpoint);
     ui_map.update_data_layer(data, colorbar);
     $("#opacityInput")[0].oninput();
 }
@@ -50,6 +55,11 @@ async function update_boundary_layer(layer_name) {
         window.location.protocol + "//" + window.location.host + "/" +
         window.location.pathname + "/boundaries/" + layer_name
     ); 
+
+    gtag('event', 'update_boundary_layer', {
+        'layer_name': layer_name,
+        'url_endpoint': url,
+    });
     const data = await fetch_data(url.href);
     ui_map.update_boundary_layer(data, valid_layers[layer_name]);
 }
@@ -153,9 +163,8 @@ async function on_user_input() {
         return;
     previous_input_values = input_values;
 
-    const url_endpoint = make_data_url(input_values, '');
     const colorbar = get_hazard_function_meta(input_values["#scenario"], input_values["#calculation"]).legend;
-    await update_data_layer(url_endpoint, colorbar);
+    await update_data_layer(input_values, colorbar);
 }
 
 

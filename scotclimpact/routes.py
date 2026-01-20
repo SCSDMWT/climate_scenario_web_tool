@@ -32,6 +32,7 @@ def index():
         navigation=menu_items(),
         mapserverurl=app.config['MAPSERVER_URL'],
         tilelayerurl=app.config['TILE_LAYER_URL'],
+        gtag_id=app.config['GTAG_ID'],
     )
 
 @app.route('/disclaimer')

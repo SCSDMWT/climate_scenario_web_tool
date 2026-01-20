@@ -31,3 +31,8 @@ class Config:
         'DATA_DIR',
         pooch.os_cache('scotclimpact'),
     )
+
+    GTAG_ID = os.environ.get(
+        'GTAG_ID',
+        '',
+    )

@@ -1,7 +1,7 @@
 name: climate_scenario_web_tool
 services:
   web:
-    image: "ghcr.io/scsdmwt/climate_scenario_web_tool:v0.1.1"
+    image: "ghcr.io/scsdmwt/climate_scenario_web_tool:v0.1.2"
     hostname: web
     depends_on: 
       postgres:

@@ -4,6 +4,8 @@ import numpy as np
 import re
 import xarray as xr
 
+from .boundary_layer import in_scotland
+
 def is_number(s):
     '''Returns true if s is a string representing an actual number (excluding NaN or Inf)'''
     return re.match(r'(^\d+(\.\d*)?$)|(^\.\d+$)', s) is not None
@@ -81,6 +83,7 @@ def unwrap_xarray(xr_dataset, x_key='projection_x_coordinate', y_key='projection
         (tr, tl, br, bl)
         for tr, tl, br, bl
         in zip(top_right, top_left, bottom_right, bottom_left)
+        if in_scotland([tr, tl, br, bl])
     ]
     return [
         dict(
@@ -176,6 +179,7 @@ def xarray_to_geojson(dataset_name, xr_dataset, x_key='projection_x_coordinate',
         )
         for tr, tl, br, bl, value, coord_idx 
         in zip(top_right, top_left, bottom_right, bottom_left, np_dataset[idx], zip(*idx))
+        if in_scotland([tr, tl, br, bl])
     ]
 
     crs = dict(

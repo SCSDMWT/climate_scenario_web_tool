@@ -83,7 +83,6 @@ def unwrap_xarray(xr_dataset, x_key='projection_x_coordinate', y_key='projection
         (tr, tl, br, bl)
         for tr, tl, br, bl
         in zip(top_right, top_left, bottom_right, bottom_left)
-        if in_scotland([tr, tl, br, bl])
     ]
     return [
         dict(
@@ -93,6 +92,7 @@ def unwrap_xarray(xr_dataset, x_key='projection_x_coordinate', y_key='projection
         )
         for central_estimate, coord_idx, geometry 
         in zip(np_dataset[idx], zip(*idx), geometries)
+        if in_scotland(geometry)
     ]
 
 def unwrapped_xarray_to_sql(function_name, unwrapped_dataset, argument_values):

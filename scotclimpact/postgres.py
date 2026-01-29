@@ -19,7 +19,7 @@ class PostgresDB:
             self.pool = SimpleConnectionPool(1, 20, self.connection_url)
         except OperationalError:
             if app:
-                app.logger.warn(f"Database connection could not be stablished: {self.connection_url}")
+                app.logger.warning(f"Database connection could not be stablished: {self.connection_url}")
             self.pool = None
         return self.pool
 

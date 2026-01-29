@@ -2,8 +2,6 @@ import click
 from flask import current_app, g
 import itertools
 import numpy as np
-#import psycopg2
-#import psycopg2.pool import SimpleConnectionPool
 import xarray as xr
 
 from .developing_process import init_composite_fit

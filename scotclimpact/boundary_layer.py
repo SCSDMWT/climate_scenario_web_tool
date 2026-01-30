@@ -30,6 +30,6 @@ def get_scotland_shape():
 def in_scotland(bounds):
     '''Predicate to determine if a rectangular region overlaps with Scotland'''
     scotland = get_scotland_shape()
-    region = shapely.geometry.Polygon(bounds + [bounds[0]])
+    region = shapely.geometry.Polygon(list(bounds) + [bounds[0]])
     return shapely.intersects(scotland, region)
     

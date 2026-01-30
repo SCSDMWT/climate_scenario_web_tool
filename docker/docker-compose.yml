@@ -1,7 +1,7 @@
 name: climate_scenario_web_tool
 services:
   web:
-    image: "ghcr.io/scsdmwt/climate_scenario_web_tool:v0.1.2"
+    image: "ghcr.io/scsdmwt/climate_scenario_web_tool:latest"
     hostname: web
     depends_on: 
       postgres:
@@ -22,7 +22,7 @@ services:
       - ./scotclimpact/v0.1.0:/app/data/v0.1.0
 
   postgres:
-    image: "ghcr.io/scsdmwt/climate_scenario_web_tool_data:v0.1.2"
+    image: "ghcr.io/scsdmwt/climate_scenario_web_tool_data:latest"
     hostname: postgres
     env_file:
       - path: .env

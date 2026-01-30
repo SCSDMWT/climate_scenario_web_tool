@@ -40,4 +40,9 @@ All stopped Docker containers can be removed with
 ```bash
 sudo docker rm (docker ps -a -q)
 ```
+Pull the latest versions of the containers with:
+```bash
+docker pull ghcr.io/scsdmwt/climate_scenario_web_tool:latest
+docker pull ghcr.io/scsdmwt/climate_scenario_web_tool_data:latest
+```
 After this, running `docker compose up` will reinitialise all containers.

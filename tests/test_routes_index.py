@@ -11,7 +11,7 @@ def test_index(client):
     response = client.get("/")
 
     assert response.status_code == 200
-    assert b"<div id='map' class='map'></div>" in response.data
+    assert b'<div id="map" class="map" tabindex="0"></div>' in response.data
     assert b"src=\"/static/dist/main.js\"" in response.data
 
 

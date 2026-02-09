@@ -1,6 +1,7 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
+    <title>ScotClimATE</title>
     {% if gtag_id | length %}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ gtag_id }}"></script>
     <script>
@@ -13,7 +14,7 @@
     {% else %}
     <script>
       const gtag_id = "";
-      function gtag() {console.log(arguments)};
+      function gtag() {};
     </script>
     {% endif %}
     <meta charset="utf-8">

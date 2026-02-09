@@ -298,6 +298,18 @@ async function init_ui() {
         postcode_search_input,
         (coordinate) => { ui_map.select_feature_at(coordinate); },
     );
+    postcode_search_input.addEventListener("keyup", function(event) {
+        event.preventDefault();
+        if (event.keyCode == 13) {
+            postcode_search_button.onclick();
+        }
+    })
+
+    // Set map focus on mousover
+    const map = $("#map")[0]
+    map.addEventListener('mouseover', function() {
+        map.focus();
+    });
 }
 
 await init_ui();

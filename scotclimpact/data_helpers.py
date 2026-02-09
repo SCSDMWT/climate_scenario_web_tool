@@ -71,7 +71,30 @@ def _fix_infs(np_array, multiplier=1000):
     idx_finite = np.where(finites)
     np_array[inf_idx] = multiplier * np.max(np_array[idx_finite])
 
-def unwrap_xarray(xr_dataset, x_key='projection_x_coordinate', y_key='projection_y_coordinate'):
+
+def unwrap_grid(grid, x_key='projection_x_coordinate', y_key='projection_y_coordinate'):
+    idx = np.meshgrid(
+        np.arange(grid.sizes[x_key]),
+        np.arange(grid.sizes[y_key]),
+        #indexing='ij',
+    )
+    idx = (idx[0].flatten(), idx[1].flatten())
+
+    top_right, top_left, bottom_right, bottom_left = _make_bounds(grid, idx, x_key, y_key)
+    geometries = [
+        (tr, tl, br, bl)
+        for tr, tl, br, bl
+        in zip(top_right, top_left, bottom_right, bottom_left)
+    ]
+    return [
+        (coord_idx, geometry)
+        for coord_idx, geometry
+        in zip(zip(*idx), geometries)
+        if in_scotland(geometry)
+    ]
+
+
+def unwrap_xarray(xr_dataset, grid_size, x_key='projection_x_coordinate', y_key='projection_y_coordinate'):
     '''Convert a grid of 2D cells to a list of containing only the points in the grid with values.'''
 
     np_dataset = xr_dataset.to_numpy()
@@ -89,15 +112,21 @@ def unwrap_xarray(xr_dataset, x_key='projection_x_coordinate', y_key='projection
             central_estimate=central_estimate,
             coord_idx=coord_idx,
             geometry_coords=geometry,
+            geometry_id=make_geometry_id(grid_size, *coord_idx),
         )
         for central_estimate, coord_idx, geometry 
         in zip(np_dataset[idx], zip(*idx), geometries)
-        if in_scotland(geometry)
+        #if in_scotland(geometry)
     ]
+
+def make_geometry_id(grid_size, x_idx, y_idx):
+    '''Generate a unique id for a coordinate in a grid'''
+    return y_idx + 1000 * x_idx + 1000 * 1000 * grid_size
 
 def unwrapped_xarray_to_sql(function_name, unwrapped_dataset, argument_values):
     '''Convert an unwrapped xarray.DataArray list to a list of VALUES clauses for an SQL query.'''
 
+    '''
     def sql_coord_format(coord):
         return f"{coord[0]} {coord[1]}"
 
@@ -107,12 +136,13 @@ def unwrapped_xarray_to_sql(function_name, unwrapped_dataset, argument_values):
             for coord in coords
         ]
         return f"ST_GeomFromText('POLYGON(({tr}, {tl}, {bl}, {br}, {tr}))', 27700)"
-
+    '''
     argument_values_entry = ', '.join(map(str, argument_values))
 
-    def entry_to_sql(central_estimate=0.0, geometry_coords='', coord_idx=[0, 0], ci_report_url=''):
-        geometry = geometry_coords_to_sql(geometry_coords)
-        return f"('{function_name}', {central_estimate}, {geometry}, {coord_idx[0]}, {coord_idx[1]}, '{ci_report_url}', {argument_values_entry})"
+    def entry_to_sql(central_estimate=0.0, geometry_coords='', coord_idx=[0, 0], ci_report_url='', geometry_id=0):
+        #geometry = geometry_coords_to_sql(geometry_coords)
+        #geometry_id = make_geometry_id(grid_size, *coord_idx)
+        return f"'{function_name}', {central_estimate}, {geometry_id}, '{ci_report_url}', {argument_values_entry}"
 
     values_clauses = [
         entry_to_sql(**entry)
@@ -179,7 +209,7 @@ def xarray_to_geojson(dataset_name, xr_dataset, x_key='projection_x_coordinate',
         )
         for tr, tl, br, bl, value, coord_idx 
         in zip(top_right, top_left, bottom_right, bottom_left, np_dataset[idx], zip(*idx))
-        if in_scotland([tr, tl, br, bl])
+        #if in_scotland([tr, tl, br, bl])
     ]
 
     crs = dict(

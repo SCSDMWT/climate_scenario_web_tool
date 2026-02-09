@@ -6,7 +6,8 @@ import xarray as xr
 
 from .developing_process import init_composite_fit
 from .postgres import pgdb
-from .data_helpers import (sql_to_geojson, unwrapped_xarray_to_sql, unwrap_xarray)
+from .data_helpers import (sql_to_geojson, unwrapped_xarray_to_sql, unwrap_xarray, unwrap_grid, make_geometry_id)
+from .data import datasets
 from .hazards import hazards
 
 def get_db():
@@ -53,10 +54,52 @@ def has_results(**kwargs):
 def get_json_hazard_data(**kwargs):
     where_clause = _make_where_clause(kwargs)
     with pgdb.get_cursor() as cursor:
-        cursor.execute(f"SELECT central_estimate, ST_AsGeoJSON(geom), ci_report FROM hazard_data WHERE {where_clause};")
+        cursor.execute(f"SELECT hd.central_estimate, ST_AsGeoJSON(g.geom), hd.ci_report FROM hazard_data as hd, geometries as g WHERE g.id = hd.geometry_id and {where_clause};")
         results = cursor.fetchall()
     return sql_to_geojson(kwargs['function'], results)
     
+
+def has_dataset_geometries(grid_size):
+    if not pgdb.is_connected():
+        return False
+    with pgdb.get_cursor() as cursor:
+        cursor.execute(f"SELECT count(*) FROM geometries WHERE resolution = {grid_size};")
+        results = cursor.fetchall()
+    return len(results) > 0
+    
+
+def insert_dataset_geometries(composite_fit, grid_size, commit=True):
+
+    def sql_coord_format(coord):
+        return f"{coord[0]} {coord[1]}"
+
+    def geometry_coords_to_sql(coords):
+        tr, tl, br, bl = [
+            sql_coord_format(coord)
+            for coord in coords
+        ]
+        return f"ST_GeomFromText('POLYGON(({tr}, {tl}, {bl}, {br}, {tr}))', 27700)"
+
+    def entry_to_sql(coord_idx=[0, 0], geometry_coords=[]):
+        geometry = geometry_coords_to_sql(geometry_coords)
+        id = make_geometry_id(grid_size, *coord_idx)
+        return f"({id}, {geometry}, {coord_idx[0]}, {coord_idx[1]}, {grid_size})"
+
+    grid = composite_fit.grid
+    unwrapped_grid = unwrap_grid(grid)
+    values_clauses = [
+        entry_to_sql(*entry)
+        for entry in unwrapped_grid
+    ]
+
+    value_clause = ','.join(values_clauses)
+    query = f"INSERT INTO geometries (id, geom, x_idx, y_idx, resolution) VALUES {value_clause};"
+
+    if commit:
+        db_insert(query)
+    else:
+        print(query)
+
 
 def db_insert(query):
     '''Wrapper to run a SQL query that does not return data against the database'''
@@ -79,23 +122,40 @@ def pre_compute(commit=False, no_header=False):
     '''Precompute all hazard data and store the results in the database.'''
     
     header = not no_header
-    if header:
+    if header and not commit:
         with current_app.open_resource("schema.sql") as f:
-            print(f.read().decode('utf-8'))
-
-    insert_query_template = (
-        "INSERT INTO hazard_data (function, central_estimate, geom, x_idx, y_idx, ci_report, {arg_names_clause}) VALUES {value_clauses};"
-    )
+            create_query = f.read().decode('utf-8')
+        if commit:
+            db_insert(create_query)
+            db.commit()
+        else:
+            print(create_query)
 
     # Clear old data from the database.
     if commit:
         db_insert("DELETE FROM hazard_data;")
+        db_insert("DELETE FROM geometries;")
+
+    grid_sizes = set()
+    for dataset_name, dataset in datasets.items():
+        #dataset = datasets[hazard['dataset']]
+        #if has_dataset_geometries(dataset['grid_size']) and 
+        if not dataset['grid_size'] in grid_sizes:
+            grid_sizes.add(dataset['grid_size'])
+            composite_fit = init_composite_fit(
+                dataset_name,
+                simParams='c,loc1,scale0,scale1',
+                nVariates=1000,
+                preProcess=True,
+            )
+            insert_dataset_geometries(composite_fit, dataset['grid_size'], commit=commit)
 
     for func_name, hazard in hazards.items():
         func = hazard['function']
         #func_name = hazard['function_name']
         arg_names = hazard['arg_names']
         ci_report_url = hazard['ci_report_url']
+
         # Call each function with all combinations of input parameters.
         for arg in itertools.product(*hazard['args']):
 
@@ -104,7 +164,8 @@ def pre_compute(commit=False, no_header=False):
 
             composite_fit = init_composite_fit(
                 hazard['dataset'],
-                simParams='c,loc1,scale1',
+                #simParams='c,loc1,scale1',
+                simParams='c,loc1,scale0,scale1',
                 nVariates=1000,
                 preProcess=True,
             )
@@ -115,16 +176,18 @@ def pre_compute(commit=False, no_header=False):
             params = dict(zip(arg_names, arg))
             unwrapped_central_estimate = [
                 {**ce, 'ci_report_url': ci_report_url.format(x=ce['coord_idx'][0], y=ce['coord_idx'][1], **params)}
-                for ce in unwrap_xarray(central_estimate)
+                for ce in unwrap_xarray(central_estimate, datasets[hazard['dataset']]['grid_size'])
             ]
 
             # Build the SQL query
             values_clauses = unwrapped_xarray_to_sql(func_name, unwrapped_central_estimate, arg)
             arg_names_clause = ', '.join(arg_names)
-            query = insert_query_template.format(
-                arg_names_clause=arg_names_clause, 
-                value_clauses=', '.join(values_clauses)
-            )
+            queries = [
+                f"INSERT INTO hazard_data (function, central_estimate, geometry_id, ci_report, {arg_names_clause}) SELECT {value_clause} WHERE EXISTS (SELECT id FROM geometries WHERE geometries.id = {uce['geometry_id']});"
+                for value_clause, uce
+                in zip(values_clauses, unwrapped_central_estimate)
+            ]
+            query = '\n'.join(queries)
 
             if commit:
                 db_insert(query)
@@ -137,4 +200,3 @@ def init_app(app):
     #app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_cli)
     app.cli.add_command(pre_compute)
-

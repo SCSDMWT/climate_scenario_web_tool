@@ -1,12 +1,18 @@
 --CREATE EXTENSION postgis;
 
+CREATE TABLE if NOT EXISTS geometries (
+    id INT PRIMARY KEY,
+    geom GEOMETRY,
+    x_idx INT,
+    y_idx INT,
+    resolution INT
+);
+
 CREATE TABLE IF NOT EXISTS hazard_data (
 
     id SERIAL PRIMARY KEY,
     -- 
-    geom GEOMETRY,
-    x_idx INT,
-    y_idx INT,
+    geometry_id INT references geometries(id),
     --
     function TEXT,
     -- Function parameters

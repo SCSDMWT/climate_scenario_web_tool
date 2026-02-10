@@ -130,7 +130,6 @@ def pre_compute(commit=False, no_header=False):
             create_query = f.read().decode('utf-8')
         if commit:
             db_insert(create_query)
-            db.commit()
         else:
             print(create_query)
 

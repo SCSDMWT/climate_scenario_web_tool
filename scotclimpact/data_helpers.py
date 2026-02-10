@@ -116,7 +116,7 @@ def unwrap_xarray(xr_dataset, grid_size, x_key='projection_x_coordinate', y_key=
         )
         for central_estimate, coord_idx, geometry 
         in zip(np_dataset[idx], zip(*idx), geometries)
-        #if in_scotland(geometry)
+        if in_scotland(geometry)
     ]
 
 def make_geometry_id(grid_size, x_idx, y_idx):
@@ -126,23 +126,10 @@ def make_geometry_id(grid_size, x_idx, y_idx):
 def unwrapped_xarray_to_sql(function_name, unwrapped_dataset, argument_values):
     '''Convert an unwrapped xarray.DataArray list to a list of VALUES clauses for an SQL query.'''
 
-    '''
-    def sql_coord_format(coord):
-        return f"{coord[0]} {coord[1]}"
-
-    def geometry_coords_to_sql(coords):
-        tr, tl, br, bl = [
-            sql_coord_format(coord)
-            for coord in coords
-        ]
-        return f"ST_GeomFromText('POLYGON(({tr}, {tl}, {bl}, {br}, {tr}))', 27700)"
-    '''
     argument_values_entry = ', '.join(map(str, argument_values))
 
     def entry_to_sql(central_estimate=0.0, geometry_coords='', coord_idx=[0, 0], ci_report_url='', geometry_id=0):
-        #geometry = geometry_coords_to_sql(geometry_coords)
-        #geometry_id = make_geometry_id(grid_size, *coord_idx)
-        return f"'{function_name}', {central_estimate}, {geometry_id}, '{ci_report_url}', {argument_values_entry}"
+        return f"('{function_name}', {central_estimate}, {geometry_id}, '{ci_report_url}', {argument_values_entry})"
 
     values_clauses = [
         entry_to_sql(**entry)
@@ -209,7 +196,7 @@ def xarray_to_geojson(dataset_name, xr_dataset, x_key='projection_x_coordinate',
         )
         for tr, tl, br, bl, value, coord_idx 
         in zip(top_right, top_left, bottom_right, bottom_left, np_dataset[idx], zip(*idx))
-        #if in_scotland([tr, tl, br, bl])
+        if in_scotland([tr, tl, br, bl])
     ]
 
     crs = dict(

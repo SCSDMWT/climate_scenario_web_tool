@@ -625,19 +625,19 @@ def init_composite_fit(dataset_name, simParams='c,loc1,scale0,scale1', nVariates
     return Fitted_Obs_Sim(dsObs, dsSim, grid, simParams = simParams, nVariates = nVariates, preProcess = preProcess, **kwargs)
 
 
-def intensity_from_return_time(compositeFit, covariate, tauReturn):
+def intensity_from_return_time(compositeFit, covariate, tauReturn, **kwargs):
     compositeFit.set_temperature_anomaly(covariate)
-    return compositeFit.intensity_from_return_time(tauReturn).intensity
+    return compositeFit.intensity_from_return_time(tauReturn, **kwargs).intensity
 
-def return_time_from_intensity(compositeFit, covariate, intensity):
+def return_time_from_intensity(compositeFit, covariate, intensity, **kwargs):
     compositeFit.set_temperature_anomaly(covariate)
-    return compositeFit.return_time_from_intensity(intensity).return_time
+    return compositeFit.return_time_from_intensity(intensity, **kwargs).return_time
 
-def change_in_intensity(compositeFit, return_time, cov0, cov1):
-    return compositeFit.change_in_intensity(return_time, cov0, cov1).intensity_change
+def change_in_intensity(compositeFit, return_time, cov0, cov1, **kwargs):
+    return compositeFit.change_in_intensity(return_time, cov0, cov1, **kwargs).intensity_change
 
-def change_in_frequency(compositeFit, intensity, cov0, cov1):
-    return compositeFit.times_more_likely(intensity, cov0, cov1).times_more_likely
+def change_in_frequency(compositeFit, intensity, cov0, cov1, **kwargs):
+    return compositeFit.times_more_likely(intensity, cov0, cov1, **kwargs).times_more_likely
 
 def intensity_ci_report(compositeFit, cov, return_time, x_idx, y_idx):
     compositeFit.set_temperature_anomaly(cov)

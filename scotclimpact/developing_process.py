@@ -625,19 +625,27 @@ def init_composite_fit(dataset_name, simParams='c,loc1,scale0,scale1', nVariates
     return Fitted_Obs_Sim(dsObs, dsSim, grid, simParams = simParams, nVariates = nVariates, preProcess = preProcess, **kwargs)
 
 
-def intensity_from_return_time(compositeFit, covariate, tauReturn, **kwargs):
+def intensity_from_return_time(compositeFit, covariate, tauReturn, format='geojson', **kwargs):
     compositeFit.set_temperature_anomaly(covariate)
-    return compositeFit.intensity_from_return_time(tauReturn, **kwargs).intensity
+    if format=='geojson':
+        return compositeFit.intensity_from_return_time(tauReturn, **kwargs).intensity
+    return compositeFit.intensity_from_return_time(tauReturn, **kwargs)
 
-def return_time_from_intensity(compositeFit, covariate, intensity, **kwargs):
+def return_time_from_intensity(compositeFit, covariate, intensity, format='geojson', **kwargs):
     compositeFit.set_temperature_anomaly(covariate)
-    return compositeFit.return_time_from_intensity(intensity, **kwargs).return_time
+    if format=='geojson':
+        return compositeFit.return_time_from_intensity(intensity, **kwargs).return_time
+    return compositeFit.return_time_from_intensity(intensity, **kwargs)
 
-def change_in_intensity(compositeFit, return_time, cov0, cov1, **kwargs):
-    return compositeFit.change_in_intensity(return_time, cov0, cov1, **kwargs).intensity_change
+def change_in_intensity(compositeFit, return_time, cov0, cov1, format='geojson', **kwargs):
+    if format=='geojson':
+        return compositeFit.change_in_intensity(return_time, cov0, cov1, **kwargs).intensity_change
+    return compositeFit.change_in_intensity(return_time, cov0, cov1, **kwargs)
 
-def change_in_frequency(compositeFit, intensity, cov0, cov1, **kwargs):
-    return compositeFit.times_more_likely(intensity, cov0, cov1, **kwargs).times_more_likely
+def change_in_frequency(compositeFit, intensity, cov0, cov1, format='geojson', **kwargs):
+    if format=='geojson':
+        return compositeFit.times_more_likely(intensity, cov0, cov1, **kwargs).times_more_likely
+    return compositeFit.times_more_likely(intensity, cov0, cov1, **kwargs)
 
 def intensity_ci_report(compositeFit, cov, return_time, x_idx, y_idx):
     compositeFit.set_temperature_anomaly(cov)

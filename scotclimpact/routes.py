@@ -184,7 +184,7 @@ def data(function_name, format='geojson'):
     )
 
     quantiles = [0.01, 0.025, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.975, 0.99]
-    result = hazard_function(composite_fit, *args, quantiles=quantiles)
+    result = hazard_function(composite_fit, *args, format=format, mode='quantiles', quantiles=quantiles)
     composite_fit.apply_metadata(
         result,
         creator="ScotClimATE",

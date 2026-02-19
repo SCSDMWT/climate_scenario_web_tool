@@ -22,6 +22,7 @@ def menu_items():
     MenuItem = namedtuple("MenuItem", "title path order")
     return [
         MenuItem("Disclaimer", "disclaimer", 2),
+        MenuItem("Accessibility", "accessibility", 3),
     ]
 
 @app.route('/')
@@ -35,17 +36,26 @@ def index():
         gtag_id=app.config['GTAG_ID'],
     )
 
+
+def render_markdown_page(page):
+    with open(f"scotclimpact/pages/{page}.md", "r") as f:
+        content = markdown.markdown(f.read())
+
+    return render_template(
+        f'{page}.html',
+        content=content,
+        navigation=menu_items(),
+    )
+
 @app.route('/disclaimer')
 @get_cache().cached(timeout=50)
 def disclaimer():
-    with open("scotclimpact/pages/disclaimer.md", "r") as f:
-        disclaimer_text = markdown.markdown(f.read())
+    return render_markdown_page("disclaimer")
 
-    return render_template(
-        'disclaimer.html',
-        disclaimer_text=disclaimer_text,
-        navigation=menu_items(),
-    )
+@app.route('/accessibility')
+@get_cache().cached(timeout=50)
+def accessibility():
+    return render_markdown_page("accessibility")
 
 def make_json_response(json_data):
     '''Serialize JSON and create a response object'''
